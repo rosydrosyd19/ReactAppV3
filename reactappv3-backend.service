@@ -1,0 +1,27 @@
+[Unit]
+Description=ReactAppV3 Backend API Server
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/ReactAppV3/backend
+Environment="NODE_ENV=production"
+Environment="PORT=3001"
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=reactappv3-backend
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/ReactAppV3/backend/uploads
+
+[Install]
+WantedBy=multi-user.target

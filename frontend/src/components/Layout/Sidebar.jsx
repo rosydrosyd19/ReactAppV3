@@ -1,0 +1,147 @@
+import './Sidebar.css';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import {
+    FiHome,
+    FiUsers,
+    FiShield,
+    FiPackage,
+    FiMapPin,
+    FiTool,
+    FiSettings,
+    FiActivity,
+} from 'react-icons/fi';
+
+const Sidebar = ({ isOpen, onClose }) => {
+    const location = useLocation();
+    const { hasPermission, hasModule } = useAuth();
+
+    const menuItems = [
+        {
+            title: 'Dashboard',
+            path: '/dashboard',
+            icon: <FiHome />,
+            show: true,
+        },
+        // Sysadmin Module
+        {
+            title: 'System Admin',
+            module: 'sysadmin',
+            icon: <FiSettings />,
+            show: hasModule('sysadmin'),
+            children: [
+                {
+                    title: 'Users',
+                    path: '/sysadmin/users',
+                    icon: <FiUsers />,
+                    show: hasPermission('sysadmin.users.view'),
+                },
+                {
+                    title: 'Roles',
+                    path: '/sysadmin/roles',
+                    icon: <FiShield />,
+                    show: hasPermission('sysadmin.roles.view'),
+                },
+                {
+                    title: 'Activity Logs',
+                    path: '/sysadmin/logs',
+                    icon: <FiActivity />,
+                    show: hasPermission('sysadmin.logs.view'),
+                },
+            ],
+        },
+        // Asset Management Module
+        {
+            title: 'Asset Management',
+            module: 'asset',
+            icon: <FiPackage />,
+            show: hasModule('asset'),
+            children: [
+                {
+                    title: 'Assets',
+                    path: '/asset/items',
+                    icon: <FiPackage />,
+                    show: hasPermission('asset.items.view'),
+                },
+                {
+                    title: 'Categories',
+                    path: '/asset/categories',
+                    icon: <FiTool />,
+                    show: hasPermission('asset.categories.manage'),
+                },
+                {
+                    title: 'Locations',
+                    path: '/asset/locations',
+                    icon: <FiMapPin />,
+                    show: hasPermission('asset.locations.manage'),
+                },
+                {
+                    title: 'Maintenance',
+                    path: '/asset/maintenance',
+                    icon: <FiTool />,
+                    show: hasPermission('asset.maintenance.view'),
+                },
+            ],
+        },
+    ];
+
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
+
+    return (
+        <>
+            {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
+            <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+                <div className="sidebar-header">
+                    <h2>ReactAppV3</h2>
+                </div>
+
+                <nav className="sidebar-nav">
+                    {menuItems.map((item, index) => {
+                        if (!item.show) return null;
+
+                        if (item.children) {
+                            return (
+                                <div key={index} className="menu-section">
+                                    <div className="menu-section-title">
+                                        {item.icon}
+                                        <span>{item.title}</span>
+                                    </div>
+                                    {item.children.map((child, childIndex) => {
+                                        if (!child.show) return null;
+                                        return (
+                                            <Link
+                                                key={childIndex}
+                                                to={child.path}
+                                                className={`menu-item ${isActive(child.path) ? 'active' : ''}`}
+                                                onClick={onClose}
+                                            >
+                                                {child.icon}
+                                                <span>{child.title}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <Link
+                                key={index}
+                                to={item.path}
+                                className={`menu-item ${isActive(item.path) ? 'active' : ''}`}
+                                onClick={onClose}
+                            >
+                                {item.icon}
+                                <span>{item.title}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </aside>
+        </>
+    );
+};
+
+export default Sidebar;

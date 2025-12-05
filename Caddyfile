@@ -1,0 +1,59 @@
+# Caddyfile untuk ReactAppV3
+# Ganti IP atau domain sesuai kebutuhan
+
+# Untuk akses dengan IP (contoh: 192.168.1.100)
+:80 {
+    # Frontend - serve built React app
+    root * /var/www/ReactAppV3/frontend/dist
+    file_server
+    
+    # Backend API - reverse proxy to Node.js
+    handle /api/* {
+        reverse_proxy localhost:3001
+    }
+    
+    # Handle uploads
+    handle /uploads/* {
+        reverse_proxy localhost:3001
+    }
+    
+    # SPA fallback - semua route ke index.html
+    try_files {path} /index.html
+    
+    # Encode responses
+    encode gzip
+    
+    # CORS headers untuk local network
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/reactappv3.log
+        format json
+    }
+}
+
+# Untuk domain dengan HTTPS otomatis
+# yourdomain.com {
+#     root * /var/www/ReactAppV3/frontend/dist
+#     file_server
+#     
+#     handle /api/* {
+#         reverse_proxy localhost:3001
+#     }
+#     
+#     handle /uploads/* {
+#         reverse_proxy localhost:3001
+#     }
+#     
+#     try_files {path} /index.html
+#     encode gzip
+#     
+#     log {
+#         output file /var/log/caddy/reactappv3.log
+#     }
+# }
