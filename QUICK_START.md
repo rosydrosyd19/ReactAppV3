@@ -25,6 +25,9 @@ cd c:\Users\Rosyd\Documents\React-js\ReactAppV3\backend
 npm install
 npm run init-db
 ```
+bila muncul error waktu install coba ini
+npm cache clean --force
+
 
 Wait for "✅ Database initialized successfully!" message.
 
