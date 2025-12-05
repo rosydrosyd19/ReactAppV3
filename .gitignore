@@ -9,11 +9,11 @@ build/
 **/build/
 
 # Environment files
-.env
-.env.local
-.env.*.local
-**/.env
-**/.env.local
+#.env
+#.env.local
+#.env.*.local
+#**/.env
+#**/.env.local
 
 # Logs
 *.log
@@ -40,7 +40,7 @@ uploads/
 # yarn.lock
 
 # Backup files
-*.sql
-*.sql.gz
-*.tar.gz
+#*.sql
+#*.sql.gz
+#*.tar.gz
 backups/
