@@ -22,7 +22,7 @@ module.exports = {
             name: "reactappv3-frontend",
             cwd: "./frontend",
             script: "npm",
-            args: "run dev",
+            args: "run dev -- --host",
             instances: 1,
             autorestart: true,
             watch: false,
