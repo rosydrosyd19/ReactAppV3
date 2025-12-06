@@ -115,6 +115,7 @@ echo "🌐 Setting up Caddy..."
 cp $PROJECT_DIR/Caddyfile /etc/caddy/Caddyfile
 systemctl reload caddy
 
+
 echo ""
 echo "🔧 Setting permissions..."
 chown -R www-data:www-data $PROJECT_DIR
