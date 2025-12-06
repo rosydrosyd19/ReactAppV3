@@ -27,5 +27,7 @@
 
     .main-content {
         padding: 1rem;
+        padding-bottom: 80px;
+        /* Add space for bottom navigation */
     }
 }

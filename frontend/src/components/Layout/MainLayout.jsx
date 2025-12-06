@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import MobileBottomNav from './MobileBottomNav';
 
 const MainLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
@@ -15,6 +16,7 @@ const MainLayout = () => {
                 <main className="main-content">
                     <Outlet />
                 </main>
+                <MobileBottomNav />
             </div>
         </div>
     );

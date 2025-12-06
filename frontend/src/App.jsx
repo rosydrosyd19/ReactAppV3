@@ -6,6 +6,7 @@ import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import AssetDashboard from './pages/Dashboard/AssetDashboard'; // New
 import SysAdminDashboard from './pages/Dashboard/SysAdminDashboard'; // New
+import UserList from './pages/SysAdmin/UserList'; // New
 import AssetList from './pages/Asset/AssetList/AssetList';
 import ModuleSelection from './pages/Modules/ModuleSelection';
 
@@ -77,7 +78,7 @@ function App() {
             {/* Sysadmin routes */}
             <Route path="sysadmin">
               <Route path="dashboard" element={<SysAdminDashboard />} /> {/* New */}
-              <Route path="users" element={<div className="card"><h2>Users Management</h2><p>Coming soon...</p></div>} />
+              <Route path="users" element={<UserList />} />
               <Route path="roles" element={<div className="card"><h2>Role Management</h2><p>Coming soon...</p></div>} />
               <Route path="logs" element={<div className="card"><h2>Activity Logs</h2><p>Coming soon...</p></div>} />
             </Route>

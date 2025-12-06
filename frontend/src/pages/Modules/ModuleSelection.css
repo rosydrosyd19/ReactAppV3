@@ -81,3 +81,50 @@
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .module-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        text-align: center;
+    }
+
+    .module-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .module-header-actions {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .module-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .module-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .module-card {
+        padding: 1rem;
+    }
+
+    .module-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+
+    .module-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .module-card p {
+        font-size: 0.85rem;
+    }
+}
