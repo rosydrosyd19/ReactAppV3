@@ -38,10 +38,10 @@
 }
 
 # Untuk domain dengan HTTPS otomatis
-react.wednesday1991.duckdns.org {
+yourdomain.com {
      root * /var/www/ReactAppV3/frontend/dist
+     file_server
      
-     # API Handling - Must be defined before file_server/try_files fallbacks
      handle /api/* {
          reverse_proxy localhost:3001
      }
@@ -50,12 +50,7 @@ react.wednesday1991.duckdns.org {
          reverse_proxy localhost:3001
      }
      
-     # SPA Fallback & Static Files
-     handle {
-         file_server
-         try_files {path} /index.html
-     }
-     
+     try_files {path} /index.html
      encode gzip
      
      log {
