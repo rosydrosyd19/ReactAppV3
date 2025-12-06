@@ -17,10 +17,16 @@ const Sidebar = ({ isOpen, onClose }) => {
     const { hasPermission, hasModule } = useAuth();
     const activeModule = localStorage.getItem('activeModule');
 
+    const getDashboardPath = () => {
+        if (activeModule === 'sysadmin') return '/sysadmin/dashboard';
+        if (activeModule === 'asset') return '/asset/dashboard';
+        return '/dashboard'; // Fallback
+    };
+
     const menuItems = [
         {
             title: 'Dashboard',
-            path: '/dashboard',
+            path: getDashboardPath(),
             icon: <FiHome />,
             show: true,
         },
@@ -105,10 +111,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                         if (item.children) {
                             return (
                                 <div key={index} className="menu-section">
-                                    <div className="menu-section-title">
-                                        {item.icon}
-                                        <span>{item.title}</span>
-                                    </div>
+                                    {/* Removed Section Title as requested */}
                                     {item.children.map((child, childIndex) => {
                                         if (!child.show) return null;
                                         return (

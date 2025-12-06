@@ -32,7 +32,7 @@ const ModuleSelection = () => {
             name: 'Asset Management',
             description: 'Manage assets, components, licenses, and consumables',
             icon: <FiBox />,
-            path: '/asset/items',
+            path: '/asset/dashboard',
             show: hasModule('asset') || hasAnyPermission(['VIEW_ASSETS', 'MANAGE_ASSETS']) || true
         },
         {
@@ -40,7 +40,7 @@ const ModuleSelection = () => {
             name: 'System Administrator',
             description: 'User management, roles, permissions, and system logs',
             icon: <FiSettings />,
-            path: '/sysadmin/users',
+            path: '/sysadmin/dashboard',
             show: hasModule('sysadmin') || hasAnyPermission(['MANAGE_USERS', 'MANAGE_ROLES'])
         },
         {

@@ -464,11 +464,13 @@ Untuk pertanyaan dan bantuan, silakan buat issue di repository.
 
 **Update File On Server**
 git pull
-npm install
+
 
 Tergantung mana yang mau di update
 cd /var/www/ReactAppV3/frontend
+npm install
 npm run build
 
 cd /var/www/ReactAppV3/backend
+npm install
 npm run dev

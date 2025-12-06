@@ -4,6 +4,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import MainLayout from './components/Layout/MainLayout';
 import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
+import AssetDashboard from './pages/Dashboard/AssetDashboard'; // New
+import SysAdminDashboard from './pages/Dashboard/SysAdminDashboard'; // New
 import AssetList from './pages/Asset/AssetList/AssetList';
 import ModuleSelection from './pages/Modules/ModuleSelection';
 
@@ -72,15 +74,17 @@ function App() {
             <Route index element={<Navigate to="/modules" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
 
-            {/* Sysadmin routes - will be added later */}
+            {/* Sysadmin routes */}
             <Route path="sysadmin">
+              <Route path="dashboard" element={<SysAdminDashboard />} /> {/* New */}
               <Route path="users" element={<div className="card"><h2>Users Management</h2><p>Coming soon...</p></div>} />
               <Route path="roles" element={<div className="card"><h2>Role Management</h2><p>Coming soon...</p></div>} />
               <Route path="logs" element={<div className="card"><h2>Activity Logs</h2><p>Coming soon...</p></div>} />
             </Route>
 
-            {/* Asset routes - will be added later */}
+            {/* Asset routes */}
             <Route path="asset">
+              <Route path="dashboard" element={<AssetDashboard />} /> {/* New */}
               <Route path="items" element={<AssetList />} />
               <Route path="categories" element={<div className="card"><h2>Categories</h2><p>Coming soon...</p></div>} />
               <Route path="locations" element={<div className="card"><h2>Locations</h2><p>Coming soon...</p></div>} />

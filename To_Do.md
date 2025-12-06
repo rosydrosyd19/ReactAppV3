@@ -1,6 +1,8 @@
 ## fix
 
 ## New Feature
+tambahkan fitur agar side bar bisa dihide
+
 buatkan fitur user
 
 tambahkan fitur add pada menu user
