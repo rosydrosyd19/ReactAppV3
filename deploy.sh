@@ -94,11 +94,21 @@ npm install
 npm run build
 
 echo ""
-echo "⚙️  Setting up systemd service..."
-cp $PROJECT_DIR/reactappv3-backend.service /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable $SERVICE_NAME
-systemctl start $SERVICE_NAME
+echo ""
+echo "⚙️  Setting up PM2..."
+if ! command -v pm2 &> /dev/null; then
+    echo "Installing PM2..."
+    npm install -g pm2
+else
+    echo "✅ PM2 already installed: $(pm2 -v)"
+fi
+
+# Start app with PM2
+pm2 start ecosystem.config.js --env production
+pm2 save
+pm2 startup | tail -n 1 | bash || echo "⚠️  Please run 'pm2 startup' manually if needed"
+
+echo "✅ Backend started with PM2"
 
 echo ""
 echo "🌐 Setting up Caddy..."
