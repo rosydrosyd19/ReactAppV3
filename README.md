@@ -461,3 +461,14 @@ Untuk pertanyaan dan bantuan, silakan buat issue di repository.
 ---
 
 **ReactAppV3** - Built with ❤️ using React.js, Node.js, and MariaDB
+
+**Update File On Server**
+git pull
+npm install
+
+Tergantung mana yang mau di update
+cd /var/www/ReactAppV3/frontend
+npm run build
+
+cd /var/www/ReactAppV3/backend
+npm run dev

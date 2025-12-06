@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import MainLayout from './components/Layout/MainLayout';
 import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import AssetList from './pages/Asset/AssetList/AssetList';
+import ModuleSelection from './pages/Modules/ModuleSelection';
 
 
 // Protected Route Component
@@ -22,13 +24,18 @@ const PublicRoute = ({ children }) => {
   const token = localStorage.getItem('token');
 
   if (token) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/modules" replace />;
   }
 
   return children;
 };
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -45,6 +52,15 @@ function App() {
 
           {/* Protected routes */}
           <Route
+            path="/modules"
+            element={
+              <ProtectedRoute>
+                <ModuleSelection />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/"
             element={
               <ProtectedRoute>
@@ -52,7 +68,8 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            {/* MainLayout routes (with sidebar) */}
+            <Route index element={<Navigate to="/modules" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
 
             {/* Sysadmin routes - will be added later */}

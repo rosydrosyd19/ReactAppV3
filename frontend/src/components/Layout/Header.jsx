@@ -1,16 +1,20 @@
 import './Header.css';
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { FiMenu, FiUser, FiLogOut, FiMoon, FiSun } from 'react-icons/fi';
+import { FiMenu, FiUser, FiLogOut, FiMoon, FiSun, FiGrid } from 'react-icons/fi';
 
 const Header = ({ onMenuClick }) => {
     const { user, logout } = useAuth();
-    const [isDark, setIsDark] = useState(false);
+    const navigate = useNavigate();
+    const [isDark, setIsDark] = useState(localStorage.getItem('theme') === 'dark');
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const toggleTheme = () => {
+        const newTheme = !isDark ? 'dark' : 'light';
         setIsDark(!isDark);
-        document.documentElement.setAttribute('data-theme', !isDark ? 'dark' : 'light');
+        localStorage.setItem('theme', newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
     };
 
     return (
@@ -22,6 +26,13 @@ const Header = ({ onMenuClick }) => {
             </div>
 
             <div className="header-right">
+                <button
+                    className="icon-button"
+                    onClick={() => navigate('/modules')}
+                    title="Switch Module"
+                >
+                    <FiGrid />
+                </button>
                 <button className="icon-button" onClick={toggleTheme} title="Toggle theme">
                     {isDark ? <FiSun /> : <FiMoon />}
                 </button>

@@ -15,6 +15,7 @@ import {
 const Sidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
     const { hasPermission, hasModule } = useAuth();
+    const activeModule = localStorage.getItem('activeModule');
 
     const menuItems = [
         {
@@ -28,7 +29,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             title: 'System Admin',
             module: 'sysadmin',
             icon: <FiSettings />,
-            show: hasModule('sysadmin'),
+            show: hasModule('sysadmin') && (!activeModule || activeModule === 'sysadmin'),
             children: [
                 {
                     title: 'Users',
@@ -55,7 +56,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             title: 'Asset Management',
             module: 'asset',
             icon: <FiPackage />,
-            show: hasModule('asset'),
+            show: hasModule('asset') && (!activeModule || activeModule === 'asset'),
             children: [
                 {
                     title: 'Assets',
