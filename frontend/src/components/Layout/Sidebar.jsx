@@ -103,6 +103,12 @@ const Sidebar = ({ isOpen, onClose }) => {
         return '';
     };
 
+    const handleItemClick = () => {
+        if (window.innerWidth <= 768) {
+            onClose();
+        }
+    };
+
     return (
         <>
             {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
@@ -129,7 +135,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                                                 key={childIndex}
                                                 to={child.path}
                                                 className={`menu-item ${isActive(child.path) ? 'active' : ''}`}
-                                                onClick={onClose}
+                                                onClick={handleItemClick}
                                             >
                                                 {child.icon}
                                                 <span>{child.title}</span>
@@ -145,7 +151,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                                 key={index}
                                 to={item.path}
                                 className={`menu-item ${isActive(item.path) ? 'active' : ''}`}
-                                onClick={onClose}
+                                onClick={handleItemClick}
                             >
                                 {item.icon}
                                 <span>{item.title}</span>
