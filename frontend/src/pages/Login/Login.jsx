@@ -7,6 +7,7 @@ import { FiUser, FiLock } from 'react-icons/fi';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
@@ -17,7 +18,7 @@ const Login = () => {
         setError('');
         setLoading(true);
 
-        const result = await login(username, password);
+        const result = await login(username, password, rememberMe);
 
         if (result.success) {
             navigate('/dashboard');
@@ -69,14 +70,23 @@ const Login = () => {
                         </div>
                     </div>
 
+                    <div className="form-group checkbox-group">
+                        <label className="checkbox-label">
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                            />
+                            Remember Me
+                        </label>
+                    </div>
+
                     <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
-                <div className="login-footer">
-                    <p>Default credentials: admin / admin123</p>
-                </div>
+
             </div>
         </div>
     );

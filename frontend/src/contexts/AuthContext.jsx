@@ -31,9 +31,9 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = async (username, password) => {
+    const login = async (username, password, remember = false) => {
         try {
-            const response = await axios.post('/auth/login', { username, password });
+            const response = await axios.post('/auth/login', { username, password, remember });
 
             if (response.data.success) {
                 const { token, user, permissions, modules } = response.data.data;

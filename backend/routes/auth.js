@@ -9,7 +9,7 @@ const router = express.Router();
 // Login
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, remember } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({
@@ -49,11 +49,14 @@ router.post('/login', async (req, res) => {
             });
         }
 
+        // Determine expiration based on remember me
+        const expiresIn = remember ? '7d' : (process.env.JWT_EXPIRES_IN || '1d');
+
         // Generate token
         const token = jwt.sign(
             { userId: user.id, username: user.username },
             process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+            { expiresIn }
         );
 
         // Get user permissions
