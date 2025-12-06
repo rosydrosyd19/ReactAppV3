@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FiMenu, FiUser, FiLogOut, FiMoon, FiSun, FiGrid } from 'react-icons/fi';
 
-const Header = ({ onMenuClick }) => {
+const Header = ({ onMenuClick, isSidebarOpen }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isDark, setIsDark] = useState(localStorage.getItem('theme') === 'dark');
@@ -20,9 +20,20 @@ const Header = ({ onMenuClick }) => {
     return (
         <header className="header">
             <div className="header-left">
-                <button className="menu-button" onClick={onMenuClick}>
-                    <FiMenu />
-                </button>
+                {!isSidebarOpen && (
+                    <button className="menu-button" onClick={onMenuClick}>
+                        <FiMenu />
+                    </button>
+                )}
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                    {/* ReactAppV3 */}
+                    {(() => {
+                        const activeModule = localStorage.getItem('activeModule');
+                        if (activeModule === 'sysadmin') return <span style={{ fontSize: '0.8em', fontWeight: 'normal', color: 'var(--text-secondary)' }}>System Admin</span>;
+                        if (activeModule === 'asset') return <span style={{ fontSize: '0.8em', fontWeight: 'normal', color: 'var(--text-secondary)' }}>Asset Management</span>;
+                        return null;
+                    })()}
+                </h2>
             </div>
 
             <div className="header-right">

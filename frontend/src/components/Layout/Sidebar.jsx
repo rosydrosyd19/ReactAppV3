@@ -10,6 +10,7 @@ import {
     FiTool,
     FiSettings,
     FiActivity,
+    FiMenu,
 } from 'react-icons/fi';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -96,12 +97,21 @@ const Sidebar = ({ isOpen, onClose }) => {
         return location.pathname === path;
     };
 
+    const getModuleName = () => {
+        if (activeModule === 'sysadmin') return 'System Admin';
+        if (activeModule === 'asset') return 'Asset Management';
+        return '';
+    };
+
     return (
         <>
             {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
             <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
                     <h2>ReactAppV3</h2>
+                    <button className="sidebar-toggle" onClick={onClose} aria-label="Close sidebar">
+                        <FiMenu />
+                    </button>
                 </div>
 
                 <nav className="sidebar-nav">

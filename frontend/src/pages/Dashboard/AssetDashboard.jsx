@@ -39,7 +39,7 @@ const AssetDashboard = () => {
             </div>
 
             <div className="card mt-6">
-                <h2>Recent Asset Activity</h2>
+                <h2 className="card-header">Recent Asset Activity</h2>
                 <div className="table-container">
                     <p style={{ padding: '1rem', color: 'var(--text-secondary)' }}>No recent activity to display.</p>
                 </div>

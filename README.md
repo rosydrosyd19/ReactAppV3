@@ -471,6 +471,6 @@ cd /var/www/ReactAppV3/frontend
 npm install
 npm run build
 
-cd /var/www/ReactAppV3/backend
+<!-- cd /var/www/ReactAppV3/backend
 npm install
-npm run dev
+npm run dev -->

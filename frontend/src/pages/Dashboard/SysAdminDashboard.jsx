@@ -39,7 +39,7 @@ const SysAdminDashboard = () => {
             </div>
 
             <div className="card mt-6">
-                <h2>Recent System Logs</h2>
+                <h2 className="card-header">Recent System Logs</h2>
                 <div className="table-container">
                     <p style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Log stream not connected.</p>
                 </div>

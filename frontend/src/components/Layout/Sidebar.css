@@ -9,6 +9,11 @@
     overflow-y: auto;
     transition: transform 0.3s ease;
     z-index: 100;
+    transform: translateX(-100%);
+}
+
+.sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar-overlay {
@@ -19,8 +24,26 @@
     height: var(--header-height);
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 1.5rem;
     border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle:hover {
+    background-color: var(--bg-tertiary);
 }
 
 .sidebar-header h2 {
@@ -84,9 +107,7 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
+    /* .sidebar transform rule removed as it's handled globally now */
 
     .sidebar.open {
         transform: translateX(0);
