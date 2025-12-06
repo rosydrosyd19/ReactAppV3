@@ -3,9 +3,8 @@
 
 # Untuk akses dengan IP (contoh: 192.168.1.100)
 :80 {
-    # Frontend - serve built React app
+    # Root directory
     root * /var/www/ReactAppV3/frontend/dist
-    file_server
     
     # Backend API - reverse proxy to Node.js
     handle /api/* {
@@ -17,8 +16,11 @@
         reverse_proxy localhost:3001
     }
     
-    # SPA fallback - semua route ke index.html
-    try_files {path} /index.html
+    # Frontend - SPA fallback
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
     
     # Encode responses
     encode gzip
@@ -38,9 +40,8 @@
 }
 
 # Untuk domain dengan HTTPS otomatis
-yourdomain.com {
+react.wednesday1991.duckdns.org {
      root * /var/www/ReactAppV3/frontend/dist
-     file_server
      
      handle /api/* {
          reverse_proxy localhost:3001
@@ -50,7 +51,11 @@ yourdomain.com {
          reverse_proxy localhost:3001
      }
      
-     try_files {path} /index.html
+     handle {
+        try_files {path} /index.html
+        file_server
+     }
+     
      encode gzip
      
      log {
