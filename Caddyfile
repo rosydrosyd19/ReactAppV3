@@ -38,22 +38,22 @@
 }
 
 # Untuk domain dengan HTTPS otomatis
-# yourdomain.com {
-#     root * /var/www/ReactAppV3/frontend/dist
-#     file_server
-#     
-#     handle /api/* {
-#         reverse_proxy localhost:3001
-#     }
-#     
-#     handle /uploads/* {
-#         reverse_proxy localhost:3001
-#     }
-#     
-#     try_files {path} /index.html
-#     encode gzip
-#     
-#     log {
-#         output file /var/log/caddy/reactappv3.log
-#     }
-# }
+yourdomain.com {
+     root * /var/www/ReactAppV3/frontend/dist
+     file_server
+     
+     handle /api/* {
+         reverse_proxy localhost:3001
+     }
+     
+     handle /uploads/* {
+         reverse_proxy localhost:3001
+     }
+     
+     try_files {path} /index.html
+     encode gzip
+     
+     log {
+         output file /var/log/caddy/reactappv3.log
+     }
+}
