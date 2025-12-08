@@ -1,20 +1,14 @@
+import './Dashboard.css';
 import { FiPackage, FiCheckCircle, FiAlertCircle, FiXCircle } from 'react-icons/fi';
 
 const StatCard = ({ title, value, icon, color, bgColor }) => (
-    <div className="card stat-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{
-            padding: '1rem',
-            borderRadius: '50%',
-            backgroundColor: bgColor,
-            color: color,
-            display: 'flex',
-            fontSize: '1.5rem'
-        }}>
+    <div className="stat-card">
+        <div className="stat-icon" style={{ backgroundColor: bgColor, color: color }}>
             {icon}
         </div>
-        <div>
-            <h3 style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{title}</h3>
-            <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{value}</p>
+        <div className="stat-content">
+            <div className="stat-value">{value}</div>
+            <div className="stat-title">{title}</div>
         </div>
     </div>
 );
@@ -32,7 +26,7 @@ const AssetDashboard = () => {
         <div className="dashboard-container">
             <h1 className="page-title">Asset Management Dashboard</h1>
 
-            <div className="grid-container" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', display: 'grid' }}>
+            <div className="dashboard-grid">
                 {stats.map((stat, index) => (
                     <StatCard key={index} {...stat} />
                 ))}

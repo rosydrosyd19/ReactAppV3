@@ -20,12 +20,17 @@
 
 .header-left {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 1rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .menu-button {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     font-size: 24px;
@@ -33,16 +38,27 @@
     cursor: pointer;
     padding: 8px;
     border-radius: var(--radius-md);
+    flex-shrink: 0;
 }
 
 .menu-button:hover {
     background-color: var(--bg-tertiary);
 }
 
+.module-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .header-right {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-shrink: 0;
 }
 
 .icon-button {
@@ -154,13 +170,42 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-    /* .header left rule removed as it's handled globally */
+    .header {
+        padding: 0 0.75rem;
+        height: 56px;
+    }
+
+    .header-left {
+        gap: 0.75rem;
+    }
+
+    .module-name {
+        font-size: 0.9rem;
+    }
+
+    .header-right {
+        gap: 0.5rem;
+    }
 
     .menu-button {
-        display: block;
+        padding: 6px;
+        font-size: 22px;
+    }
+
+    .icon-button {
+        padding: 6px;
+        font-size: 18px;
+    }
+
+    .user-button {
+        padding: 6px 10px;
     }
 
     .user-button span {
         display: none;
+    }
+
+    .user-button svg {
+        font-size: 20px;
     }
 }

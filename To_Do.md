@@ -1,9 +1,7 @@
 ## fix
 
 ## New Feature
-tambahkan fitur add pada menu user
-
-tambahkan fitur view detail pada menu user
+tambahkan fitur unhide password di halaman login
 
 tambahkan fitur edit pada menu user
 

@@ -1,5 +1,6 @@
 import './UserList.css';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import AddUserModal from './AddUserModal';
@@ -11,10 +12,13 @@ import {
     FiTrash2,
     FiUser,
     FiMail,
-    FiShield
+    FiShield,
+    FiEye,
+    FiChevronDown
 } from 'react-icons/fi';
 
 const UserList = () => {
+    const navigate = useNavigate();
     const { hasPermission } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,6 +26,11 @@ const UserList = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [expandedUserId, setExpandedUserId] = useState(null);
+
+    const toggleMobileItem = (id) => {
+        setExpandedUserId(expandedUserId === id ? null : id);
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -147,6 +156,15 @@ const UserList = () => {
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
+                                                    {hasPermission('sysadmin.users.view') && (
+                                                        <button
+                                                            className="btn-icon btn-info"
+                                                            title="View"
+                                                            onClick={() => navigate(`/sysadmin/users/${user.id}`)}
+                                                        >
+                                                            <FiEye />
+                                                        </button>
+                                                    )}
                                                     {hasPermission('sysadmin.users.edit') && (
                                                         <button className="btn-icon" title="Edit" onClick={() => alert('Edit feature coming soon')}>
                                                             <FiEdit2 />
@@ -169,61 +187,78 @@ const UserList = () => {
                             </table>
                         </div>
 
-                        {/* Mobile Card View */}
-                        <div className="mobile-cards">
+                        {/* Mobile List View - Cleaner & More User Friendly */}
+                        <div className="mobile-list">
                             {filteredUsers.map((user) => (
-                                <div key={user.id} className="user-card">
-                                    <div className="user-card-header">
-                                        <div className="user-info">
-                                            <h3>{user.username}</h3>
-                                            <span className={`status-badge ${user.is_active ? 'active' : 'inactive'}`}>
-                                                {user.is_active ? 'Active' : 'Inactive'}
-                                            </span>
+                                <div key={user.id} className="mobile-list-item">
+                                    <div className="mobile-list-main" onClick={() => toggleMobileItem(user.id)}>
+                                        <div className="mobile-user-avatar">
+                                            <span className="avatar-letter">{user.username.charAt(0).toUpperCase()}</span>
+                                            <span className={`status-dot ${user.is_active ? 'active' : 'inactive'}`} />
+                                        </div>
+                                        <div className="mobile-user-info">
+                                            <div className="user-primary-text">
+                                                <span className="username">{user.username}</span>
+                                                {user.roles && (
+                                                    <span className="role-badge-small">
+                                                        {user.roles.split(',')[0]}
+                                                        {user.roles.split(',').length > 1 && '+'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="user-secondary-text">{user.full_name || user.email}</div>
+                                        </div>
+                                        <div className="mobile-expand-icon">
+                                            <FiChevronDown className={expandedUserId === user.id ? 'rotated' : ''} />
                                         </div>
                                     </div>
 
-                                    <div className="user-card-body">
-                                        {user.full_name && (
-                                            <div className="info-row">
-                                                <FiUser className="info-icon" />
-                                                <span className="info-value">{user.full_name}</span>
-                                            </div>
-                                        )}
-
-                                        <div className="info-row">
-                                            <FiMail className="info-icon" />
-                                            <span className="info-value">{user.email}</span>
-                                        </div>
-
-                                        {user.roles && (
-                                            <div className="info-row">
-                                                <FiShield className="info-icon" />
-                                                <div className="roles-container">
-                                                    {user.roles.split(',').map((role, idx) => (
-                                                        <span key={idx} className="role-tag">
-                                                            {role.trim()}
-                                                        </span>
-                                                    ))}
+                                    {expandedUserId === user.id && (
+                                        <div className="mobile-list-details">
+                                            <div className="detail-grid">
+                                                <div className="detail-item">
+                                                    <span className="label">Email</span>
+                                                    <span className="value">{user.email}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Full Name</span>
+                                                    <span className="value">{user.full_name || '-'}</span>
+                                                </div>
+                                                <div className="detail-item full-width">
+                                                    <span className="label">Roles</span>
+                                                    <div className="roles-inline">
+                                                        {user.roles ? user.roles.split(',').map((role, idx) => (
+                                                            <span key={idx} className="role-pill">{role.trim()}</span>
+                                                        )) : '-'}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
 
-                                    <div className="user-card-actions">
-                                        {hasPermission('sysadmin.users.edit') && (
-                                            <button className="card-btn edit-btn" onClick={() => alert('Edit feature coming soon')}>
-                                                <FiEdit2 /> Edit
-                                            </button>
-                                        )}
-                                        {hasPermission('sysadmin.users.delete') && (
-                                            <button
-                                                className="card-btn delete-btn"
-                                                onClick={() => handleDelete(user.id, user.username)}
-                                            >
-                                                <FiTrash2 /> Delete
-                                            </button>
-                                        )}
-                                    </div>
+                                            <div className="mobile-actions">
+                                                {hasPermission('sysadmin.users.view') && (
+                                                    <button
+                                                        className="action-btn view"
+                                                        onClick={() => navigate(`/sysadmin/users/${user.id}`)}
+                                                    >
+                                                        <FiEye /> View
+                                                    </button>
+                                                )}
+                                                {hasPermission('sysadmin.users.edit') && (
+                                                    <button className="action-btn edit" onClick={() => alert('Coming soon')}>
+                                                        <FiEdit2 /> Edit
+                                                    </button>
+                                                )}
+                                                {hasPermission('sysadmin.users.delete') && (
+                                                    <button
+                                                        className="action-btn delete"
+                                                        onClick={() => handleDelete(user.id, user.username)}
+                                                    >
+                                                        <FiTrash2 /> Delete
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

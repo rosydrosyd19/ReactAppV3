@@ -120,8 +120,81 @@
     font-weight: 500;
 }
 
+/* Shared Dashboard Grid Styles that are responsive */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
 @media (max-width: 768px) {
-    .stats-grid {
+
+    /* Main Dashboard Header */
+    .dashboard-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 22px;
+    }
+
+    /* Compact Grid for Mobile */
+    .stats-grid,
+    .dashboard-grid {
         grid-template-columns: 1fr;
+        gap: 0;
+        /* Remove gap for list view */
+        background-color: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    /* Transform Stat Cards into Horizontal Compact Items */
+    .stat-card {
+        padding: 1rem;
+        border: none;
+        box-shadow: none;
+        /* Remove card shadow in list view */
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 0;
+        background: transparent;
+        /* Use container background */
+    }
+
+    .stat-card:last-child {
+        border-bottom: none;
+    }
+
+    .stat-card:hover {
+        transform: none;
+        background-color: var(--bg-tertiary);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        border-radius: 50%;
+    }
+
+    .stat-value {
+        font-size: 18px;
+        margin-bottom: 0;
+    }
+
+    .stat-title {
+        font-size: 13px;
+    }
+
+    /* Page Title override */
+    .page-title {
+        font-size: 22px;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Table Container text */
+    .table-container p {
+        font-size: 14px;
     }
 }

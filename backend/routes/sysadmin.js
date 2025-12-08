@@ -47,7 +47,7 @@ router.get('/users/:id', checkPermission('sysadmin.users.view'), async (req, res
 
         // Get roles
         const roles = await db.query(`
-      SELECT r.id, r.role_name
+      SELECT r.id, r.role_name, r.description
       FROM sysadmin_roles r
       INNER JOIN sysadmin_user_roles ur ON ur.role_id = r.id
       WHERE ur.user_id = ?

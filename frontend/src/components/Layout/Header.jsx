@@ -17,6 +17,14 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
         document.documentElement.setAttribute('data-theme', newTheme);
     };
 
+    const getModuleName = () => {
+        const activeModule = localStorage.getItem('activeModule');
+
+        if (activeModule === 'sysadmin') return 'System Administrator';
+        if (activeModule === 'asset') return 'Asset Management';
+        return 'System';
+    };
+
     return (
         <header className="header">
             <div className="header-left">
@@ -25,18 +33,13 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                         <FiMenu />
                     </button>
                 )}
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                    {/* ReactAppV3 */}
-                    {(() => {
-                        const activeModule = localStorage.getItem('activeModule');
-                        if (activeModule === 'sysadmin') return <span style={{ fontSize: '0.8em', fontWeight: 'normal', color: 'var(--text-secondary)' }}>System Admin</span>;
-                        if (activeModule === 'asset') return <span style={{ fontSize: '0.8em', fontWeight: 'normal', color: 'var(--text-secondary)' }}>Asset Management</span>;
-                        return null;
-                    })()}
-                </h2>
             </div>
 
+            <div className="header-center" style={{ flex: 1 }}></div>
+
             <div className="header-right">
+                <span className="module-name">{getModuleName()}</span>
+
                 <button
                     className="icon-button"
                     onClick={() => navigate('/modules')}
