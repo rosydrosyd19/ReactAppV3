@@ -73,6 +73,9 @@ router.get('/users/:id', checkPermission('sysadmin.users.view'), async (req, res
 
 // Create user
 router.post('/users', checkPermission('sysadmin.users.create'), async (req, res) => {
+    console.log('=== CREATE USER REQUEST ===');
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+
     try {
         const { username, email, password, full_name, phone, role_ids } = req.body;
 
@@ -80,30 +83,64 @@ router.post('/users', checkPermission('sysadmin.users.create'), async (req, res)
             return res.status(400).json({ success: false, message: 'Required fields missing' });
         }
 
+        // Check if username already exists
+        const existingUsers = await db.query(
+            'SELECT id FROM sysadmin_users WHERE username = ? OR email = ?',
+            [username, email]
+        );
+
+        if (existingUsers && existingUsers.length > 0) {
+            console.log('User already exists');
+            return res.status(400).json({
+                success: false,
+                message: 'Username atau email sudah digunakan'
+            });
+        }
+
+        console.log('Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        console.log('Inserting user...');
         const result = await db.query(
             'INSERT INTO sysadmin_users (username, email, password, full_name, phone) VALUES (?, ?, ?, ?, ?)',
-            [username, email, hashedPassword, full_name, phone]
+            [username, email, hashedPassword, full_name || null, phone || null]
         );
 
         const userId = result.insertId;
+        console.log('User created with ID:', userId);
 
         // Assign roles if provided
-        if (role_ids && role_ids.length > 0) {
-            const values = role_ids.map(roleId => [userId, roleId, req.user.id]);
-            await db.query(
-                'INSERT INTO sysadmin_user_roles (user_id, role_id, assigned_by) VALUES ?',
-                [values]
-            );
+        if (role_ids && Array.isArray(role_ids) && role_ids.length > 0) {
+            console.log('Assigning roles:', role_ids);
+            for (const roleId of role_ids) {
+                await db.query(
+                    'INSERT INTO sysadmin_user_roles (user_id, role_id, assigned_by) VALUES (?, ?, ?)',
+                    [userId, roleId, req.user.id]
+                );
+            }
         }
 
+        console.log('Logging activity...');
         await logActivity(req.user.id, 'CREATE_USER', 'sysadmin', 'user', userId, { username }, req);
 
-        res.status(201).json({ success: true, data: { id: userId, username, email } });
+        console.log('User created successfully!');
+        res.status(201).json({
+            success: true,
+            data: {
+                id: Number(userId), // Convert BigInt to Number
+                username,
+                email
+            }
+        });
     } catch (error) {
-        console.error('Create user error:', error);
-        res.status(500).json({ success: false, message: 'Error creating user' });
+        console.error('=== CREATE USER ERROR ===');
+        console.error('Error:', error);
+        console.error('Message:', error.message);
+        console.error('Stack:', error.stack);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error creating user'
+        });
     }
 });
 
@@ -149,6 +186,17 @@ router.delete('/users/:id', checkPermission('sysadmin.users.delete'), async (req
     } catch (error) {
         console.error('Delete user error:', error);
         res.status(500).json({ success: false, message: 'Error deleting user' });
+    }
+});
+
+// Get roles list (for dropdowns/selects)
+router.get('/roles-list', checkPermission('sysadmin.users.create'), async (req, res) => {
+    try {
+        const roles = await db.query('SELECT id, role_name, description FROM sysadmin_roles ORDER BY role_name');
+        res.json({ success: true, data: roles });
+    } catch (error) {
+        console.error('Get roles list error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching roles list' });
     }
 });
 

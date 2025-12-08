@@ -2,6 +2,8 @@ import './UserList.css';
 import { useState, useEffect } from 'react';
 import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
+import AddUserModal from './AddUserModal';
+import Toast from '../../components/Toast/Toast';
 import {
     FiPlus,
     FiSearch,
@@ -17,6 +19,9 @@ const UserList = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     useEffect(() => {
         fetchUsers();
@@ -53,6 +58,15 @@ const UserList = () => {
         }
     };
 
+    const handleUserAdded = () => {
+        // Tampilkan toast notification
+        setToastMessage('User berhasil ditambahkan!');
+        setShowToast(true);
+
+        // Refresh data
+        fetchUsers();
+    };
+
     const filteredUsers = users.filter(user =>
         user.username.toLowerCase().includes(search.toLowerCase()) ||
         user.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -67,7 +81,7 @@ const UserList = () => {
                     <p>Kelola pengguna sistem</p>
                 </div>
                 {hasPermission('sysadmin.users.create') && (
-                    <button className="btn btn-primary" onClick={() => alert('Fitur tambah user segera hadir')}>
+                    <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
                         <FiPlus /> Tambah User
                     </button>
                 )}
@@ -216,6 +230,20 @@ const UserList = () => {
                     </>
                 )}
             </div>
+
+            <AddUserModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onSuccess={handleUserAdded}
+            />
+
+            {showToast && (
+                <Toast
+                    message={toastMessage}
+                    type="success"
+                    onClose={() => setShowToast(false)}
+                />
+            )}
         </div>
     );
 };

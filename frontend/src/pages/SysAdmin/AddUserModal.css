@@ -1,0 +1,171 @@
+.add-user-modal {
+    max-width: 800px;
+}
+
+/* Form Grid - 2 Kolom untuk Desktop */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Password Input dengan Toggle */
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-input-wrapper .form-input {
+    padding-right: 45px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    border-radius: var(--radius-sm);
+}
+
+.password-toggle:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+}
+
+.password-toggle svg {
+    font-size: 18px;
+}
+
+/* Role Checkboxes */
+.role-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.checkbox-label:hover {
+    background: var(--bg-tertiary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+/* Role Search */
+.role-search-wrapper {
+    margin-bottom: 0.5rem;
+}
+
+.role-search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 14px;
+}
+
+.no-roles-found {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Form Hint */
+.form-hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .add-user-modal {
+        max-width: 100%;
+        margin: 0;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        max-height: 95vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Single Column untuk Mobile */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .form-column {
+        gap: 0;
+    }
+
+    /* Modal Body - Scrollable dengan tinggi terbatas */
+    .add-user-modal .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        max-height: calc(95vh - 230px);
+        /* Kurangi lebih banyak untuk bottom nav */
+        padding: 1rem;
+        padding-bottom: 2rem;
+        /* Extra padding di bawah */
+    }
+
+    /* Modal Footer - Sticky di bawah dengan ruang untuk bottom nav */
+    .add-user-modal .modal-footer {
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        background: var(--bg-color);
+        border-top: 2px solid var(--border-color);
+        padding: 1rem;
+        padding-bottom: calc(1rem + 80px);
+        /* Tambah ruang untuk bottom nav (80px) */
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .add-user-modal .modal-footer .btn {
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .role-checkboxes {
+        max-height: 150px;
+    }
+}
