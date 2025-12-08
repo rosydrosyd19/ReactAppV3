@@ -42,25 +42,25 @@ const UserList = () => {
     };
 
     const handleDelete = async (id, username) => {
-        if (!window.confirm(`Apakah Anda yakin ingin menghapus user ${username}?`)) {
+        if (!window.confirm(`Are you sure you want to delete user ${username}?`)) {
             return;
         }
 
         try {
             const response = await axios.delete(`/sysadmin/users/${id}`);
             if (response.data.success) {
-                alert('User berhasil dihapus');
+                alert('User successfully deleted');
                 fetchUsers();
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert(error.response?.data?.message || 'Gagal menghapus user');
+            alert(error.response?.data?.message || 'Failed to delete user');
         }
     };
 
     const handleUserAdded = () => {
         // Tampilkan toast notification
-        setToastMessage('User berhasil ditambahkan!');
+        setToastMessage('User successfully added!');
         setShowToast(true);
 
         // Refresh data
@@ -78,11 +78,11 @@ const UserList = () => {
             <div className="page-header">
                 <div>
                     <h1>Users</h1>
-                    <p>Kelola pengguna sistem</p>
+                    <p>Manage User Systems</p>
                 </div>
                 {hasPermission('sysadmin.users.create') && (
                     <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-                        <FiPlus /> Tambah User
+                        <FiPlus /> Add User
                     </button>
                 )}
             </div>
@@ -94,7 +94,7 @@ const UserList = () => {
                         <input
                             type="text"
                             className="form-input"
-                            placeholder="Cari nama, username, atau email..."
+                            placeholder="Search for name, username, or email..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -104,13 +104,13 @@ const UserList = () => {
                 {loading ? (
                     <div className="loading-container">
                         <div className="loading-spinner" />
-                        <p>Memuat data...</p>
+                        <p>Loading data...</p>
                     </div>
                 ) : filteredUsers.length === 0 ? (
                     <div className="empty-state">
                         <FiUser />
-                        <h3>Tidak ada user</h3>
-                        <p>Mulai dengan menambahkan user pertama</p>
+                        <h3>No users</h3>
+                        <p>Start by adding your first user</p>
                     </div>
                 ) : (
                     <>
@@ -120,11 +120,11 @@ const UserList = () => {
                                 <thead>
                                     <tr>
                                         <th>Username</th>
-                                        <th>Nama Lengkap</th>
+                                        <th>Full Name</th>
                                         <th>Email</th>
                                         <th>Role</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -142,20 +142,20 @@ const UserList = () => {
                                             </td>
                                             <td>
                                                 <span className={`badge ${user.is_active ? 'badge-success' : 'badge-danger'}`}>
-                                                    {user.is_active ? 'Aktif' : 'Nonaktif'}
+                                                    {user.is_active ? 'Active' : 'Inactive'}
                                                 </span>
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
                                                     {hasPermission('sysadmin.users.edit') && (
-                                                        <button className="btn-icon" title="Edit" onClick={() => alert('Fitur edit segera hadir')}>
+                                                        <button className="btn-icon" title="Edit" onClick={() => alert('Edit feature coming soon')}>
                                                             <FiEdit2 />
                                                         </button>
                                                     )}
                                                     {hasPermission('sysadmin.users.delete') && (
                                                         <button
                                                             className="btn-icon btn-danger"
-                                                            title="Hapus"
+                                                            title="Delete"
                                                             onClick={() => handleDelete(user.id, user.username)}
                                                         >
                                                             <FiTrash2 />
@@ -177,7 +177,7 @@ const UserList = () => {
                                         <div className="user-info">
                                             <h3>{user.username}</h3>
                                             <span className={`status-badge ${user.is_active ? 'active' : 'inactive'}`}>
-                                                {user.is_active ? 'Aktif' : 'Nonaktif'}
+                                                {user.is_active ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
                                     </div>
@@ -211,7 +211,7 @@ const UserList = () => {
 
                                     <div className="user-card-actions">
                                         {hasPermission('sysadmin.users.edit') && (
-                                            <button className="card-btn edit-btn" onClick={() => alert('Fitur edit segera hadir')}>
+                                            <button className="card-btn edit-btn" onClick={() => alert('Edit feature coming soon')}>
                                                 <FiEdit2 /> Edit
                                             </button>
                                         )}
@@ -220,7 +220,7 @@ const UserList = () => {
                                                 className="card-btn delete-btn"
                                                 onClick={() => handleDelete(user.id, user.username)}
                                             >
-                                                <FiTrash2 /> Hapus
+                                                <FiTrash2 /> Delete
                                             </button>
                                         )}
                                     </div>

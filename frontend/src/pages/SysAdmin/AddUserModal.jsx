@@ -74,19 +74,19 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
 
         // Validasi
         if (!formData.username || !formData.email || !formData.password) {
-            setError('Username, Email, dan Password wajib diisi');
+            setError('Username, Email, and Password are required');
             scrollToTop();
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('Password minimal 6 karakter');
+            setError('Password must be at least 6 characters');
             scrollToTop();
             return;
         }
 
         if (formData.password !== confirmPassword) {
-            setError('Password dan Konfirmasi Password tidak sama');
+            setError('Password and Confirmation Password do not match');
             scrollToTop();
             return;
         }
@@ -102,7 +102,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
             }
         } catch (error) {
             console.error('Error creating user:', error);
-            setError(error.response?.data?.message || 'Gagal menambahkan user');
+            setError(error.response?.data?.message || 'Failed to add user');
             scrollToTop(); // Scroll ke atas untuk menampilkan error
         } finally {
             setLoading(false);
@@ -157,7 +157,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="modal-overlay" onClick={handleClose}>
             <div className="modal add-user-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2 className="modal-title">Tambah User Baru</h2>
+                    <h2 className="modal-title">Add New User</h2>
                     <button className="modal-close" onClick={handleClose}>
                         <FiX />
                     </button>
@@ -181,7 +181,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                                         className="form-input"
                                         value={formData.username}
                                         onChange={handleChange}
-                                        placeholder="Masukkan username"
+                                        placeholder="Enter username"
                                         required
                                     />
                                 </div>
@@ -194,7 +194,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                                         className="form-input"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        placeholder="Masukkan email"
+                                        placeholder="Enter email"
                                         required
                                     />
                                 </div>
@@ -208,7 +208,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                                             className="form-input"
                                             value={formData.password}
                                             onChange={handleChange}
-                                            placeholder="Minimal 6 karakter"
+                                            placeholder="Enter minimum 6 characters"
                                             required
                                         />
                                         <button
@@ -229,7 +229,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                                             className="form-input"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            placeholder="Ketik ulang password"
+                                            placeholder="Enter password confirmation"
                                             required
                                         />
                                         <button
@@ -245,30 +245,30 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
 
                             <div className="form-column">
                                 <div className="form-group">
-                                    <label className="form-label">Nama Lengkap</label>
+                                    <label className="form-label">Full Name</label>
                                     <input
                                         type="text"
                                         name="full_name"
                                         className="form-input"
                                         value={formData.full_name}
                                         onChange={handleChange}
-                                        placeholder="Masukkan nama lengkap"
+                                        placeholder="Enter full name"
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Nomor Telepon</label>
+                                    <label className="form-label">Phone Number</label>
                                     <input
                                         type="tel"
                                         name="phone"
                                         className="form-input"
                                         value={formData.phone}
                                         onChange={handleChange}
-                                        placeholder="Contoh: 081234567890"
+                                        placeholder="Example : 8058182123"
                                         pattern="[0-9]*"
                                         inputMode="numeric"
                                     />
-                                    <small className="form-hint">Hanya angka (0-9)</small>
+                                    <small className="form-hint">Only numbers (0-9)</small>
                                 </div>
 
                                 <div className="form-group">
@@ -277,7 +277,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                                         <input
                                             type="text"
                                             className="form-input role-search-input"
-                                            placeholder="Cari role..."
+                                            placeholder="Search role..."
                                             value={roleSearch}
                                             onChange={(e) => setRoleSearch(e.target.value)}
                                         />
@@ -296,7 +296,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                                             ))
                                         ) : (
                                             <div className="no-roles-found">
-                                                Tidak ada role yang ditemukan
+                                                No roles found
                                             </div>
                                         )}
                                     </div>
@@ -312,14 +312,14 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                             onClick={handleClose}
                             disabled={loading}
                         >
-                            Batal
+                            Cancel
                         </button>
                         <button
                             type="submit"
                             className="btn btn-primary"
                             disabled={loading}
                         >
-                            {loading ? 'Menyimpan...' : 'Simpan'}
+                            {loading ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </form>
