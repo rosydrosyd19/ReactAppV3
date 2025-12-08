@@ -18,27 +18,17 @@
 
 .page-header p {
     color: var(--text-secondary);
+    font-size: 14px;
 }
 
-.filters-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+/* Search Section */
+.search-section {
     margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.search-form {
-    display: flex;
-    gap: 0.5rem;
-    flex: 1;
-    min-width: 300px;
 }
 
 .input-with-icon {
     position: relative;
-    flex: 1;
+    width: 100%;
 }
 
 .input-with-icon svg {
@@ -47,20 +37,22 @@
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
+    font-size: 18px;
 }
 
 .input-with-icon .form-input {
-    padding-left: 36px;
+    padding-left: 40px;
+    width: 100%;
 }
 
-.filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+/* Desktop Table - Default */
+.desktop-table {
+    display: block;
+    overflow-x: auto;
 }
 
-.filter-group svg {
-    color: var(--text-secondary);
+.mobile-cards {
+    display: none;
 }
 
 .action-buttons {
@@ -71,7 +63,7 @@
 .btn-icon {
     background: none;
     border: none;
-    padding: 6px;
+    padding: 8px;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     cursor: pointer;
@@ -114,23 +106,233 @@
     color: var(--text-primary);
 }
 
-/* Responsive */
+/* ============================================
+   MOBILE RESPONSIVE - TAMPILAN CARD
+   ============================================ */
 @media (max-width: 768px) {
+    .user-list {
+        padding-bottom: 100px;
+    }
+
+    /* Header Mobile - Padding 1rem */
     .page-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 0 1rem;
+        /* Padding kiri-kanan konsisten */
+    }
+
+    .page-header h1 {
+        font-size: 22px;
     }
 
     .page-header .btn {
         width: 100%;
+        justify-content: center;
+        padding: 14px;
+        font-size: 15px;
     }
 
-    .filters-bar {
+    /* Card Container - Hapus padding */
+    .card {
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    /* Search Mobile - Margin 1rem kiri-kanan */
+    .search-section {
+        margin: 0 1rem 1rem 1rem;
+        background: var(--bg-color);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Sembunyikan tabel desktop */
+    .desktop-table {
+        display: none;
+    }
+
+    /* Tampilkan card mobile - Padding 1rem kiri-kanan */
+    .mobile-cards {
+        display: flex;
         flex-direction: column;
+        gap: 1rem;
+        padding: 0 1rem;
     }
 
-    .search-form {
-        width: 100%;
+    /* User Card Styling */
+    .user-card {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .user-card:active {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Card Header */
+    .user-card-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        padding: 1rem 1.25rem;
+        color: white;
+    }
+
+    .user-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-info h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        color: white;
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Card Body */
+    .user-card-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .info-icon {
+        color: var(--primary-color);
+        font-size: 18px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-size: 14px;
+        line-height: 1.5;
+        word-break: break-word;
+        flex: 1;
+    }
+
+    .roles-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        flex: 1;
+    }
+
+    .role-tag {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-color);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* Card Actions */
+    .user-card-actions {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .card-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 12px 16px;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 44px;
+    }
+
+    .edit-btn {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .edit-btn:active {
+        background: var(--primary-dark);
+        transform: scale(0.98);
+    }
+
+    .delete-btn {
+        background: transparent;
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+    }
+
+    .delete-btn:active {
+        background: rgba(239, 68, 68, 0.1);
+        transform: scale(0.98);
+    }
+
+    /* Loading & Empty State Mobile - Margin 1rem kiri-kanan */
+    .loading-container,
+    .empty-state {
+        padding: 2rem 1rem;
+        margin: 0 1rem;
+        background: var(--bg-color);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+}
+
+/* Tablet - Medium screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .page-header {
+        flex-direction: row;
+    }
+
+    .page-header .btn {
+        width: auto;
     }
 }

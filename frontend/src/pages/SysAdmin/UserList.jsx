@@ -7,7 +7,9 @@ import {
     FiSearch,
     FiEdit2,
     FiTrash2,
-    FiUser
+    FiUser,
+    FiMail,
+    FiShield
 } from 'react-icons/fi';
 
 const UserList = () => {
@@ -29,36 +31,25 @@ const UserList = () => {
             }
         } catch (error) {
             console.error('Error fetching users:', error);
-            // alert('Failed to fetch users'); // Squelch error for now or show toast
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        // Frontend filtering since API might not support search yet or it's small enough
-        // Ideally API should handle this, but for now filtering locally if needed or re-fetching
-        // The current plan doesn't specifying modifying API for search, so I'll just filter displayed data or re-fetch if API supported it.
-        // Looking at sysadmin.js, it doesn't seem to support search query params for /users. 
-        // So I will implement client-side filtering for search or just ignore it for now if complex.
-        // Let's do simple client-side filtering for this iteration to be helpful.
-    };
-
     const handleDelete = async (id, username) => {
-        if (!window.confirm(`Are you sure you want to delete user ${username}?`)) {
+        if (!window.confirm(`Apakah Anda yakin ingin menghapus user ${username}?`)) {
             return;
         }
 
         try {
             const response = await axios.delete(`/sysadmin/users/${id}`);
             if (response.data.success) {
-                alert('User deleted successfully');
+                alert('User berhasil dihapus');
                 fetchUsers();
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert(error.response?.data?.message || 'Failed to delete user');
+            alert(error.response?.data?.message || 'Gagal menghapus user');
         }
     };
 
@@ -73,98 +64,156 @@ const UserList = () => {
             <div className="page-header">
                 <div>
                     <h1>Users</h1>
-                    <p>Manage system users and access</p>
+                    <p>Kelola pengguna sistem</p>
                 </div>
                 {hasPermission('sysadmin.users.create') && (
-                    <button className="btn btn-primary" onClick={() => alert('Add User functionality coming next')}>
-                        <FiPlus /> Add User
+                    <button className="btn btn-primary" onClick={() => alert('Fitur tambah user segera hadir')}>
+                        <FiPlus /> Tambah User
                     </button>
                 )}
             </div>
 
             <div className="card">
-                <div className="filters-bar">
-                    <form onSubmit={handleSearch} className="search-form">
-                        <div className="input-with-icon">
-                            <FiSearch />
-                            <input
-                                type="text"
-                                className="form-input"
-                                placeholder="Search by name, username, or email..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                    </form>
+                <div className="search-section">
+                    <div className="input-with-icon">
+                        <FiSearch />
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Cari nama, username, atau email..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 {loading ? (
                     <div className="loading-container">
                         <div className="loading-spinner" />
-                        <p>Loading users...</p>
+                        <p>Memuat data...</p>
                     </div>
                 ) : filteredUsers.length === 0 ? (
                     <div className="empty-state">
                         <FiUser />
-                        <h3>No users found</h3>
-                        <p>Start by adding your first user</p>
+                        <h3>Tidak ada user</h3>
+                        <p>Mulai dengan menambahkan user pertama</p>
                     </div>
                 ) : (
-                    <div className="table-container">
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Roles</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredUsers.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>
-                                            <strong>{user.username}</strong>
-                                        </td>
-                                        <td>{user.full_name || '-'}</td>
-                                        <td>{user.email}</td>
-                                        <td>
-                                            {user.roles ? user.roles.split(',').map((role, idx) => (
-                                                <span key={idx} className="badge badge-primary" style={{ marginRight: '4px' }}>
-                                                    {role.trim()}
-                                                </span>
-                                            )) : '-'}
-                                        </td>
-                                        <td>
-                                            <span className={`badge ${user.is_active ? 'badge-success' : 'badge-danger'}`}>
-                                                {user.is_active ? 'Active' : 'Inactive'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="action-buttons">
-                                                {hasPermission('sysadmin.users.edit') && (
-                                                    <button className="btn-icon" title="Edit" onClick={() => alert('Edit functionality coming next')}>
-                                                        <FiEdit2 />
-                                                    </button>
-                                                )}
-                                                {hasPermission('sysadmin.users.delete') && (
-                                                    <button
-                                                        className="btn-icon btn-danger"
-                                                        title="Delete"
-                                                        onClick={() => handleDelete(user.id, user.username)}
-                                                    >
-                                                        <FiTrash2 />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
+                    <>
+                        {/* Desktop Table View */}
+                        <div className="desktop-table">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Nama Lengkap</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {filteredUsers.map((user) => (
+                                        <tr key={user.id}>
+                                            <td><strong>{user.username}</strong></td>
+                                            <td>{user.full_name || '-'}</td>
+                                            <td>{user.email}</td>
+                                            <td>
+                                                {user.roles ? user.roles.split(',').map((role, idx) => (
+                                                    <span key={idx} className="badge badge-primary" style={{ marginRight: '4px' }}>
+                                                        {role.trim()}
+                                                    </span>
+                                                )) : '-'}
+                                            </td>
+                                            <td>
+                                                <span className={`badge ${user.is_active ? 'badge-success' : 'badge-danger'}`}>
+                                                    {user.is_active ? 'Aktif' : 'Nonaktif'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="action-buttons">
+                                                    {hasPermission('sysadmin.users.edit') && (
+                                                        <button className="btn-icon" title="Edit" onClick={() => alert('Fitur edit segera hadir')}>
+                                                            <FiEdit2 />
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('sysadmin.users.delete') && (
+                                                        <button
+                                                            className="btn-icon btn-danger"
+                                                            title="Hapus"
+                                                            onClick={() => handleDelete(user.id, user.username)}
+                                                        >
+                                                            <FiTrash2 />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="mobile-cards">
+                            {filteredUsers.map((user) => (
+                                <div key={user.id} className="user-card">
+                                    <div className="user-card-header">
+                                        <div className="user-info">
+                                            <h3>{user.username}</h3>
+                                            <span className={`status-badge ${user.is_active ? 'active' : 'inactive'}`}>
+                                                {user.is_active ? 'Aktif' : 'Nonaktif'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="user-card-body">
+                                        {user.full_name && (
+                                            <div className="info-row">
+                                                <FiUser className="info-icon" />
+                                                <span className="info-value">{user.full_name}</span>
+                                            </div>
+                                        )}
+
+                                        <div className="info-row">
+                                            <FiMail className="info-icon" />
+                                            <span className="info-value">{user.email}</span>
+                                        </div>
+
+                                        {user.roles && (
+                                            <div className="info-row">
+                                                <FiShield className="info-icon" />
+                                                <div className="roles-container">
+                                                    {user.roles.split(',').map((role, idx) => (
+                                                        <span key={idx} className="role-tag">
+                                                            {role.trim()}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="user-card-actions">
+                                        {hasPermission('sysadmin.users.edit') && (
+                                            <button className="card-btn edit-btn" onClick={() => alert('Fitur edit segera hadir')}>
+                                                <FiEdit2 /> Edit
+                                            </button>
+                                        )}
+                                        {hasPermission('sysadmin.users.delete') && (
+                                            <button
+                                                className="card-btn delete-btn"
+                                                onClick={() => handleDelete(user.id, user.username)}
+                                            >
+                                                <FiTrash2 /> Hapus
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
         </div>
