@@ -21,6 +21,10 @@
     font-size: 14px;
 }
 
+.page-header .btn {
+    margin-top: 10px;
+}
+
 /* Search Section */
 .search-section {
     margin-bottom: 1.5rem;

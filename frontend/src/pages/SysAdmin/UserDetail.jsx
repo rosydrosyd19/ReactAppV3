@@ -147,7 +147,7 @@ const UserDetail = () => {
                             </div>
                             <div className="info-item">
                                 <label>Last Updated</label>
-                                <p>{new Date(user.updated_at).toLocaleString()}</p>
+                                <p>{user.updated_at ? new Date(user.updated_at).toLocaleString() : 'No changes yet'}</p>
                             </div>
                         </div>
                     </div>
