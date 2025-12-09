@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import EditUserModal from './EditUserModal';
+import ConfirmationModal from '../../components/Modal/ConfirmationModal';
 import Toast from '../../components/Toast/Toast';
 import {
     FiArrowLeft,
@@ -25,6 +26,7 @@ const UserDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
@@ -53,20 +55,21 @@ const UserDetail = () => {
         fetchUserDetail();
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm(`Are you sure you want to delete user ${user.username}?`)) {
-            return;
-        }
+    const handleDeleteClick = () => {
+        setShowDeleteModal(true);
+    };
 
+    const confirmDelete = async () => {
         try {
             const response = await axios.delete(`/sysadmin/users/${id}`);
             if (response.data.success) {
-                alert('User successfully deleted');
+                // Not using internal alert, just navigate
                 navigate('/sysadmin/users');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert(error.response?.data?.message || 'Failed to delete user');
+            alert(error.response?.data?.message || 'Failed to delete user'); // Keep native alert for error for now or use Toast? Native is fine for error.
+            setShowDeleteModal(false);
         }
     };
 
@@ -114,7 +117,7 @@ const UserDetail = () => {
                         </button>
                     )}
                     {hasPermission('sysadmin.users.delete') && (
-                        <button className="btn btn-danger" onClick={handleDelete}>
+                        <button className="btn btn-danger" onClick={handleDeleteClick}>
                             <FiTrash2 /> Delete
                         </button>
                     )}
@@ -215,16 +218,24 @@ const UserDetail = () => {
                 userId={id}
             />
 
-            {
-                showToast && (
-                    <Toast
-                        message={toastMessage}
-                        type="success"
-                        onClose={() => setShowToast(false)}
-                    />
-                )
-            }
-        </div >
+            {showToast && (
+                <Toast
+                    message={toastMessage}
+                    type="success"
+                    onClose={() => setShowToast(false)}
+                />
+            )}
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete User"
+                message={`Are you sure you want to delete user "${user?.username}"? This action cannot be undone.`}
+                confirmText="Delete User"
+                type="danger"
+            />
+        </div>
     );
 };
 

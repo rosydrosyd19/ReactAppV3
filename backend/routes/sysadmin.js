@@ -22,6 +22,7 @@ router.get('/users', checkPermission('sysadmin.users.view'), async (req, res) =>
       FROM sysadmin_users u
       LEFT JOIN sysadmin_user_roles ur ON u.id = ur.user_id
       LEFT JOIN sysadmin_roles r ON ur.role_id = r.id
+      WHERE u.is_deleted = FALSE
       GROUP BY u.id
       ORDER BY u.created_at DESC
     `);
@@ -37,7 +38,7 @@ router.get('/users', checkPermission('sysadmin.users.view'), async (req, res) =>
 router.get('/users/:id', checkPermission('sysadmin.users.view'), async (req, res) => {
     try {
         const [user] = await db.query(
-            'SELECT id, username, email, full_name, phone, is_active, created_at FROM sysadmin_users WHERE id = ?',
+            'SELECT id, username, email, full_name, phone, is_active, created_at FROM sysadmin_users WHERE id = ? AND is_deleted = FALSE',
             [req.params.id]
         );
 
@@ -224,8 +225,13 @@ router.delete('/users/:id', checkPermission('sysadmin.users.delete'), async (req
             return res.status(400).json({ success: false, message: 'Cannot delete your own account' });
         }
 
-        await db.query('DELETE FROM sysadmin_users WHERE id = ?', [req.params.id]);
-        await logActivity(req.user.id, 'DELETE_USER', 'sysadmin', 'user', req.params.id, null, req);
+        // Soft delete instead of hard delete
+        await db.query('UPDATE sysadmin_users SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
+
+        // Also we might want to deactivate user to be safe
+        await db.query('UPDATE sysadmin_users SET is_active = FALSE WHERE id = ?', [req.params.id]);
+
+        await logActivity(req.user.id, 'DELETE_USER', 'sysadmin', 'user', req.params.id, { soft_delete: true }, req);
 
         res.json({ success: true, message: 'User deleted successfully' });
     } catch (error) {

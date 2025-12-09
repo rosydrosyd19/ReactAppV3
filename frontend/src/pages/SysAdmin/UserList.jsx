@@ -5,6 +5,7 @@ import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
+import ConfirmationModal from '../../components/Modal/ConfirmationModal';
 import Toast from '../../components/Toast/Toast';
 import {
     FiPlus,
@@ -27,6 +28,8 @@ const UserList = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [selectedUsername, setSelectedUsername] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [expandedUserId, setExpandedUserId] = useState(null);
@@ -53,20 +56,29 @@ const UserList = () => {
         }
     };
 
-    const handleDelete = async (id, username) => {
-        if (!window.confirm(`Are you sure you want to delete user ${username}?`)) {
-            return;
-        }
+    const handleDeleteClick = (id, username) => {
+        setSelectedUserId(id);
+        setSelectedUsername(username);
+        setShowDeleteModal(true);
+    };
 
+    const confirmDelete = async () => {
         try {
-            const response = await axios.delete(`/sysadmin/users/${id}`);
+            setLoading(true); // Or use specific loading state for modal
+            const response = await axios.delete(`/sysadmin/users/${selectedUserId}`);
             if (response.data.success) {
-                alert('User successfully deleted');
+                setToastMessage('User successfully deleted');
+                setShowToast(true);
                 fetchUsers();
             }
         } catch (error) {
             console.error('Error deleting user:', error);
             alert(error.response?.data?.message || 'Failed to delete user');
+        } finally {
+            setLoading(false);
+            setShowDeleteModal(false);
+            setSelectedUserId(null);
+            setSelectedUsername('');
         }
     };
 
@@ -188,7 +200,7 @@ const UserList = () => {
                                                         <button
                                                             className="btn-icon btn-danger"
                                                             title="Delete"
-                                                            onClick={() => handleDelete(user.id, user.username)}
+                                                            onClick={() => handleDeleteClick(user.id, user.username)}
                                                         >
                                                             <FiTrash2 />
                                                         </button>
@@ -265,7 +277,7 @@ const UserList = () => {
                                                 {hasPermission('sysadmin.users.delete') && (
                                                     <button
                                                         className="action-btn delete"
-                                                        onClick={() => handleDelete(user.id, user.username)}
+                                                        onClick={() => handleDeleteClick(user.id, user.username)}
                                                     >
                                                         <FiTrash2 /> Delete
                                                     </button>
@@ -291,6 +303,16 @@ const UserList = () => {
                 onClose={() => setShowEditModal(false)}
                 onSuccess={handleUserUpdated}
                 userId={selectedUserId}
+            />
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete User"
+                message={`Are you sure you want to delete user "${selectedUsername}"? This action cannot be undone.`}
+                confirmText="Delete User"
+                type="danger"
             />
 
             {showToast && (
