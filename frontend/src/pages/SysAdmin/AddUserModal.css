@@ -115,9 +115,17 @@
 }
 
 /* Form Hint */
+.form-group {
+    position: relative;
+    margin-bottom: 2px;
+    /* Slight adjustment */
+}
+
 .form-hint {
     display: block;
-    margin-top: 0.25rem;
+    position: absolute;
+    bottom: -18px;
+    left: 0;
     font-size: 12px;
     color: var(--text-secondary);
 }
@@ -140,7 +148,7 @@
     }
 
     .form-column {
-        gap: 0;
+        gap: 1.5rem;
     }
 
     /* Modal Body - Scrollable dengan tinggi terbatas */
