@@ -147,7 +147,7 @@ router.post('/users', checkPermission('sysadmin.users.create'), async (req, res)
 // Update user
 router.put('/users/:id', checkPermission('sysadmin.users.edit'), async (req, res) => {
     try {
-        const { email, full_name, phone, is_active, password } = req.body;
+        const { email, full_name, phone, is_active, password, role_ids } = req.body;
 
         let query = 'UPDATE sysadmin_users SET email = ?, full_name = ?, phone = ?, is_active = ?';
         let params = [email, full_name, phone, is_active];
@@ -161,13 +161,58 @@ router.put('/users/:id', checkPermission('sysadmin.users.edit'), async (req, res
         query += ' WHERE id = ?';
         params.push(req.params.id);
 
-        await db.query(query, params);
-        await logActivity(req.user.id, 'UPDATE_USER', 'sysadmin', 'user', req.params.id, req.body, req);
+        const result = await db.query(query, params);
+        console.log('User basic info updated, affectedRows:', result.affectedRows);
+
+        // Update roles if provided
+        if (role_ids !== undefined) {
+            try {
+                console.log('Updating roles:', role_ids);
+                // First remove existing roles
+                await db.query('DELETE FROM sysadmin_user_roles WHERE user_id = ?', [req.params.id]);
+
+                if (Array.isArray(role_ids) && role_ids.length > 0) {
+                    if (!req.user || !req.user.id) throw new Error('User context missing');
+
+                    const placeholders = role_ids.map(() => '(?, ?, ?)').join(', ');
+                    const query = `INSERT INTO sysadmin_user_roles (user_id, role_id, assigned_by) VALUES ${placeholders}`;
+
+                    const params = [];
+                    role_ids.forEach(roleId => {
+                        params.push(parseInt(req.params.id));
+                        params.push(parseInt(roleId));
+                        params.push(req.user.id);
+                    });
+
+                    await db.query(query, params);
+                }
+            } catch (roleError) {
+                console.error('Error updating roles:', roleError);
+                throw new Error('Failed to update user roles: ' + roleError.message);
+            }
+        }
+
+        try {
+            if (req.user && req.user.id) {
+                // Sanitize password from logs
+                const logData = { ...req.body };
+                delete logData.password;
+
+                await logActivity(req.user.id, 'UPDATE_USER', 'sysadmin', 'user', req.params.id, logData, req);
+            }
+        } catch (logError) {
+            console.error('Error logging activity:', logError);
+            // Don't fail the request if logging fails, just log errors
+        }
 
         res.json({ success: true, message: 'User updated successfully' });
     } catch (error) {
-        console.error('Update user error:', error);
-        res.status(500).json({ success: false, message: 'Error updating user' });
+        console.error('Update user error details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating user: ' + error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 

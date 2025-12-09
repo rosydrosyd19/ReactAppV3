@@ -15,6 +15,15 @@
     gap: 1rem;
 }
 
+/* Disabled Input Styling */
+.form-input:disabled {
+    background-color: var(--bg-tertiary, #f5f5f5);
+    color: var(--text-secondary, #666);
+    cursor: not-allowed;
+    border-color: var(--border-color);
+    opacity: 0.8;
+}
+
 /* Password Input dengan Toggle */
 .password-input-wrapper {
     position: relative;

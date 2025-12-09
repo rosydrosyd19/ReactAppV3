@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
+import EditUserModal from './EditUserModal';
+import Toast from '../../components/Toast/Toast';
 import {
     FiArrowLeft,
     FiUser,
@@ -22,6 +24,9 @@ const UserDetail = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     useEffect(() => {
         fetchUserDetail();
@@ -40,6 +45,12 @@ const UserDetail = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleUserUpdated = () => {
+        setToastMessage('User successfully updated!');
+        setShowToast(true);
+        fetchUserDetail();
     };
 
     const handleDelete = async () => {
@@ -98,7 +109,7 @@ const UserDetail = () => {
                 </div>
                 <div className="header-actions">
                     {hasPermission('sysadmin.users.edit') && (
-                        <button className="btn btn-primary" onClick={() => alert('Edit feature coming soon')}>
+                        <button className="btn btn-primary" onClick={() => setShowEditModal(true)}>
                             <FiEdit2 /> Edit
                         </button>
                     )}
@@ -196,7 +207,24 @@ const UserDetail = () => {
                     </div>
                 )}
             </div>
-        </div>
+
+            <EditUserModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                onSuccess={handleUserUpdated}
+                userId={id}
+            />
+
+            {
+                showToast && (
+                    <Toast
+                        message={toastMessage}
+                        type="success"
+                        onClose={() => setShowToast(false)}
+                    />
+                )
+            }
+        </div >
     );
 };
 

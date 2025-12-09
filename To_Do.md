@@ -2,8 +2,6 @@
 
 ## New Feature
 
-tambahkan fitur edit pada menu user
-
 tambahkan fitur delete pada menu user
  
 buat menu asset dimodul asset

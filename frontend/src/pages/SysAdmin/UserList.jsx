@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import AddUserModal from './AddUserModal';
+import EditUserModal from './EditUserModal';
 import Toast from '../../components/Toast/Toast';
 import {
     FiPlus,
@@ -24,6 +25,8 @@ const UserList = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [expandedUserId, setExpandedUserId] = useState(null);
@@ -73,6 +76,17 @@ const UserList = () => {
         setShowToast(true);
 
         // Refresh data
+        fetchUsers();
+    };
+
+    const handleEditClick = (id) => {
+        setSelectedUserId(id);
+        setShowEditModal(true);
+    };
+
+    const handleUserUpdated = () => {
+        setToastMessage('User successfully updated!');
+        setShowToast(true);
         fetchUsers();
     };
 
@@ -166,7 +180,7 @@ const UserList = () => {
                                                         </button>
                                                     )}
                                                     {hasPermission('sysadmin.users.edit') && (
-                                                        <button className="btn-icon" title="Edit" onClick={() => alert('Edit feature coming soon')}>
+                                                        <button className="btn-icon" title="Edit" onClick={() => handleEditClick(user.id)}>
                                                             <FiEdit2 />
                                                         </button>
                                                     )}
@@ -244,7 +258,7 @@ const UserList = () => {
                                                     </button>
                                                 )}
                                                 {hasPermission('sysadmin.users.edit') && (
-                                                    <button className="action-btn edit" onClick={() => alert('Coming soon')}>
+                                                    <button className="action-btn edit" onClick={() => handleEditClick(user.id)}>
                                                         <FiEdit2 /> Edit
                                                     </button>
                                                 )}
@@ -270,6 +284,13 @@ const UserList = () => {
                 isOpen={showAddModal}
                 onClose={() => setShowAddModal(false)}
                 onSuccess={handleUserAdded}
+            />
+
+            <EditUserModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                onSuccess={handleUserUpdated}
+                userId={selectedUserId}
             />
 
             {showToast && (
