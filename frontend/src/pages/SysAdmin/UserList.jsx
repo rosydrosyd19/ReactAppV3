@@ -1,3 +1,4 @@
+import Pagination from '../../components/Pagination/Pagination';
 import './UserList.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +35,10 @@ const UserList = () => {
     const [toastMessage, setToastMessage] = useState('');
     const [expandedUserId, setExpandedUserId] = useState(null);
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
     const toggleMobileItem = (id) => {
         setExpandedUserId(expandedUserId === id ? null : id);
     };
@@ -41,6 +46,11 @@ const UserList = () => {
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    // Reset pagination when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
 
     const fetchUsers = async () => {
         try {
@@ -108,6 +118,13 @@ const UserList = () => {
         user.email?.toLowerCase().includes(search.toLowerCase())
     );
 
+    // Pagination Logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
     return (
         <div className="user-list">
             <div className="page-header">
@@ -163,7 +180,7 @@ const UserList = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredUsers.map((user) => (
+                                    {currentItems.map((user) => (
                                         <tr key={user.id}>
                                             <td><strong>{user.username}</strong></td>
                                             <td>{user.full_name || '-'}</td>
@@ -215,7 +232,7 @@ const UserList = () => {
 
                         {/* Mobile List View - Cleaner & More User Friendly */}
                         <div className="mobile-list">
-                            {filteredUsers.map((user) => (
+                            {currentItems.map((user) => (
                                 <div key={user.id} className="mobile-list-item">
                                     <div className="mobile-list-main" onClick={() => toggleMobileItem(user.id)}>
                                         <div className="mobile-user-avatar">
@@ -288,6 +305,16 @@ const UserList = () => {
                                 </div>
                             ))}
                         </div>
+
+                        {/* Pagination Component */}
+                        {/* Pagination Component */}
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={filteredUsers.length}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={paginate}
+                            onItemsPerPageChange={setItemsPerPage}
+                        />
                     </>
                 )}
             </div>

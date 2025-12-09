@@ -13,15 +13,17 @@
 }
 
 .confirmation-modal {
-    background: var(--bg-primary, #ffffff);
+    background: var(--bg-color, #ffffff);
     border-radius: 12px;
     width: 90%;
     max-width: 400px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--border-color, transparent);
+    display: flex;
+    flex-direction: column;
 }
-
 
 .confirmation-modal .modal-header {
     padding: 24px 24px 0;
@@ -30,6 +32,7 @@
     align-items: center;
     text-align: center;
     position: relative;
+    border-bottom: none;
 }
 
 .confirmation-modal .modal-header .icon-wrapper {
@@ -103,8 +106,8 @@
     justify-content: flex-end;
 }
 
-.btn-cancel,
-.btn-confirm {
+.confirmation-modal .btn-cancel,
+.confirmation-modal .btn-confirm {
     padding: 10px 16px;
     border-radius: 6px;
     font-weight: 500;
@@ -114,28 +117,28 @@
     border: 1px solid transparent;
 }
 
-.btn-cancel {
+.confirmation-modal .btn-cancel {
     background-color: white;
     border-color: #d1d5db;
     color: #374151;
 }
 
-.btn-cancel:hover:not(:disabled) {
+.confirmation-modal .btn-cancel:hover:not(:disabled) {
     background-color: #f3f4f6;
     border-color: #9ca3af;
 }
 
-.btn-confirm.danger {
+.confirmation-modal .btn-confirm.danger {
     background-color: #dc2626;
     color: white;
 }
 
-.btn-confirm.danger:hover:not(:disabled) {
+.confirmation-modal .btn-confirm.danger:hover:not(:disabled) {
     background-color: #b91c1c;
 }
 
-.btn-confirm:disabled,
-.btn-cancel:disabled {
+.confirmation-modal .btn-confirm:disabled,
+.confirmation-modal .btn-cancel:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -159,36 +162,5 @@
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
-    }
-}
-
-/* Dark Mode Support via Variables */
-/* Assuming global variables exist, but providing fallbacks */
-@media (prefers-color-scheme: dark) {
-    .confirmation-modal {
-        background: var(--bg-primary, #1f2937);
-        /* Fallback dark */
-    }
-
-    .confirmation-modal .modal-footer {
-        background: var(--bg-secondary, #111827);
-    }
-
-    .confirmation-modal .modal-header h3 {
-        color: var(--text-primary, #f9fafb);
-    }
-
-    .confirmation-modal .modal-body p {
-        color: var(--text-secondary, #9ca3af);
-    }
-
-    .btn-cancel {
-        background-color: transparent;
-        border-color: #4b5563;
-        color: #d1d5db;
-    }
-
-    .btn-cancel:hover:not(:disabled) {
-        background-color: #374151;
     }
 }

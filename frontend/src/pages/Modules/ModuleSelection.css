@@ -14,10 +14,15 @@
     align-items: center;
 }
 
+.header-left {
+    /* No special desktop positioning needed */
+}
+
 .module-header h1 {
     font-size: 1.5rem;
     color: var(--primary-color);
     font-weight: 700;
+    margin: 0;
 }
 
 .module-header-actions {
@@ -86,19 +91,35 @@
 @media (max-width: 768px) {
     .module-header {
         flex-direction: column;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
+        gap: 1rem;
+        padding: 1rem;
         text-align: center;
+        justify-content: center;
+        align-items: center;
+        /* Ensure items are centered in column flex */
+    }
+
+    .header-left {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        display: flex;
+        /* Explicitly use flex */
+        justify-content: center;
+        /* Center content horizontally */
+        align-items: center;
     }
 
     .module-header h1 {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
+        text-align: center;
+        width: 100%;
     }
 
     .module-header-actions {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
+        gap: 0.75rem;
     }
 
     .module-content {

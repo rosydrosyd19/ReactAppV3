@@ -1,3 +1,4 @@
+import Pagination from '../../../components/Pagination/Pagination';
 import './AssetList.css';
 import { useState, useEffect } from 'react';
 import axios from '../../../utils/axios';
@@ -9,7 +10,8 @@ import {
     FiEdit2,
     FiTrash2,
     FiEye,
-    FiPackage
+    FiPackage,
+    FiChevronDown
 } from 'react-icons/fi';
 
 const AssetList = () => {
@@ -18,17 +20,31 @@ const AssetList = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [expandedItemId, setExpandedItemId] = useState(null);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const toggleMobileItem = (id) => {
+        setExpandedItemId(expandedItemId === id ? null : id);
+    };
 
     useEffect(() => {
         fetchAssets();
     }, [statusFilter]);
+
+    // Reset pagination when search or status filter changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, statusFilter]);
 
     const fetchAssets = async () => {
         try {
             setLoading(true);
             const params = {};
             if (statusFilter) params.status = statusFilter;
-            if (search) params.search = search;
+            // Removed search param from server call to enable client-side filtering
 
             const response = await axios.get('/asset/assets', { params });
             if (response.data.success) {
@@ -40,11 +56,6 @@ const AssetList = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleSearch = (e) => {
-        e.preventDefault();
-        fetchAssets();
     };
 
     const handleDelete = async (id, assetTag) => {
@@ -75,6 +86,19 @@ const AssetList = () => {
         return `badge ${statusColors[status] || 'badge-primary'}`;
     };
 
+    const filteredAssets = assets.filter(asset =>
+        asset.asset_name.toLowerCase().includes(search.toLowerCase()) ||
+        asset.asset_tag.toLowerCase().includes(search.toLowerCase()) ||
+        (asset.category_name && asset.category_name.toLowerCase().includes(search.toLowerCase()))
+    );
+
+    // Pagination Logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredAssets.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
     return (
         <div className="asset-list">
             <div className="page-header">
@@ -91,19 +115,18 @@ const AssetList = () => {
 
             <div className="card">
                 <div className="filters-bar">
-                    <form onSubmit={handleSearch} className="search-form">
+                    <div className="search-form">
                         <div className="input-with-icon">
                             <FiSearch />
                             <input
                                 type="text"
                                 className="form-input"
-                                placeholder="Search by name, tag, or serial number..."
+                                placeholder="Search by name, tag, or category..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary">Search</button>
-                    </form>
+                    </div>
 
                     <div className="filter-group">
                         <FiFilter />
@@ -126,7 +149,7 @@ const AssetList = () => {
                         <div className="loading-spinner" />
                         <p>Loading assets...</p>
                     </div>
-                ) : assets.length === 0 ? (
+                ) : filteredAssets.length === 0 ? (
                     <div className="empty-state">
                         <FiPackage />
                         <h3>No assets found</h3>
@@ -138,62 +161,144 @@ const AssetList = () => {
                         )}
                     </div>
                 ) : (
-                    <div className="table-container">
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Asset Tag</th>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Location</th>
-                                    <th>Assigned To</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {assets.map((asset) => (
-                                    <tr key={asset.id}>
-                                        <td>
-                                            <strong>{asset.asset_tag}</strong>
-                                        </td>
-                                        <td>{asset.asset_name}</td>
-                                        <td>{asset.category_name || '-'}</td>
-                                        <td>{asset.location_name || '-'}</td>
-                                        <td>{asset.assigned_to_name || '-'}</td>
-                                        <td>
-                                            <span className={getStatusBadge(asset.status)}>
-                                                {asset.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="action-buttons">
+                    <>
+                        {/* Desktop Table View */}
+                        <div className="desktop-table">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset Tag</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Location</th>
+                                        <th>Assigned To</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentItems.map((asset) => (
+                                        <tr key={asset.id}>
+                                            <td>
+                                                <strong>{asset.asset_tag}</strong>
+                                            </td>
+                                            <td>{asset.asset_name}</td>
+                                            <td>{asset.category_name || '-'}</td>
+                                            <td>{asset.location_name || '-'}</td>
+                                            <td>{asset.assigned_to_name || '-'}</td>
+                                            <td>
+                                                <span className={getStatusBadge(asset.status)}>
+                                                    {asset.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="action-buttons">
+                                                    {hasPermission('asset.items.view') && (
+                                                        <button className="btn-icon" title="View">
+                                                            <FiEye />
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.items.edit') && (
+                                                        <button className="btn-icon" title="Edit">
+                                                            <FiEdit2 />
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.items.delete') && (
+                                                        <button
+                                                            className="btn-icon btn-danger"
+                                                            title="Delete"
+                                                            onClick={() => handleDelete(asset.id, asset.asset_tag)}
+                                                        >
+                                                            <FiTrash2 />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile List View */}
+                        <div className="mobile-list">
+                            {currentItems.map((asset) => (
+                                <div key={asset.id} className="mobile-list-item">
+                                    <div className="mobile-list-main" onClick={() => toggleMobileItem(asset.id)}>
+                                        <div className="mobile-asset-icon">
+                                            <FiPackage />
+                                            <span className={`status-dot ${asset.status === 'available' ? 'active' :
+                                                asset.status === 'maintenance' ? 'warning' :
+                                                    asset.status === 'assigned' ? 'primary' : 'danger'
+                                                }`} />
+                                        </div>
+                                        <div className="mobile-asset-info">
+                                            <div className="asset-primary-text">
+                                                <span className="asset-tag">{asset.asset_tag}</span>
+                                                <span className="category-badge-small">{asset.category_name || 'No Category'}</span>
+                                            </div>
+                                            <div className="asset-secondary-text">{asset.asset_name}</div>
+                                        </div>
+                                        <div className="mobile-expand-icon">
+                                            <FiChevronDown className={expandedItemId === asset.id ? 'rotated' : ''} />
+                                        </div>
+                                    </div>
+
+                                    {expandedItemId === asset.id && (
+                                        <div className="mobile-list-details">
+                                            <div className="detail-grid">
+                                                <div className="detail-item">
+                                                    <span className="label">Status</span>
+                                                    <span className="value" style={{ textTransform: 'capitalize' }}>{asset.status}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Type</span>
+                                                    <span className="value">{asset.item_type_name || 'Asset'}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Location</span>
+                                                    <span className="value">{asset.location_name || '-'}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Assigned To</span>
+                                                    <span className="value">{asset.assigned_to_name || '-'}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mobile-actions">
                                                 {hasPermission('asset.items.view') && (
-                                                    <button className="btn-icon" title="View">
-                                                        <FiEye />
+                                                    <button className="action-btn view">
+                                                        <FiEye /> View
                                                     </button>
                                                 )}
                                                 {hasPermission('asset.items.edit') && (
-                                                    <button className="btn-icon" title="Edit">
-                                                        <FiEdit2 />
+                                                    <button className="action-btn edit">
+                                                        <FiEdit2 /> Edit
                                                     </button>
                                                 )}
                                                 {hasPermission('asset.items.delete') && (
                                                     <button
-                                                        className="btn-icon btn-danger"
-                                                        title="Delete"
+                                                        className="action-btn delete"
                                                         onClick={() => handleDelete(asset.id, asset.asset_tag)}
                                                     >
-                                                        <FiTrash2 />
+                                                        <FiTrash2 /> Delete
                                                     </button>
                                                 )}
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={filteredAssets.length}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={paginate}
+                            onItemsPerPageChange={setItemsPerPage}
+                        />
+                    </>
                 )}
             </div>
         </div>
