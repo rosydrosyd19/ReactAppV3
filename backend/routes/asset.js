@@ -134,6 +134,13 @@ router.post('/assets', checkPermission('asset.items.create'), upload.single('ima
 
         const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
+        const purchase_date_val = purchase_date || null;
+        const warranty_expiry_val = warranty_expiry || null;
+        const supplier_id_val = supplier_id || null;
+        const location_id_val = location_id || null;
+        const category_id_val = category_id || null;
+        const purchase_cost_val = purchase_cost || null;
+
         const result = await db.query(
             `INSERT INTO asset_items (
         asset_tag, asset_name, category_id, description, serial_number,
@@ -141,9 +148,9 @@ router.post('/assets', checkPermission('asset.items.create'), upload.single('ima
         warranty_expiry, location_id, status, condition_status, image_url, notes, created_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                asset_tag, asset_name, category_id, description, serial_number,
-                model, manufacturer, purchase_date, purchase_cost, supplier_id,
-                warranty_expiry, location_id, status, condition_status, image_url, notes, req.user.id
+                asset_tag, asset_name, category_id_val, description, serial_number,
+                model, manufacturer, purchase_date_val, purchase_cost_val, supplier_id_val,
+                warranty_expiry_val, location_id_val, status, condition_status, image_url, notes, req.user.id
             ]
         );
 
@@ -156,11 +163,12 @@ router.post('/assets', checkPermission('asset.items.create'), upload.single('ima
             [assetId, req.user.id]
         );
 
-        await logActivity(req.user.id, 'CREATE_ASSET', 'asset', 'asset', assetId, { asset_tag, asset_name }, req);
+        await logActivity(req.user.id, 'CREATE_ASSET', 'asset', 'asset', Number(assetId), { asset_tag, asset_name }, req);
 
-        res.status(201).json({ success: true, data: { id: assetId } });
+        res.status(201).json({ success: true, data: { id: Number(assetId) } });
     } catch (error) {
         console.error('Create asset error:', error);
+        require('fs').appendFileSync('error_log.txt', `[${new Date().toISOString()}] Create Asset Error: ${error.stack || error.message}\n`);
         res.status(500).json({ success: false, message: 'Error creating asset' });
     }
 });
@@ -300,9 +308,15 @@ router.get('/categories', checkPermission('asset.items.view'), async (req, res) 
       ORDER BY c.category_name
     `);
 
-        res.json({ success: true, data: categories });
+        const categoriesWithCount = categories.map(cat => ({
+            ...cat,
+            asset_count: Number(cat.asset_count)
+        }));
+
+        res.json({ success: true, data: categoriesWithCount });
     } catch (error) {
         console.error('Get categories error:', error);
+        require('fs').appendFileSync('error_log.txt', `[${new Date().toISOString()}] Categories Error: ${error.stack || error.message}\n`);
         res.status(500).json({ success: false, message: 'Error fetching categories' });
     }
 });
@@ -362,9 +376,15 @@ router.get('/locations', checkPermission('asset.items.view'), async (req, res) =
       ORDER BY l.location_name
     `);
 
-        res.json({ success: true, data: locations });
+        const locationsWithCount = locations.map(loc => ({
+            ...loc,
+            asset_count: Number(loc.asset_count)
+        }));
+
+        res.json({ success: true, data: locationsWithCount });
     } catch (error) {
         console.error('Get locations error:', error);
+        require('fs').appendFileSync('error_log.txt', `[${new Date().toISOString()}] Locations Error: ${error.stack || error.message}\n`);
         res.status(500).json({ success: false, message: 'Error fetching locations' });
     }
 });

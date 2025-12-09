@@ -3,6 +3,8 @@ import './AssetList.css';
 import { useState, useEffect } from 'react';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
+import AssetModal from './AssetModal';
+import Toast from '../../../components/Toast/Toast';
 import {
     FiPlus,
     FiSearch,
@@ -19,8 +21,15 @@ const AssetList = () => {
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+
+    // Modal State
+    const [showAssetModal, setShowAssetModal] = useState(false);
+    const [selectedAssetId, setSelectedAssetId] = useState(null);
+
     const [statusFilter, setStatusFilter] = useState('');
     const [expandedItemId, setExpandedItemId] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -99,6 +108,22 @@ const AssetList = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+    const handleCreateClick = () => {
+        setSelectedAssetId(null);
+        setShowAssetModal(true);
+    };
+
+    const handleEditClick = (id) => {
+        setSelectedAssetId(id);
+        setShowAssetModal(true);
+    };
+
+    const handleModalSuccess = (action) => {
+        setToastMessage(`Asset ${action} successfully`);
+        setShowToast(true);
+        fetchAssets();
+    };
+
     return (
         <div className="asset-list">
             <div className="page-header">
@@ -107,7 +132,7 @@ const AssetList = () => {
                     <p>Manage your organization's assets</p>
                 </div>
                 {hasPermission('asset.items.create') && (
-                    <button className="btn btn-primary">
+                    <button className="btn btn-primary" onClick={handleCreateClick}>
                         <FiPlus /> Add Asset
                     </button>
                 )}
@@ -155,7 +180,10 @@ const AssetList = () => {
                         <h3>No assets found</h3>
                         <p>Start by adding your first asset</p>
                         {hasPermission('asset.items.create') && (
-                            <button className="btn btn-primary">
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleCreateClick}
+                            >
                                 <FiPlus /> Add Asset
                             </button>
                         )}
@@ -199,7 +227,11 @@ const AssetList = () => {
                                                         </button>
                                                     )}
                                                     {hasPermission('asset.items.edit') && (
-                                                        <button className="btn-icon" title="Edit">
+                                                        <button
+                                                            className="btn-icon"
+                                                            title="Edit"
+                                                            onClick={() => handleEditClick(asset.id)}
+                                                        >
                                                             <FiEdit2 />
                                                         </button>
                                                     )}
@@ -272,7 +304,10 @@ const AssetList = () => {
                                                     </button>
                                                 )}
                                                 {hasPermission('asset.items.edit') && (
-                                                    <button className="action-btn edit">
+                                                    <button
+                                                        className="action-btn edit"
+                                                        onClick={() => handleEditClick(asset.id)}
+                                                    >
                                                         <FiEdit2 /> Edit
                                                     </button>
                                                 )}
@@ -301,6 +336,21 @@ const AssetList = () => {
                     </>
                 )}
             </div>
+
+            <AssetModal
+                isOpen={showAssetModal}
+                onClose={() => setShowAssetModal(false)}
+                onSuccess={handleModalSuccess}
+                assetId={selectedAssetId}
+            />
+
+            {showToast && (
+                <Toast
+                    message={toastMessage}
+                    type="success"
+                    onClose={() => setShowToast(false)}
+                />
+            )}
         </div>
     );
 };

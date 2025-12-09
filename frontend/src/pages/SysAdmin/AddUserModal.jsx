@@ -1,6 +1,6 @@
 import './AddUserModal.css';
 import { useState, useEffect } from 'react';
-import { FiX, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiX, FiEye, FiEyeOff, FiSave } from 'react-icons/fi';
 import axios from '../../utils/axios';
 import './AddUserModal.css';
 
@@ -319,7 +319,12 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
                             className="btn btn-primary"
                             disabled={loading}
                         >
-                            {loading ? 'Saving...' : 'Save'}
+                            {loading ? 'Saving...' : (
+                                <>
+                                    <FiSave style={{ marginRight: '8px' }} />
+                                    Save
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

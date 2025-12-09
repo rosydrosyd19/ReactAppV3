@@ -1,8 +1,7 @@
 ## fix
 
-## New Feature
-
-tambah fitur create pada menu asset
+## New Feature 
+[/] tambah fitur create pada menu asset
 
 tambah fitur view pada menu asset
 
