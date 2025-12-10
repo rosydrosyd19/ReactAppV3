@@ -37,14 +37,44 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
 
     useEffect(() => {
         if (isOpen) {
-            fetchDependencies();
             if (isEditMode) {
+                // Only fetch dependencies once if needed, or if already loaded ok
+                if (categories.length === 0) fetchDependencies();
                 fetchAsset();
             } else {
+                if (categories.length === 0) fetchDependencies();
                 resetForm();
             }
         }
     }, [isOpen, assetId]);
+
+    // Separate effect for autogenerating tag
+    useEffect(() => {
+        if (isOpen && !isEditMode) {
+            fetchNextAssetTag();
+        }
+    }, [isOpen, isEditMode, formData.category_id, formData.location_id, formData.purchase_date]);
+
+    const fetchNextAssetTag = async () => {
+        // Don't fetch if minimal info is missing (though we can fallback to default)
+        // actually backend handles it gracefully
+        try {
+            const params = {
+                category_id: formData.category_id,
+                location_id: formData.location_id,
+                date: formData.purchase_date
+            };
+            const response = await axios.get('/asset/assets/next-tag', { params });
+            if (response.data.success) {
+                setFormData(prev => ({
+                    ...prev,
+                    asset_tag: response.data.data
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching next asset tag:', error);
+        }
+    };
 
     const resetForm = () => {
         setFormData({
@@ -203,15 +233,15 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
                                 <div className="form-section-title">Basic Information</div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Asset Tag <span className="required">*</span></label>
+                                    <label className="form-label">Asset Tag </label>
                                     <input
                                         type="text"
                                         name="asset_tag"
                                         value={formData.asset_tag}
                                         onChange={handleChange}
-                                        className="form-input"
-                                        required
-                                        placeholder="e.g. AST-001"
+                                        className="form-input bg-gray-50 text-gray-500 cursor-not-allowed"
+                                        disabled
+                                        placeholder="Automatically filled"
                                     />
                                 </div>
 
@@ -229,12 +259,13 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Category</label>
+                                    <label className="form-label">Category <span className="required">*</span> </label>
                                     <select
                                         name="category_id"
                                         value={formData.category_id}
                                         onChange={handleChange}
                                         className="form-select"
+                                        required
                                     >
                                         <option value="">Select Category</option>
                                         {categories.map(cat => (
@@ -244,12 +275,13 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Location</label>
+                                    <label className="form-label">Location <span className="required">*</span></label>
                                     <select
                                         name="location_id"
                                         value={formData.location_id}
                                         onChange={handleChange}
                                         className="form-select"
+                                        required
                                     >
                                         <option value="">Select Location</option>
                                         {locations.map(loc => (

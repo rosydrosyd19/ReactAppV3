@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS sysadmin_activity_logs (
 CREATE TABLE IF NOT EXISTS asset_categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   category_name VARCHAR(100) NOT NULL,
+  category_code VARCHAR(10),
   description TEXT,
   icon VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -133,6 +134,7 @@ CREATE TABLE IF NOT EXISTS asset_categories (
 CREATE TABLE IF NOT EXISTS asset_locations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   location_name VARCHAR(100) NOT NULL,
+  location_code VARCHAR(10),
   address TEXT,
   city VARCHAR(50),
   state VARCHAR(50),
@@ -322,7 +324,7 @@ CREATE TABLE IF NOT EXISTS asset_license_assignments (
 
 -- Insert default admin user (password: admin123)
 INSERT INTO sysadmin_users (username, email, password, full_name, is_active) VALUES
-('admin', 'admin@reactappv3.com', '$2a$10$8K1p/a0dL0WlVJKpJQ5pLO.Jy8p3KKx3rPvQ5DXQX0V9X0qV9X0qV', 'System Administrator', TRUE)
+('admin', 'admin@reactappv3.com', '$2a$10$q/j2n9Z/5zdAqLLcj0DWB.dppAHimBLbB.DDRUxS1xeAmPuV67QK.', 'System Administrator', TRUE)
 ON DUPLICATE KEY UPDATE username=username;
 
 -- Insert default roles

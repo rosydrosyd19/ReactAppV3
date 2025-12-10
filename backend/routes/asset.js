@@ -67,6 +67,61 @@ router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
     }
 });
 
+// Get next asset tag
+router.get('/assets/next-tag', checkPermission('asset.items.create'), async (req, res) => {
+    try {
+        const { category_id, location_id, date } = req.query;
+
+        // Default tag if info is missing
+        if (!category_id || !location_id) {
+            return res.json({ success: true, data: '' });
+        }
+
+        const [category] = await db.query('SELECT category_code FROM asset_categories WHERE id = ?', [category_id]);
+        const [location] = await db.query('SELECT location_code FROM asset_locations WHERE id = ?', [location_id]);
+
+        if (!category || !location) {
+            return res.json({ success: true, data: '' });
+        }
+
+        const catCode = category.category_code || 'CAT';
+        const locCode = location.location_code || 'LOC';
+
+        let year = new Date().getFullYear();
+        if (date) {
+            year = new Date(date).getFullYear();
+        }
+
+        const prefix = `${locCode}/${catCode}/${year}/`;
+
+        // Find last tag with this prefix
+        // We use length check to avoid matching shorter prefixes accidentally if format changes
+        const [lastAsset] = await db.query(
+            `SELECT asset_tag FROM asset_items 
+             WHERE asset_tag LIKE ? 
+             ORDER BY LENGTH(asset_tag) DESC, asset_tag DESC LIMIT 1`,
+            [`${prefix}%`]
+        );
+
+        let nextSequence = '001';
+
+        if (lastAsset && lastAsset.asset_tag) {
+            const parts = lastAsset.asset_tag.split('/');
+            const lastSeq = parts[parts.length - 1]; // Get last part
+            if (/^\d+$/.test(lastSeq)) { // Check if it's a number
+                const nextNum = parseInt(lastSeq, 10) + 1;
+                nextSequence = String(nextNum).padStart(3, '0');
+            }
+        }
+
+        const nextTag = `${prefix}${nextSequence}`;
+        res.json({ success: true, data: nextTag });
+    } catch (error) {
+        console.error('Get next tag error:', error);
+        res.status(500).json({ success: false, message: 'Error generating next tag' });
+    }
+});
+
 // Get single asset
 router.get('/assets/:id', checkPermission('asset.items.view'), async (req, res) => {
     try {

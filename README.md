@@ -153,6 +153,11 @@ Inisialisasi database:
 npm run init-db
 ```
 
+**PENTING: Jalankan script perbaikan data** (untuk mencegah duplikat & mengisi data default):
+```bash
+node fix-asset-data.js
+```
+
 Test backend:
 ```bash
 npm run dev
