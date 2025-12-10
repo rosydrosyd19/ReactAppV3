@@ -130,12 +130,23 @@
     color: var(--text-secondary);
 }
 
+/* Ensure form fills the modal space correctly */
+.add-user-modal form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .add-user-modal {
         max-width: 100%;
         margin: 0;
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        height: 90vh;
+        /* Fixed height for consistency */
         max-height: 95vh;
         display: flex;
         flex-direction: column;
@@ -168,18 +179,19 @@
         position: sticky;
         bottom: 0;
         background: var(--bg-color);
-        border-top: 2px solid var(--border-color);
+        border-top: 1px solid var(--border-color);
         padding: 1rem;
-        padding-bottom: calc(1rem + 80px);
-        /* Tambah ruang untuk bottom nav (80px) */
+        padding-bottom: calc(1rem + 65px);
+        /* Match AssetModal manual adjustment */
         box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
         z-index: 10;
+        gap: 1rem;
     }
 
     .add-user-modal .modal-footer .btn {
-        padding: 14px;
-        font-size: 15px;
-        font-weight: 600;
+        flex: 1;
+        padding: 12px;
+        justify-content: center;
     }
 
     .role-checkboxes {

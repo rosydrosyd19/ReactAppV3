@@ -6,10 +6,23 @@
     flex-direction: column;
 }
 
+.asset-modal form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    /* Critical for nested flex scrolling */
+    overflow: hidden;
+}
+
 .asset-modal .modal-body {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
+}
+
+.asset-modal .modal-footer {
+    flex-shrink: 0;
 }
 
 .form-row {
@@ -93,8 +106,46 @@
 }
 
 @media (max-width: 768px) {
+    .asset-modal {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        height: 90vh;
+        /* Match AddUserModal approach roughly but keep defined height */
+        max-height: 95vh;
+    }
+
     .form-row {
         flex-direction: column;
         gap: 0;
+    }
+
+    .asset-modal .modal-body {
+        padding: 16px;
+        padding-bottom: 2rem;
+        /* Ensure scrolling area is constrained correctly */
+        max-height: calc(95vh - 180px);
+    }
+
+    /* Modal Footer - Sticky di bawah dengan ruang untuk bottom nav */
+    .asset-modal .modal-footer {
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        background: var(--bg-color);
+        border-top: 1px solid var(--border-color);
+        padding: 1rem;
+        padding-bottom: calc(1rem + 65px);
+        /* Reduced padding as requested */
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        gap: 1rem;
+    }
+
+    .asset-modal .modal-footer .btn {
+        flex: 1;
+        padding: 12px;
+        justify-content: center;
     }
 }
