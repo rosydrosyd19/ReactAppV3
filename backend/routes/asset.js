@@ -31,7 +31,7 @@ router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
       LEFT JOIN asset_suppliers s ON a.supplier_id = s.id
       LEFT JOIN sysadmin_users u ON a.assigned_to = u.id
       LEFT JOIN sysadmin_users creator ON a.created_by = creator.id
-      WHERE 1=1
+      WHERE (a.is_deleted = FALSE OR a.is_deleted IS NULL)
     `;
         const params = [];
 
@@ -237,15 +237,22 @@ router.put('/assets/:id', checkPermission('asset.items.edit'), upload.single('im
             warranty_expiry, location_id, status, condition_status, notes
         } = req.body;
 
+        const purchase_date_val = purchase_date || null;
+        const warranty_expiry_val = warranty_expiry || null;
+        const supplier_id_val = supplier_id || null;
+        const location_id_val = location_id || null;
+        const category_id_val = category_id || null;
+        const purchase_cost_val = purchase_cost || null;
+
         let query = `UPDATE asset_items SET 
       asset_name = ?, category_id = ?, description = ?, serial_number = ?,
       model = ?, manufacturer = ?, purchase_date = ?, purchase_cost = ?, supplier_id = ?,
       warranty_expiry = ?, location_id = ?, status = ?, condition_status = ?, notes = ?
     `;
         let params = [
-            asset_name, category_id, description, serial_number,
-            model, manufacturer, purchase_date, purchase_cost, supplier_id,
-            warranty_expiry, location_id, status, condition_status, notes
+            asset_name, category_id_val, description, serial_number,
+            model, manufacturer, purchase_date_val, purchase_cost_val, supplier_id_val,
+            warranty_expiry_val, location_id_val, status, condition_status, notes
         ];
 
         if (req.file) {
@@ -273,10 +280,18 @@ router.put('/assets/:id', checkPermission('asset.items.edit'), upload.single('im
     }
 });
 
-// Delete asset
+// Delete asset (Soft Delete)
 router.delete('/assets/:id', checkPermission('asset.items.delete'), async (req, res) => {
     try {
-        await db.query('DELETE FROM asset_items WHERE id = ?', [req.params.id]);
+        await db.query('UPDATE asset_items SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
+
+        // Log activity
+        await db.query(
+            `INSERT INTO asset_history (asset_id, action_type, performed_by, notes)
+       VALUES (?, 'retire', ?, 'Asset deleted (soft delete)')`,
+            [req.params.id, req.user.id]
+        );
+
         await logActivity(req.user.id, 'DELETE_ASSET', 'asset', 'asset', req.params.id, null, req);
 
         res.json({ success: true, message: 'Asset deleted successfully' });

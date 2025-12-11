@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import AssetModal from './AssetModal';
+import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 import {
     FiPlus,
@@ -32,6 +33,9 @@ const AssetList = () => {
     const [expandedItemId, setExpandedItemId] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [assetToDelete, setAssetToDelete] = useState(null);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -69,20 +73,27 @@ const AssetList = () => {
         }
     };
 
-    const handleDelete = async (id, assetTag) => {
-        if (!window.confirm(`Are you sure you want to delete asset ${assetTag}?`)) {
-            return;
-        }
+    const handleDelete = (id, assetTag) => {
+        setAssetToDelete({ id, assetTag });
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!assetToDelete) return;
 
         try {
-            const response = await axios.delete(`/asset/assets/${id}`);
+            const response = await axios.delete(`/asset/assets/${assetToDelete.id}`);
             if (response.data.success) {
-                alert('Asset deleted successfully');
+                setToastMessage('Asset deleted successfully');
+                setShowToast(true);
                 fetchAssets();
             }
         } catch (error) {
             console.error('Error deleting asset:', error);
             alert('Failed to delete asset');
+        } finally {
+            setShowDeleteModal(false);
+            setAssetToDelete(null);
         }
     };
 
@@ -360,6 +371,16 @@ const AssetList = () => {
                     onClose={() => setShowToast(false)}
                 />
             )}
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Asset"
+                message={`Are you sure you want to delete asset "${assetToDelete?.assetTag}"? This action cannot be undone.`}
+                confirmText="Delete Asset"
+                type="danger"
+            />
         </div>
     );
 };

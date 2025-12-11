@@ -36,6 +36,8 @@ const AssetDetail = () => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     useEffect(() => {
         fetchAssetDetail();
     }, [id]);
@@ -62,11 +64,11 @@ const AssetDetail = () => {
         setShowEditModal(false);
     };
 
-    const handleDeleteClick = async () => {
-        if (!window.confirm(`Are you sure you want to delete asset "${asset.asset_name}"?`)) {
-            return;
-        }
+    const handleDeleteClick = () => {
+        setShowDeleteModal(true);
+    };
 
+    const confirmDelete = async () => {
         try {
             const response = await axios.delete(`/asset/assets/${id}`);
             if (response.data.success) {
@@ -75,6 +77,8 @@ const AssetDetail = () => {
         } catch (error) {
             console.error('Error deleting asset:', error);
             alert('Failed to delete asset');
+        } finally {
+            setShowDeleteModal(false);
         }
     };
 
@@ -254,6 +258,16 @@ const AssetDetail = () => {
                     onClose={() => setShowToast(false)}
                 />
             )}
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Asset"
+                message={`Are you sure you want to delete asset "${asset.asset_name}"? This action cannot be undone.`}
+                confirmText="Delete Asset"
+                type="danger"
+            />
         </div>
     );
 };
