@@ -39,6 +39,8 @@
     padding: 8px;
     border-radius: var(--radius-md);
     flex-shrink: 0;
+    transform: translateY(4px);
+    /* Push down as requested */
 }
 
 .menu-button:hover {
@@ -52,6 +54,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    /* Flex to center text vertically if needed */
+    align-items: center;
+    height: 100%;
+    line-height: 1;
+    /* Reset line height for better alignment */
+    transform: translateY(-2px);
+    /* Push up as requested */
 }
 
 .header-right {
@@ -59,6 +69,8 @@
     align-items: center;
     gap: 1rem;
     flex-shrink: 0;
+    height: 100%;
+    /* Ensure full height for alignment */
 }
 
 .icon-button {
