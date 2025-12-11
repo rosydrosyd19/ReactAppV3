@@ -1,6 +1,7 @@
 import Pagination from '../../../components/Pagination/Pagination';
 import './AssetList.css';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import AssetModal from './AssetModal';
@@ -17,6 +18,7 @@ import {
 } from 'react-icons/fi';
 
 const AssetList = () => {
+    const navigate = useNavigate();
     const { hasPermission } = useAuth();
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -222,7 +224,11 @@ const AssetList = () => {
                                             <td>
                                                 <div className="action-buttons">
                                                     {hasPermission('asset.items.view') && (
-                                                        <button className="btn-icon" title="View">
+                                                        <button
+                                                            className="btn-icon"
+                                                            title="View"
+                                                            onClick={() => navigate(`/asset/items/${asset.id}`)}
+                                                        >
                                                             <FiEye />
                                                         </button>
                                                     )}
@@ -299,7 +305,10 @@ const AssetList = () => {
 
                                             <div className="mobile-actions">
                                                 {hasPermission('asset.items.view') && (
-                                                    <button className="action-btn view">
+                                                    <button
+                                                        className="action-btn view"
+                                                        onClick={() => navigate(`/asset/items/${asset.id}`)}
+                                                    >
                                                         <FiEye /> View
                                                     </button>
                                                 )}

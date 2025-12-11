@@ -9,6 +9,7 @@ import SysAdminDashboard from './pages/Dashboard/SysAdminDashboard'; // New
 import UserList from './pages/SysAdmin/UserList'; // New
 import UserDetail from './pages/SysAdmin/UserDetail'; // New
 import AssetList from './pages/Asset/AssetList/AssetList';
+import AssetDetail from './pages/Asset/AssetDetail/AssetDetail'; // New
 import ModuleSelection from './pages/Modules/ModuleSelection';
 
 
@@ -89,6 +90,7 @@ function App() {
             <Route path="asset">
               <Route path="dashboard" element={<AssetDashboard />} /> {/* New */}
               <Route path="items" element={<AssetList />} />
+              <Route path="items/:id" element={<AssetDetail />} />
               <Route path="categories" element={<div className="card"><h2>Categories</h2><p>Coming soon...</p></div>} />
               <Route path="locations" element={<div className="card"><h2>Locations</h2><p>Coming soon...</p></div>} />
               <Route path="maintenance" element={<div className="card"><h2>Maintenance</h2><p>Coming soon...</p></div>} />

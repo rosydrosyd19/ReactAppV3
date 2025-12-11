@@ -1,11 +1,13 @@
 ## fix
 
 ## New Feature 
-tambah fitur view pada menu asset
+perbaiki tampilan asset detail untuk halaman mobile samakan style dengan user detail
 
 tambah fitur edit pada menu asset
 
 tambah fitur delete pada menu asset
+
+tambahkan fituk cekin cekout pada menu asset
 
 tambahkan fitur scan barcode pada menu asset
 

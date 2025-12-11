@@ -1,0 +1,94 @@
+/* AssetDetail specifics that aren't in UserDetail */
+/* We are using .user-detail class on the parent to inherit UserDetail styles */
+
+/* Ensure the image container has correct dimensions and styling */
+.asset-detail-override .image-container {
+    width: 100%;
+    height: 300px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 0;
+    border: 1px solid var(--border-color);
+}
+
+.asset-detail-override .asset-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.asset-detail-override .placeholder-image {
+    color: var(--text-tertiary);
+    font-size: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.asset-detail-override .placeholder-image span {
+    font-size: 0.875rem;
+}
+
+/* Status Badge Overrides/Additions if needed */
+.asset-detail-override .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.asset-detail-override .status-badge.available {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.asset-detail-override .status-badge.assigned {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.asset-detail-override .status-badge.maintenance {
+    background: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.asset-detail-override .status-badge.retired,
+.asset-detail-override .status-badge.lost {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+/* Mobile Adjustments specific to asset detail */
+@media (max-width: 768px) {
+    .asset-detail-override .image-container {
+        height: 200px;
+    }
+
+    /* Fine-tune header gap if user feels it's not left enough */
+    .user-detail.asset-detail-override .header-left {
+        gap: 0.5rem;
+        /* Reduced from 0.75rem in UserDetail */
+    }
+
+    /* Force the back button to be more to the left by reducing container padding if needed 
+       or ensuring no extra margin on the button */
+    .user-detail.asset-detail-override .header-left .btn {
+        margin-left: -20px;
+        margin-right: 5px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+    }
+}
