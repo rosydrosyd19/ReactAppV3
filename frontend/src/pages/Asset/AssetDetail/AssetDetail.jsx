@@ -5,8 +5,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import AssetModal from '../AssetList/AssetModal'; // Reusing existing modal
-import Toast from '../../../components/Toast/Toast';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
+import Toast from '../../../components/Toast/Toast';
+import CheckOutModal from '../AssetList/CheckOutModal';
+import CheckInModal from '../AssetList/CheckInModal';
 import {
     FiArrowLeft,
     FiPackage,
@@ -22,7 +24,9 @@ import {
     FiXCircle,
     FiAlertCircle,
     FiInfo,
-    FiImage
+    FiImage,
+    FiLogOut,
+    FiLogIn
 } from 'react-icons/fi';
 
 const AssetDetail = () => {
@@ -37,6 +41,8 @@ const AssetDetail = () => {
     const [toastMessage, setToastMessage] = useState('');
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showCheckOutModal, setShowCheckOutModal] = useState(false);
+    const [showCheckInModal, setShowCheckInModal] = useState(false);
 
     useEffect(() => {
         fetchAssetDetail();
@@ -62,6 +68,13 @@ const AssetDetail = () => {
         setShowToast(true);
         fetchAssetDetail();
         setShowEditModal(false);
+    };
+
+    const handleTransactionSuccess = () => {
+        setToastMessage('Asset status updated successfully!');
+        setShowToast(true);
+        fetchAssetDetail();
+        fetchAssetDetail(); // Refresh data
     };
 
     const handleDeleteClick = () => {
@@ -120,14 +133,27 @@ const AssetDetail = () => {
                     </div>
                 </div>
                 <div className="header-actions">
+                    {/* Check In/Out Buttons */}
+                    {/* Check In/Out Buttons */}
+                    {asset.status === 'available' && hasPermission('asset.items.checkout') && (
+                        <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
+                            <FiLogOut /> <span>Check Out</span>
+                        </button>
+                    )}
+                    {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
+                        <button className="btn btn-warning" onClick={() => setShowCheckInModal(true)} title="Check In">
+                            <FiLogIn /> <span>Check In</span>
+                        </button>
+                    )}
+
                     {hasPermission('asset.items.edit') && (
-                        <button className="btn btn-primary" onClick={() => setShowEditModal(true)}>
-                            <FiEdit2 /> Edit
+                        <button className="btn btn-outline" onClick={() => setShowEditModal(true)} title="Edit">
+                            <FiEdit2 /> <span>Edit</span>
                         </button>
                     )}
                     {hasPermission('asset.items.delete') && (
-                        <button className="btn btn-danger" onClick={handleDeleteClick}>
-                            <FiTrash2 /> Delete
+                        <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
+                            <FiTrash2 /> <span>Delete</span>
                         </button>
                     )}
                 </div>
@@ -267,6 +293,22 @@ const AssetDetail = () => {
                 message={`Are you sure you want to delete asset "${asset.asset_name}"? This action cannot be undone.`}
                 confirmText="Delete Asset"
                 type="danger"
+            />
+
+            <CheckOutModal
+                isOpen={showCheckOutModal}
+                onClose={() => setShowCheckOutModal(false)}
+                onSuccess={handleTransactionSuccess}
+                assetId={id}
+                assetName={asset.asset_name}
+            />
+
+            <CheckInModal
+                isOpen={showCheckInModal}
+                onClose={() => setShowCheckInModal(false)}
+                onSuccess={handleTransactionSuccess}
+                assetId={id}
+                assetName={asset.asset_name}
             />
         </div>
     );

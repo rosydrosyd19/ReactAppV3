@@ -13,8 +13,8 @@ async function verify() {
             database: process.env.DB_NAME || 'reactappv3_db'
         });
 
-        const rows = await conn.query(`DESCRIBE asset_items`);
-        console.log('Columns in asset_items:');
+        const rows = await conn.query(`DESCRIBE asset_locations`);
+        console.log('Columns in asset_locations:');
         rows.forEach(row => console.log(row.Field));
 
     } catch (error) {

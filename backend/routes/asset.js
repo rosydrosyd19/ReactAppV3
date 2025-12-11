@@ -280,91 +280,140 @@ router.put('/assets/:id', checkPermission('asset.items.edit'), upload.single('im
     }
 });
 
-// Delete asset (Soft Delete)
-router.delete('/assets/:id', checkPermission('asset.items.delete'), async (req, res) => {
+// Get users list for assignment (Dropdown)
+router.get('/users/list', checkPermission('asset.items.view'), async (req, res) => {
     try {
-        await db.query('UPDATE asset_items SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
-
-        // Log activity
-        await db.query(
-            `INSERT INTO asset_history (asset_id, action_type, performed_by, notes)
-       VALUES (?, 'retire', ?, 'Asset deleted (soft delete)')`,
-            [req.params.id, req.user.id]
-        );
-
-        await logActivity(req.user.id, 'DELETE_ASSET', 'asset', 'asset', req.params.id, null, req);
-
-        res.json({ success: true, message: 'Asset deleted successfully' });
+        const users = await db.query('SELECT DISTINCT id, username, full_name FROM sysadmin_users WHERE is_active = TRUE AND is_deleted = FALSE ORDER BY username');
+        res.json({ success: true, data: [...users] });
     } catch (error) {
-        console.error('Delete asset error:', error);
-        res.status(500).json({ success: false, message: 'Error deleting asset' });
+        console.error('Get users list error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching users list' });
     }
 });
+
+
+
+// Check-in Asset
+router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async (req, res) => {
+    try {
+        const { notes, condition_status, location_id } = req.body;
+
+        // Get current asset info
+        const [asset] = await db.query('SELECT status, assigned_to, location_id FROM asset_items WHERE id = ?', [req.params.id]);
+        if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        // Allow checkin if assigned OR if checking in from a location move context (if needed in future, but stick to assigned for now)
+        if (asset.status !== 'assigned') {
+            // Optional: Allow 'available' assets to be moved via checkin? No, strictly return.
+            // But wait, if an asset is at a "Site", it might be "Available" there. 
+            // Users request: "Check in... assigned to location".
+            // Let's stick to strict: Check-in is for returning 'assigned' items.
+            // If they want to move 'available' items, that's an Edit or separate Move.
+            // But if I check out to a Location, status becomes 'assigned'. So Check-in works.
+            return res.status(400).json({ success: false, message: `Asset is ${asset.status}, cannot check in` });
+        }
+
+        // Update asset
+        let updateQuery = "UPDATE asset_items SET status = 'available', assigned_to = NULL";
+        const updateParams = [];
+
+        if (location_id) {
+            updateQuery += ", location_id = ?";
+            updateParams.push(location_id);
+        }
+
+        if (condition_status) {
+            updateQuery += ", condition_status = ?";
+            updateParams.push(condition_status);
+        }
+
+        updateQuery += " WHERE id = ?";
+        updateParams.push(req.params.id);
+
+        await db.query(updateQuery, updateParams);
+
+        // Record history
+        await db.query(`
+            INSERT INTO asset_history (asset_id, action_type, performed_by, from_user_id, from_location_id, to_location_id, notes)
+            VALUES (?, 'checkin', ?, ?, ?, ?, ?)
+        `, [req.params.id, req.user.id, asset.assigned_to, asset.location_id, location_id || null, notes || null]);
+
+        await logActivity(req.user.id, 'CHECKIN_ASSET', 'asset', 'asset', req.params.id, { notes, condition_status, location_id }, req);
+
+        res.json({ success: true, message: 'Asset checked in successfully' });
+    } catch (error) {
+        console.error('Checkin error:', error);
+        res.status(500).json({ success: false, message: 'Error checking in asset' });
+    }
+});
+
+// ... delete route ...
 
 // Checkout asset
 router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), async (req, res) => {
     try {
-        const { user_id, notes } = req.body;
+        const { user_id, location_id, notes } = req.body;
+        // console.log('Checkout Request Body:', req.body);
+        require('fs').appendFileSync('chk_debug.txt', JSON.stringify(req.body) + '\n');
 
-        // Get current asset state
-        const [asset] = await db.query('SELECT assigned_to, location_id FROM asset_items WHERE id = ?', [req.params.id]);
-
-        if (!asset) {
-            return res.status(404).json({ success: false, message: 'Asset not found' });
+        if (!user_id && !location_id) {
+            require('fs').appendFileSync('chk_debug.txt', 'Validation Failed: Missing user_id and location_id\n');
+            console.log('Checkout Validation Failed: Missing user_id and location_id');
+            return res.status(400).json({ success: false, message: 'User or Location is required' });
         }
 
-        // Update asset
-        await db.query(
-            'UPDATE asset_items SET assigned_to = ?, status = ? WHERE id = ?',
-            [user_id, 'assigned', req.params.id]
-        );
+        // Get current asset state
+        const [asset] = await db.query('SELECT assigned_to, location_id, status FROM asset_items WHERE id = ?', [req.params.id]);
 
-        // Log history
-        await db.query(
-            `INSERT INTO asset_history (asset_id, action_type, performed_by, from_user_id, to_user_id, notes)
-       VALUES (?, 'checkout', ?, ?, ?, ?)`,
-            [req.params.id, req.user.id, asset.assigned_to, user_id, notes]
-        );
+        if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
 
-        await logActivity(req.user.id, 'CHECKOUT_ASSET', 'asset', 'asset', req.params.id, { to_user: user_id }, req);
+        // console.log('Asset Status:', asset.status);
+        require('fs').appendFileSync('chk_debug.txt', 'Asset Status: ' + asset.status + '\n');
+        if (asset.status !== 'available') {
+            return res.status(400).json({ success: false, message: `Asset is ${asset.status}, cannot check out` });
+        }
+
+        let updateQuery = "UPDATE asset_items SET status = 'assigned'";
+        const updateParams = [];
+
+        if (user_id) {
+            updateQuery += ", assigned_to = ?";
+            updateParams.push(user_id);
+        } else if (location_id) {
+            updateQuery += ", location_id = ?, assigned_to = NULL";
+            updateParams.push(location_id);
+        }
+
+        updateQuery += " WHERE id = ?";
+        updateParams.push(req.params.id);
+
+        await db.query(updateQuery, updateParams);
+
+        // Record history
+        await db.query(`
+            INSERT INTO asset_history (asset_id, action_type, performed_by, to_user_id, from_location_id, to_location_id, notes)
+            VALUES (?, 'checkout', ?, ?, ?, ?, ?)
+        `, [
+            req.params.id,
+            req.user.id,
+            user_id || null,
+            asset.location_id, // from previous location
+            location_id || null, // to new location (if location_id provided)
+            notes || null
+        ]);
+
+        await logActivity(req.user.id, 'CHECKOUT_ASSET', 'asset', 'asset', req.params.id, { user_id, location_id, notes }, req);
 
         res.json({ success: true, message: 'Asset checked out successfully' });
     } catch (error) {
-        console.error('Checkout asset error:', error);
+        console.error('Checkout error:', error);
         res.status(500).json({ success: false, message: 'Error checking out asset' });
     }
 });
 
-// Checkin asset
-router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async (req, res) => {
-    try {
-        const { notes } = req.body;
 
-        const [asset] = await db.query('SELECT assigned_to FROM asset_items WHERE id = ?', [req.params.id]);
 
-        if (!asset) {
-            return res.status(404).json({ success: false, message: 'Asset not found' });
-        }
 
-        await db.query(
-            'UPDATE asset_items SET assigned_to = NULL, status = ? WHERE id = ?',
-            ['available', req.params.id]
-        );
 
-        await db.query(
-            `INSERT INTO asset_history (asset_id, action_type, performed_by, from_user_id, notes)
-       VALUES (?, 'checkin', ?, ?, ?)`,
-            [req.params.id, req.user.id, asset.assigned_to, notes]
-        );
-
-        await logActivity(req.user.id, 'CHECKIN_ASSET', 'asset', 'asset', req.params.id, null, req);
-
-        res.json({ success: true, message: 'Asset checked in successfully' });
-    } catch (error) {
-        console.error('Checkin asset error:', error);
-        res.status(500).json({ success: false, message: 'Error checking in asset' });
-    }
-});
 
 // ==================== CATEGORIES ====================
 

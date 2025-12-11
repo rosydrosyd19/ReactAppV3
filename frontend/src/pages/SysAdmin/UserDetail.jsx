@@ -112,13 +112,13 @@ const UserDetail = () => {
                 </div>
                 <div className="header-actions">
                     {hasPermission('sysadmin.users.edit') && (
-                        <button className="btn btn-primary" onClick={() => setShowEditModal(true)}>
-                            <FiEdit2 /> Edit
+                        <button className="btn btn-primary" onClick={() => setShowEditModal(true)} title="Edit">
+                            <FiEdit2 /> <span>Edit</span>
                         </button>
                     )}
                     {hasPermission('sysadmin.users.delete') && (
-                        <button className="btn btn-danger" onClick={handleDeleteClick}>
-                            <FiTrash2 /> Delete
+                        <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
+                            <FiTrash2 /> <span>Delete</span>
                         </button>
                     )}
                 </div>

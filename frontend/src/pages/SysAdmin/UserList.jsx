@@ -282,21 +282,23 @@ const UserList = () => {
                                                     <button
                                                         className="action-btn view"
                                                         onClick={() => navigate(`/sysadmin/users/${user.id}`)}
+                                                        title="View"
                                                     >
-                                                        <FiEye /> View
+                                                        <FiEye /> <span>View</span>
                                                     </button>
                                                 )}
                                                 {hasPermission('sysadmin.users.edit') && (
-                                                    <button className="action-btn edit" onClick={() => handleEditClick(user.id)}>
-                                                        <FiEdit2 /> Edit
+                                                    <button className="action-btn edit" onClick={() => handleEditClick(user.id)} title="Edit">
+                                                        <FiEdit2 /> <span>Edit</span>
                                                     </button>
                                                 )}
                                                 {hasPermission('sysadmin.users.delete') && (
                                                     <button
                                                         className="action-btn delete"
                                                         onClick={() => handleDeleteClick(user.id, user.username)}
+                                                        title="Delete"
                                                     >
-                                                        <FiTrash2 /> Delete
+                                                        <FiTrash2 /> <span>Delete</span>
                                                     </button>
                                                 )}
                                             </div>

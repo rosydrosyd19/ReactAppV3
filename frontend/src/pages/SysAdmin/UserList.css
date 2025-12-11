@@ -344,12 +344,12 @@
     }
 
     .mobile-actions {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
         gap: 8px;
     }
 
     .action-btn {
-        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -360,6 +360,12 @@
         font-weight: 500;
         cursor: pointer;
         border: 1px solid transparent;
+        width: 100%;
+        /* Ensure full width in grid */
+    }
+
+    .mobile-actions .action-btn span {
+        display: none;
     }
 
     .action-btn.view {

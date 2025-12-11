@@ -6,6 +6,8 @@ import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import AssetModal from './AssetModal';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
+import CheckOutModal from './CheckOutModal';
+import CheckInModal from './CheckInModal';
 import Toast from '../../../components/Toast/Toast';
 import {
     FiPlus,
@@ -15,7 +17,9 @@ import {
     FiTrash2,
     FiEye,
     FiPackage,
-    FiChevronDown
+    FiChevronDown,
+    FiLogOut,
+    FiLogIn
 } from 'react-icons/fi';
 
 const AssetList = () => {
@@ -36,6 +40,11 @@ const AssetList = () => {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [assetToDelete, setAssetToDelete] = useState(null);
+
+    // Check In/Out State
+    const [showCheckOutModal, setShowCheckOutModal] = useState(false);
+    const [showCheckInModal, setShowCheckInModal] = useState(false);
+    const [selectedTransactionAsset, setSelectedTransactionAsset] = useState(null);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -76,6 +85,23 @@ const AssetList = () => {
     const handleDelete = (id, assetTag) => {
         setAssetToDelete({ id, assetTag });
         setShowDeleteModal(true);
+    };
+
+    const handleCheckOut = (asset) => {
+        setSelectedTransactionAsset(asset);
+        setShowCheckOutModal(true);
+    };
+
+    const handleCheckIn = (asset) => {
+        setSelectedTransactionAsset(asset);
+        setShowCheckInModal(true);
+    };
+
+    const handleTransactionSuccess = () => {
+        setToastMessage('Asset status updated successfully');
+        setShowToast(true);
+        fetchAssets();
+        setSelectedTransactionAsset(null);
     };
 
     const confirmDelete = async () => {
@@ -234,6 +260,24 @@ const AssetList = () => {
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
+                                                    {asset.status === 'available' && hasPermission('asset.items.checkout') && (
+                                                        <button
+                                                            className="btn-icon btn-primary"
+                                                            title="Check Out"
+                                                            onClick={() => handleCheckOut(asset)}
+                                                        >
+                                                            <FiLogOut />
+                                                        </button>
+                                                    )}
+                                                    {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
+                                                        <button
+                                                            className="btn-icon btn-warning"
+                                                            title="Check In"
+                                                            onClick={() => handleCheckIn(asset)}
+                                                        >
+                                                            <FiLogIn />
+                                                        </button>
+                                                    )}
                                                     {hasPermission('asset.items.view') && (
                                                         <button
                                                             className="btn-icon"
@@ -315,28 +359,49 @@ const AssetList = () => {
                                             </div>
 
                                             <div className="mobile-actions">
+                                                {asset.status === 'available' && hasPermission('asset.items.checkout') && (
+                                                    <button
+                                                        className="action-btn primary"
+                                                        onClick={() => handleCheckOut(asset)}
+                                                        title="Check Out"
+                                                    >
+                                                        <FiLogOut /> <span>Check Out</span>
+                                                    </button>
+                                                )}
+                                                {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
+                                                    <button
+                                                        className="action-btn warning"
+                                                        onClick={() => handleCheckIn(asset)}
+                                                        title="Check In"
+                                                    >
+                                                        <FiLogIn /> <span>Check In</span>
+                                                    </button>
+                                                )}
                                                 {hasPermission('asset.items.view') && (
                                                     <button
                                                         className="action-btn view"
                                                         onClick={() => navigate(`/asset/items/${asset.id}`)}
+                                                        title="View"
                                                     >
-                                                        <FiEye /> View
+                                                        <FiEye /> <span>View</span>
                                                     </button>
                                                 )}
                                                 {hasPermission('asset.items.edit') && (
                                                     <button
                                                         className="action-btn edit"
                                                         onClick={() => handleEditClick(asset.id)}
+                                                        title="Edit"
                                                     >
-                                                        <FiEdit2 /> Edit
+                                                        <FiEdit2 /> <span>Edit</span>
                                                     </button>
                                                 )}
                                                 {hasPermission('asset.items.delete') && (
                                                     <button
                                                         className="action-btn delete"
                                                         onClick={() => handleDelete(asset.id, asset.asset_tag)}
+                                                        title="Delete"
                                                     >
-                                                        <FiTrash2 /> Delete
+                                                        <FiTrash2 /> <span>Delete</span>
                                                     </button>
                                                 )}
                                             </div>
@@ -380,6 +445,22 @@ const AssetList = () => {
                 message={`Are you sure you want to delete asset "${assetToDelete?.assetTag}"? This action cannot be undone.`}
                 confirmText="Delete Asset"
                 type="danger"
+            />
+
+            <CheckOutModal
+                isOpen={showCheckOutModal}
+                onClose={() => setShowCheckOutModal(false)}
+                onSuccess={handleTransactionSuccess}
+                assetId={selectedTransactionAsset?.id}
+                assetName={selectedTransactionAsset?.asset_name}
+            />
+
+            <CheckInModal
+                isOpen={showCheckInModal}
+                onClose={() => setShowCheckInModal(false)}
+                onSuccess={handleTransactionSuccess}
+                assetId={selectedTransactionAsset?.id}
+                assetName={selectedTransactionAsset?.asset_name}
             />
         </div>
     );

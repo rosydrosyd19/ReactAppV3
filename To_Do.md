@@ -1,7 +1,9 @@
 ## fix
 
 ## New Feature 
-tambahkan fitur cekin cekout pada menu asset
+tambahkan fitur cekin cekout pada menu asset ---
+
+pada Add New Asset tambahkan search pada Category, Location dan Supplier
 
 tambahkan fitur scan barcode pada menu asset
 
