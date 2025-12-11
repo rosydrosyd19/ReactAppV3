@@ -223,7 +223,18 @@ const AssetDetail = () => {
                             </div>
                             <div className="info-item">
                                 <label><FiUser /> Assigned To</label>
-                                <p>{asset.assigned_to_name || '-'}</p>
+                                <p>
+                                    {asset.assigned_to_name ? (
+                                        <span><FiUser style={{ marginRight: '4px' }} /> {asset.assigned_to_name}</span>
+                                    ) : asset.assigned_to_asset_name ? (
+                                        <span
+                                            onClick={() => navigate(`/asset/items/${asset.assigned_to_asset_id}`)}
+                                            style={{ cursor: 'pointer', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                        >
+                                            <FiPackage /> {asset.assigned_to_asset_name}
+                                        </span>
+                                    ) : '-'}
+                                </p>
                             </div>
                         </div>
                     </div>

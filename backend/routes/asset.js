@@ -24,13 +24,16 @@ router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
         s.supplier_name,
         u.username as assigned_to_username,
         u.full_name as assigned_to_name,
-        creator.username as created_by_username
+        creator.username as created_by_username,
+        parent_asset.asset_name as assigned_to_asset_name,
+        parent_asset.asset_tag as assigned_to_asset_tag
       FROM asset_items a
       LEFT JOIN asset_categories c ON a.category_id = c.id
       LEFT JOIN asset_locations l ON a.location_id = l.id
       LEFT JOIN asset_suppliers s ON a.supplier_id = s.id
       LEFT JOIN sysadmin_users u ON a.assigned_to = u.id
       LEFT JOIN sysadmin_users creator ON a.created_by = creator.id
+      LEFT JOIN asset_items parent_asset ON a.assigned_to_asset_id = parent_asset.id
       WHERE (a.is_deleted = FALSE OR a.is_deleted IS NULL)
     `;
         const params = [];
@@ -133,12 +136,15 @@ router.get('/assets/:id', checkPermission('asset.items.view'), async (req, res) 
         s.supplier_name,
         u.username as assigned_to_username,
         u.full_name as assigned_to_name,
-        u.email as assigned_to_email
+        u.email as assigned_to_email,
+        parent_asset.asset_name as assigned_to_asset_name,
+        parent_asset.asset_tag as assigned_to_asset_tag
       FROM asset_items a
       LEFT JOIN asset_categories c ON a.category_id = c.id
       LEFT JOIN asset_locations l ON a.location_id = l.id
       LEFT JOIN asset_suppliers s ON a.supplier_id = s.id
       LEFT JOIN sysadmin_users u ON a.assigned_to = u.id
+      LEFT JOIN asset_items parent_asset ON a.assigned_to_asset_id = parent_asset.id
       WHERE a.id = ?
     `, [req.params.id]);
 
@@ -299,21 +305,15 @@ router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async
         const { notes, condition_status, location_id } = req.body;
 
         // Get current asset info
-        const [asset] = await db.query('SELECT status, assigned_to, location_id FROM asset_items WHERE id = ?', [req.params.id]);
+        const [asset] = await db.query('SELECT status, assigned_to, location_id, assigned_to_asset_id FROM asset_items WHERE id = ?', [req.params.id]);
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
         // Allow checkin if assigned OR if checking in from a location move context (if needed in future, but stick to assigned for now)
         if (asset.status !== 'assigned') {
-            // Optional: Allow 'available' assets to be moved via checkin? No, strictly return.
-            // But wait, if an asset is at a "Site", it might be "Available" there. 
-            // Users request: "Check in... assigned to location".
-            // Let's stick to strict: Check-in is for returning 'assigned' items.
-            // If they want to move 'available' items, that's an Edit or separate Move.
-            // But if I check out to a Location, status becomes 'assigned'. So Check-in works.
             return res.status(400).json({ success: false, message: `Asset is ${asset.status}, cannot check in` });
         }
 
         // Update asset
-        let updateQuery = "UPDATE asset_items SET status = 'available', assigned_to = NULL";
+        let updateQuery = "UPDATE asset_items SET status = 'available', assigned_to = NULL, assigned_to_asset_id = NULL";
         const updateParams = [];
 
         if (location_id) {
@@ -333,9 +333,9 @@ router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async
 
         // Record history
         await db.query(`
-            INSERT INTO asset_history (asset_id, action_type, performed_by, from_user_id, from_location_id, to_location_id, notes)
-            VALUES (?, 'checkin', ?, ?, ?, ?, ?)
-        `, [req.params.id, req.user.id, asset.assigned_to, asset.location_id, location_id || null, notes || null]);
+            INSERT INTO asset_history (asset_id, action_type, performed_by, from_user_id, from_asset_id, from_location_id, to_location_id, notes)
+            VALUES (?, 'checkin', ?, ?, ?, ?, ?, ?)
+        `, [req.params.id, req.user.id, asset.assigned_to, asset.assigned_to_asset_id, asset.location_id, location_id || null, notes || null]);
 
         await logActivity(req.user.id, 'CHECKIN_ASSET', 'asset', 'asset', req.params.id, { notes, condition_status, location_id }, req);
 
@@ -351,20 +351,27 @@ router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async
 // Checkout asset
 router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), async (req, res) => {
     try {
-        const { user_id, location_id, notes } = req.body;
+        const { user_id, location_id, asset_id, notes } = req.body;
         // console.log('Checkout Request Body:', req.body);
         require('fs').appendFileSync('chk_debug.txt', JSON.stringify(req.body) + '\n');
 
-        if (!user_id && !location_id) {
-            require('fs').appendFileSync('chk_debug.txt', 'Validation Failed: Missing user_id and location_id\n');
-            console.log('Checkout Validation Failed: Missing user_id and location_id');
-            return res.status(400).json({ success: false, message: 'User or Location is required' });
+        if (!user_id && !location_id && !asset_id) {
+            require('fs').appendFileSync('chk_debug.txt', 'Validation Failed: Missing target\n');
+            console.log('Checkout Validation Failed: Missing target');
+            return res.status(400).json({ success: false, message: 'User, Location, or Asset target is required' });
         }
 
         // Get current asset state
         const [asset] = await db.query('SELECT assigned_to, location_id, status FROM asset_items WHERE id = ?', [req.params.id]);
 
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+
+        // Check if target asset exists and is valid (if applicable)
+        if (asset_id) {
+            const [targetAsset] = await db.query('SELECT id FROM asset_items WHERE id = ?', [asset_id]);
+            if (!targetAsset) return res.status(404).json({ success: false, message: 'Target asset not found' });
+            if (Number(asset_id) === Number(req.params.id)) return res.status(400).json({ success: false, message: 'Cannot check out asset to itself' });
+        }
 
         // console.log('Asset Status:', asset.status);
         require('fs').appendFileSync('chk_debug.txt', 'Asset Status: ' + asset.status + '\n');
@@ -376,11 +383,14 @@ router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), asy
         const updateParams = [];
 
         if (user_id) {
-            updateQuery += ", assigned_to = ?";
+            updateQuery += ", assigned_to = ?, location_id = NULL, assigned_to_asset_id = NULL";
             updateParams.push(user_id);
         } else if (location_id) {
-            updateQuery += ", location_id = ?, assigned_to = NULL";
+            updateQuery += ", location_id = ?, assigned_to = NULL, assigned_to_asset_id = NULL";
             updateParams.push(location_id);
+        } else if (asset_id) {
+            updateQuery += ", assigned_to_asset_id = ?, assigned_to = NULL, location_id = NULL";
+            updateParams.push(asset_id);
         }
 
         updateQuery += " WHERE id = ?";
@@ -390,18 +400,19 @@ router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), asy
 
         // Record history
         await db.query(`
-            INSERT INTO asset_history (asset_id, action_type, performed_by, to_user_id, from_location_id, to_location_id, notes)
-            VALUES (?, 'checkout', ?, ?, ?, ?, ?)
+            INSERT INTO asset_history (asset_id, action_type, performed_by, to_user_id, to_asset_id, from_location_id, to_location_id, notes)
+            VALUES (?, 'checkout', ?, ?, ?, ?, ?, ?)
         `, [
             req.params.id,
             req.user.id,
             user_id || null,
+            asset_id || null,
             asset.location_id, // from previous location
-            location_id || null, // to new location (if location_id provided)
+            location_id || null, // to new location (if location_id provided as target)
             notes || null
         ]);
 
-        await logActivity(req.user.id, 'CHECKOUT_ASSET', 'asset', 'asset', req.params.id, { user_id, location_id, notes }, req);
+        await logActivity(req.user.id, 'CHECKOUT_ASSET', 'asset', 'asset', req.params.id, { user_id, location_id, asset_id, notes }, req);
 
         res.json({ success: true, message: 'Asset checked out successfully' });
     } catch (error) {

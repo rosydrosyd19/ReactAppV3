@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiX, FiUser, FiMapPin, FiFileText, FiSave, FiLogOut } from 'react-icons/fi';
+import { FiX, FiUser, FiMapPin, FiFileText, FiSave, FiLogOut, FiPackage } from 'react-icons/fi';
 import SearchableSelect from '../../../components/Form/SearchableSelect';
 import axios from '../../../utils/axios';
 import './CheckOutModal.css';
@@ -8,12 +8,14 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
     const [checkoutType, setCheckoutType] = useState('user'); // 'user' or 'location'
     const [users, setUsers] = useState([]);
     const [locations, setLocations] = useState([]);
+    const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
         user_id: '',
         location_id: '',
+        asset_id: '',
         notes: '',
         due_date: ''
     });
@@ -21,7 +23,7 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
     useEffect(() => {
         if (isOpen) {
             fetchDependencies();
-            setFormData({ user_id: '', location_id: '', notes: '', due_date: '' });
+            setFormData({ user_id: '', location_id: '', asset_id: '', notes: '', due_date: '' });
             setCheckoutType('user');
         }
     }, [isOpen]);
@@ -29,13 +31,20 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
     const fetchDependencies = async () => {
         try {
             setLoading(true);
-            const [usersRes, locsRes] = await Promise.all([
+            const [usersRes, locsRes, assetsRes] = await Promise.all([
                 axios.get('/asset/users/list'),
-                axios.get('/asset/locations')
+                axios.get('/asset/locations'),
+                axios.get('/asset/assets')
             ]);
 
             if (usersRes.data.success) setUsers(usersRes.data.data);
             if (locsRes.data.success) setLocations(locsRes.data.data);
+            if (assetsRes.data.success) {
+                // Filter out current asset and retired/lost/sold assets if needed
+                // For now just valid parent candidates (not itself)
+                const validAssets = assetsRes.data.data.filter(a => Number(a.id) !== Number(assetId));
+                setAssets(validAssets);
+            }
         } catch (error) {
             console.error('Error fetching dependencies:', error);
         } finally {
@@ -48,6 +57,7 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
 
         if (checkoutType === 'user' && !formData.user_id) return;
         if (checkoutType === 'location' && !formData.location_id) return;
+        if (checkoutType === 'asset' && !formData.asset_id) return;
 
         try {
             setSubmitting(true);
@@ -60,8 +70,10 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
 
             if (checkoutType === 'user') {
                 payload.user_id = formData.user_id;
-            } else {
+            } else if (checkoutType === 'location') {
                 payload.location_id = formData.location_id;
+            } else {
+                payload.asset_id = formData.asset_id;
             }
 
             const response = await axios.post(`/asset/assets/${assetId}/checkout`, payload);
@@ -79,7 +91,7 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
 
     if (!isOpen) return null;
 
-    const isValid = checkoutType === 'user' ? !!formData.user_id : !!formData.location_id;
+    const isValid = checkoutType === 'user' ? !!formData.user_id : checkoutType === 'location' ? !!formData.location_id : !!formData.asset_id;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -112,6 +124,13 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
                             >
                                 <FiMapPin /> To Location
                             </button>
+                            <button
+                                type="button"
+                                className={`toggle-btn ${checkoutType === 'asset' ? 'active' : ''}`}
+                                onClick={() => setCheckoutType('asset')}
+                            >
+                                <FiPackage /> To Asset
+                            </button>
                         </div>
                         {/* User Selection */}
                         {checkoutType === 'user' && (
@@ -143,6 +162,23 @@ const CheckOutModal = ({ isOpen, onClose, onSuccess, assetId, assetName }) => {
                                     value={formData.location_id}
                                     onChange={(value) => setFormData({ ...formData, location_id: value })}
                                     placeholder="Search and select location..."
+                                />
+                            </div>
+                        )}
+
+                        {/* Asset Selection */}
+                        {checkoutType === 'asset' && (
+                            <div className="form-group">
+                                <label>Assign to Asset <span className="text-danger">*</span></label>
+                                <SearchableSelect
+                                    icon={FiPackage}
+                                    options={assets.map(a => ({
+                                        value: a.id,
+                                        label: `${a.asset_name} (${a.asset_tag})`
+                                    }))}
+                                    value={formData.asset_id}
+                                    onChange={(value) => setFormData({ ...formData, asset_id: value })}
+                                    placeholder="Search and select parent asset..."
                                 />
                             </div>
                         )}

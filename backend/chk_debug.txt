@@ -4,3 +4,5 @@ Asset Status: available
 Asset Status: available
 {"notes":"","due_date":"","location_id":1}
 Asset Status: available
+{"notes":"","due_date":"","asset_id":1}
+Asset Status: available

@@ -252,7 +252,7 @@ const AssetList = () => {
                                             <td>{asset.asset_name}</td>
                                             <td>{asset.category_name || '-'}</td>
                                             <td>{asset.location_name || '-'}</td>
-                                            <td>{asset.assigned_to_name || '-'}</td>
+                                            <td>{asset.assigned_to_name || (asset.assigned_to_asset_name ? `Asset: ${asset.assigned_to_asset_name}` : '-')}</td>
                                             <td>
                                                 <span className={getStatusBadge(asset.status)}>
                                                     {asset.status}
@@ -354,7 +354,7 @@ const AssetList = () => {
                                                 </div>
                                                 <div className="detail-item">
                                                     <span className="label">Assigned To</span>
-                                                    <span className="value">{asset.assigned_to_name || '-'}</span>
+                                                    <span className="value">{asset.assigned_to_name || (asset.assigned_to_asset_name ? `Asset: ${asset.assigned_to_asset_name}` : '-')}</span>
                                                 </div>
                                             </div>
 

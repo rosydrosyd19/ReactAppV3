@@ -34,6 +34,27 @@ async function initDatabase() {
         console.log('   Password: admin123');
         console.log('   Email: admin@reactappv3.com');
 
+        // Run migrations
+        console.log('🔄 Running migrations...');
+        const migrationsDir = path.join(__dirname, 'migrations');
+        if (fs.existsSync(migrationsDir)) {
+            const files = fs.readdirSync(migrationsDir).sort();
+            for (const file of files) {
+                if (file.endsWith('.js')) {
+                    console.log(`▶️ Executing migration: ${file}`);
+                    const { execSync } = require('child_process');
+                    try {
+                        execSync(`node "${path.join(migrationsDir, file)}"`, { stdio: 'inherit', cwd: path.join(__dirname, '..') });
+                        console.log(`✅ Migration ${file} executed.`);
+                    } catch (err) {
+                        console.error(`❌ Migration ${file} failed:`, err.message);
+                    }
+                }
+            }
+        } else {
+            console.log('ℹ️ No migrations folder found.');
+        }
+
     } catch (error) {
         console.error('❌ Error initializing database:', error.message);
         console.error(error);
