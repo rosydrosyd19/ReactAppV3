@@ -244,20 +244,20 @@ const AssetDetail = ({ readOnly = false }) => {
                                 <p>{asset.category_name || '-'}</p>
                             </div>
                             <div className="info-item">
-                                <label><FiMapPin /> Location</label>
-                                <p>{asset.location_name || '-'}</p>
+                                <label><FiPackage /> Model</label>
+                                <p>{asset.model || '-'}</p>
+                            </div>
+                            <div className="info-item">
+                                <label><FiAlertCircle /> Serial Number</label>
+                                <p>{asset.serial_number || '-'}</p>
                             </div>
                             <div className="info-item">
                                 <label><FiTool /> Manufacturer</label>
                                 <p>{asset.manufacturer || '-'}</p>
                             </div>
                             <div className="info-item">
-                                <label><FiTool /> Model</label>
-                                <p>{asset.model || '-'}</p>
-                            </div>
-                            <div className="info-item">
-                                <label><FiTag /> Serial Number</label>
-                                <p>{asset.serial_number || '-'}</p>
+                                <label><FiMapPin /> Location</label>
+                                <p>{asset.location_name || '-'}</p>
                             </div>
                             <div className="info-item">
                                 <label><FiUser /> Assigned To</label>
@@ -274,12 +274,83 @@ const AssetDetail = ({ readOnly = false }) => {
                                     ) : '-'}
                                 </p>
                             </div>
+                            <div className="info-item">
+                                <label><FiCalendar /> Purchase Date</label>
+                                <p>{asset.purchase_date ? new Date(asset.purchase_date).toLocaleDateString() : '-'}</p>
+                            </div>
+                            <div className="info-item">
+                                <label><FiDollarSign /> Cost</label>
+                                <p>{asset.purchase_cost ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(asset.purchase_cost) : '-'}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                {/* Asset History Card */}
+                {!readOnly && (
+                    <div className="card">
+                        <div className="card-header">
+                            <h2><FiClock /> Asset History</h2>
+                        </div>
+                        <div className="card-body">
+                            {asset.history && asset.history.length > 0 ? (
+                                <div className="history-timeline">
+                                    {asset.history.map((record, index) => (
+                                        <div key={index} className="history-item">
+                                            <div className={`history-icon type-${record.action_type}`}>
+                                                {record.action_type === 'checkout' && <FiLogOut />}
+                                                {record.action_type === 'checkin' && <FiLogIn />}
+                                                {record.action_type === 'create' && <FiCheckCircle />}
+                                                {record.action_type === 'update' && <FiEdit2 />}
+                                                {record.action_type === 'delete' && <FiTrash2 />}
+                                                {record.action_type === 'maintenance' && <FiTool />}
+                                            </div>
+                                            <div className="history-content">
+                                                <p className="history-title">
+                                                    {record.action_type === 'create' && 'Asset Created'}
+                                                    {record.action_type === 'update' && 'Asset Updated'}
+                                                    {record.action_type === 'delete' && 'Asset Deleted'}
+                                                    {record.action_type === 'checkin' && (
+                                                        <>
+                                                            Asset Checked In
+                                                            {record.to_location_name && <span> to <strong>{record.to_location_name}</strong></span>}
+                                                        </>
+                                                    )}
+                                                    {record.action_type === 'checkout' && (
+                                                        <>
+                                                            Checked out
+                                                            {record.to_user_username && <span> to User <strong>{record.to_user_username}</strong></span>}
+                                                            {record.to_asset_name && <span> to Asset <strong>{record.to_asset_name}</strong></span>}
+                                                            {!record.to_asset_name && record.to_asset_id && <span> to Asset ID <strong>{record.to_asset_id}</strong></span>}
+                                                            {record.to_location_name && <span> to Location <strong>{record.to_location_name}</strong></span>}
+                                                        </>
+                                                    )}
+                                                    {record.action_type === 'maintenance' && 'Maintenance Performed'}
+                                                </p>
+                                                <div className="history-meta">
+                                                    <span className="history-date">
+                                                        {new Date(record.action_date).toLocaleString()}
+                                                    </span>
+                                                    <span className="history-user">
+                                                        by {record.performed_by_username || 'System'}
+                                                    </span>
+                                                </div>
+                                                {record.notes && <p className="history-notes">{record.notes}</p>}
+                                                {record.from_location_name && record.action_type === 'checkin' && (
+                                                    <p className="history-detail">From Location: {record.from_location_name}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-muted" style={{ textAlign: 'center', padding: '20px' }}>No history available</p>
+                            )}
+                        </div>
+                    </div>
+                )}
                 {/* Purchase & Warranty Card */}
-                <div className="card">
+                < div className="card" >
                     <div className="card-header">
                         <h2><FiDollarSign /> Purchase & Warranty</h2>
                     </div>
@@ -303,19 +374,21 @@ const AssetDetail = ({ readOnly = false }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div >
 
                 {/* Notes Card */}
-                {asset.notes && (
-                    <div className="card">
-                        <div className="card-header">
-                            <h2><FiEdit2 /> Notes</h2>
+                {
+                    asset.notes && (
+                        <div className="card">
+                            <div className="card-header">
+                                <h2><FiEdit2 /> Notes</h2>
+                            </div>
+                            <div className="card-body">
+                                <p>{asset.notes}</p>
+                            </div>
                         </div>
-                        <div className="card-body">
-                            <p>{asset.notes}</p>
-                        </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* System Information Card */}
                 <div className="card">
@@ -385,7 +458,7 @@ const AssetDetail = ({ readOnly = false }) => {
                 assetId={id}
                 assetName={asset.asset_name}
             />
-        </div>
+        </div >
     );
 };
 

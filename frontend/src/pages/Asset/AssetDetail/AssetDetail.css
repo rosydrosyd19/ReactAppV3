@@ -227,3 +227,109 @@
         max-width: 200px;
     }
 }
+
+/* History Timeline Styles */
+.history-timeline {
+    position: relative;
+    padding-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    /* Align with icon center */
+    top: 2rem;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--border-color);
+    z-index: 0;
+}
+
+.history-item {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.history-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.history-icon.type-create {
+    background-color: var(--success-light);
+    color: var(--success-color);
+}
+
+.history-icon.type-checkout {
+    background-color: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.history-icon.type-checkin {
+    background-color: var(--info-light);
+    color: var(--info-color);
+}
+
+.history-icon.type-delete {
+    background-color: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.history-icon.type-maintenance {
+    background-color: var(--purple-light);
+    color: var(--purple-color);
+}
+
+.history-content {
+    flex: 1;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.history-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.history-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.history-notes {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background-color: var(--bg-primary);
+    /* Slight contrast from card bg */
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    margin-top: 0.5rem;
+}
+
+.history-detail {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    margin-top: 0.25rem;
+    font-style: italic;
+}
