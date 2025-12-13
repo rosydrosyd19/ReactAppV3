@@ -15,7 +15,8 @@ import {
     FiEdit2,
     FiTrash2,
     FiCheckCircle,
-    FiXCircle
+    FiXCircle,
+    FiClock
 } from 'react-icons/fi';
 
 const UserDetail = () => {
@@ -155,14 +156,6 @@ const UserDetail = () => {
                                 <label><FiPhone /> Phone Number</label>
                                 <p>{user.phone || '-'}</p>
                             </div>
-                            <div className="info-item">
-                                <label>Created At</label>
-                                <p>{new Date(user.created_at).toLocaleString()}</p>
-                            </div>
-                            <div className="info-item">
-                                <label>Last Updated</label>
-                                <p>{user.updated_at ? new Date(user.updated_at).toLocaleString() : 'No changes yet'}</p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -209,6 +202,25 @@ const UserDetail = () => {
                         </div>
                     </div>
                 )}
+
+                {/* System Information Card */}
+                <div className="card">
+                    <div className="card-header">
+                        <h2><FiClock /> System Information</h2>
+                    </div>
+                    <div className="card-body">
+                        <div className="info-grid">
+                            <div className="info-item">
+                                <label><FiClock /> Created At</label>
+                                <p>{user.created_at ? new Date(user.created_at).toLocaleString() : '-'}</p>
+                            </div>
+                            <div className="info-item">
+                                <label><FiClock /> Last Updated</label>
+                                <p>{user.updated_at ? new Date(user.updated_at).toLocaleString() : 'No changes yet'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <EditUserModal

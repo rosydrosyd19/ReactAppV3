@@ -346,7 +346,35 @@ router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async
     }
 });
 
-// ... delete route ...
+// Delete asset (Soft delete)
+router.delete('/assets/:id', checkPermission('asset.items.delete'), async (req, res) => {
+    try {
+        const [asset] = await db.query('SELECT asset_tag, asset_name FROM asset_items WHERE id = ?', [req.params.id]);
+
+        if (!asset) {
+            return res.status(404).json({ success: false, message: 'Asset not found' });
+        }
+
+        // Soft delete
+        await db.query('UPDATE asset_items SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
+
+        // Record history
+        await db.query(`
+            INSERT INTO asset_history (asset_id, action_type, performed_by, notes)
+            VALUES (?, 'delete', ?, 'Asset deleted')
+        `, [req.params.id, req.user.id]);
+
+        await logActivity(req.user.id, 'DELETE_ASSET', 'asset', 'asset', req.params.id, {
+            asset_tag: asset.asset_tag,
+            asset_name: asset.asset_name
+        }, req);
+
+        res.json({ success: true, message: 'Asset deleted successfully' });
+    } catch (error) {
+        console.error('Delete asset error:', error);
+        res.status(500).json({ success: false, message: 'Error deleting asset' });
+    }
+});
 
 // Checkout asset
 router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), async (req, res) => {

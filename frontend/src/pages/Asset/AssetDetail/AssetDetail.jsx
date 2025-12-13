@@ -26,7 +26,8 @@ import {
     FiInfo,
     FiImage,
     FiLogOut,
-    FiLogIn
+    FiLogIn,
+    FiClock
 } from 'react-icons/fi';
 
 const AssetDetail = () => {
@@ -278,6 +279,32 @@ const AssetDetail = () => {
                         </div>
                     </div>
                 )}
+
+                {/* System Information Card */}
+                <div className="card">
+                    <div className="card-header">
+                        <h2><FiClock /> System Information</h2>
+                    </div>
+                    <div className="card-body">
+                        <div className="info-grid">
+                            <div className="info-item">
+                                <label><FiClock /> Created At</label>
+                                <p>
+                                    {asset.created_at ? new Date(asset.created_at).toLocaleString() : '-'}
+                                    {asset.created_by_username && <span className="text-muted"> by {asset.created_by_username}</span>}
+                                </p>
+                            </div>
+                            <div className="info-item">
+                                <label><FiClock /> Last Updated</label>
+                                <p>
+                                    {asset.updated_at && asset.created_at && new Date(asset.updated_at).getTime() > new Date(asset.created_at).getTime()
+                                        ? new Date(asset.updated_at).toLocaleString()
+                                        : 'No changes yet'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Edit Modal */}
