@@ -128,3 +128,102 @@
         /* Show text */
     }
 }
+
+/* Media Container Styles (Image + QR split) */
+.media-container {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch;
+    /* Stretch to make divider full height */
+}
+
+.media-image-section {
+    flex: 1;
+    width: 100%;
+}
+
+.media-qr-section {
+    width: 200px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.media-qr-section .qr-container {
+    flex: 1;
+    /* Stretch container to fill height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Center QR content vertically */
+    height: 100%;
+}
+
+.media-divider {
+    width: 1px;
+    background-color: var(--border-color);
+    margin-top: 2rem;
+    /* Align divider with content, skip headers if needed */
+    margin-bottom: 0.5rem;
+}
+
+.media-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.qr-container {
+    background: transparent;
+    padding: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.qr-code-wrapper {
+    background: white;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-help-text {
+    text-align: center;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+/* Responsive stack for minimal screens and tablets */
+@media (max-width: 768px) {
+    .media-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .media-divider {
+        display: none;
+    }
+
+    .media-qr-section {
+        width: 100%;
+        align-items: center;
+    }
+
+    .media-qr-section .qr-container {
+        height: auto;
+        /* Reset height on mobile */
+    }
+
+    .qr-container {
+        width: 100%;
+        max-width: 200px;
+    }
+}

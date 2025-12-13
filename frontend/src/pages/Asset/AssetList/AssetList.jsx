@@ -397,7 +397,7 @@ const AssetList = () => {
                                                     </button>
                                                 )}
                                                 <button
-                                                    className="action-btn"
+                                                    className="action-btn qr-code"
                                                     onClick={() => handleQRClick(asset)}
                                                     title="QR Code"
                                                 >

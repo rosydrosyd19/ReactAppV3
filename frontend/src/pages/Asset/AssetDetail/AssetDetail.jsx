@@ -9,6 +9,8 @@ import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 import CheckOutModal from '../AssetList/CheckOutModal';
 import CheckInModal from '../AssetList/CheckInModal';
+import { BsQrCode } from 'react-icons/bs'; // Correctly imported
+import QRCode from 'react-qr-code';
 import {
     FiArrowLeft,
     FiPackage,
@@ -174,21 +176,43 @@ const AssetDetail = ({ readOnly = false }) => {
             </div>
 
             <div className="detail-content">
-                {/* Asset Image Section */}
+                {/* Asset Media Section */}
                 <div className="card">
                     <div className="card-header">
-                        <h2><FiImage /> Asset Image</h2>
+                        <h2><FiImage /> Asset Media</h2>
                     </div>
                     <div className="card-body">
-                        <div className="image-container">
-                            {asset.image_url ? (
-                                <img src={asset.image_url} alt={asset.asset_name} className="asset-image" />
-                            ) : (
-                                <div className="placeholder-image">
-                                    <FiPackage />
-                                    <span>No image available</span>
+                        <div className="media-container">
+                            <div className="media-image-section">
+                                <label className="media-label">Asset Image</label>
+                                <div className="image-container">
+                                    {asset.image_url ? (
+                                        <img src={asset.image_url} alt={asset.asset_name} className="asset-image" />
+                                    ) : (
+                                        <div className="placeholder-image">
+                                            <FiPackage />
+                                            <span>No image available</span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
+
+                            <div className="media-divider"></div>
+
+                            <div className="media-qr-section">
+                                <label className="media-label">QR Code</label>
+                                <div className="qr-container">
+                                    <div className="qr-code-wrapper">
+                                        <QRCode
+                                            value={`${window.location.origin}/asset/scan/${asset.id}`}
+                                            size={128}
+                                            style={{ height: "auto", maxWidth: "128px", width: "100%" }}
+                                            viewBox={`0 0 256 256`}
+                                        />
+                                    </div>
+                                    <p className="qr-help-text">Scan to view details</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
