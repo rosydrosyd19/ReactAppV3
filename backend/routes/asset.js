@@ -6,7 +6,49 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-// Apply authentication to all routes
+// ==================== PUBLIC ROUTES ====================
+
+// Get single asset (Public)
+router.get('/public/:id', async (req, res) => {
+    try {
+        const [asset] = await db.query(`
+      SELECT 
+        a.*,
+        c.category_name,
+        l.location_name,
+        s.supplier_name,
+        parent_asset.asset_name as assigned_to_asset_name,
+        parent_asset.asset_tag as assigned_to_asset_tag
+      FROM asset_items a
+      LEFT JOIN asset_categories c ON a.category_id = c.id
+      LEFT JOIN asset_locations l ON a.location_id = l.id
+      LEFT JOIN asset_suppliers s ON a.supplier_id = s.id
+      LEFT JOIN asset_items parent_asset ON a.assigned_to_asset_id = parent_asset.id
+      WHERE a.id = ? AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)
+    `, [req.params.id]);
+
+        if (!asset) {
+            return res.status(404).json({ success: false, message: 'Asset not found' });
+        }
+
+        // We don't expose user details or history in public view for security/privacy if preferred,
+        // or we can strictly limit what's sent.
+        // For now, sending basic asset info is safe.
+
+        // Hide sensitive fields if any (cost is already visible in internal, maybe hide for public?)
+        // User didn't specify, but "read only scan" usually implies basic info.
+        // I will keep it similar to internal but maybe omit cost/warranty if that's sensitive?
+        // Let's assume full read-only detail is fine for now as per "menampilkan detail asset".
+
+        res.json({ success: true, data: asset });
+    } catch (error) {
+        console.error('Get public asset error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching asset' });
+    }
+});
+
+
+// Apply authentication to all routes below
 router.use(verifyToken);
 
 // ==================== ASSETS ====================

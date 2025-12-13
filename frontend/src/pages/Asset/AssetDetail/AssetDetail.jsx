@@ -30,10 +30,10 @@ import {
     FiClock
 } from 'react-icons/fi';
 
-const AssetDetail = () => {
+const AssetDetail = ({ readOnly = false }) => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { hasPermission } = useAuth();
+    const { hasPermission, isAuthenticated } = useAuth();
     const [asset, setAsset] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -47,12 +47,15 @@ const AssetDetail = () => {
 
     useEffect(() => {
         fetchAssetDetail();
-    }, [id]);
+    }, [id, isAuthenticated]);
 
     const fetchAssetDetail = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`/asset/assets/${id}`);
+            // If logged in, use the authenticated endpoint even for scan route to get full details/history if needed
+            // If guest (readOnly true AND not authenticated), use public endpoint
+            const endpoint = (readOnly && !isAuthenticated) ? `/asset/public/${id}` : `/asset/assets/${id}`;
+            const response = await axios.get(endpoint);
             if (response.data.success) {
                 setAsset(response.data.data);
             }
@@ -121,12 +124,16 @@ const AssetDetail = () => {
         );
     }
 
+    // Determine if actions should be shown:
+    // Show if it is NOT readOnly (normal view) OR if it IS readOnly (scan view) but user IS authenticated
+    const showActions = !readOnly || isAuthenticated;
+
     return (
         <div className="user-detail asset-detail-override"> {/* Adopt user-detail styles */}
             <div className="page-header">
                 <div className="header-left">
-                    <button className="btn btn-outline" onClick={() => navigate('/asset/items')}>
-                        <FiArrowLeft /> <span>Back</span>
+                    <button className="btn btn-outline" onClick={() => navigate(readOnly && !isAuthenticated ? '/login' : '/asset/items')}>
+                        <FiArrowLeft /> <span>{readOnly && !isAuthenticated ? 'Login' : 'Back'}</span>
                     </button>
                     <div>
                         <h1>Asset Details</h1>
@@ -134,28 +141,38 @@ const AssetDetail = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    {/* Check In/Out Buttons */}
-                    {/* Check In/Out Buttons */}
-                    {asset.status === 'available' && hasPermission('asset.items.checkout') && (
-                        <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
-                            <FiLogOut /> <span>Check Out</span>
-                        </button>
-                    )}
-                    {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
-                        <button className="btn btn-warning" onClick={() => setShowCheckInModal(true)} title="Check In">
-                            <FiLogIn /> <span>Check In</span>
+                    {/* Show Login button for guests in read-only mode */}
+                    {readOnly && !isAuthenticated && (
+                        <button className="btn btn-primary btn-login-guest" onClick={() => navigate('/login')} title="Login">
+                            <FiUser /> <span>Login</span>
                         </button>
                     )}
 
-                    {hasPermission('asset.items.edit') && (
-                        <button className="btn btn-outline" onClick={() => setShowEditModal(true)} title="Edit">
-                            <FiEdit2 /> <span>Edit</span>
-                        </button>
-                    )}
-                    {hasPermission('asset.items.delete') && (
-                        <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
-                            <FiTrash2 /> <span>Delete</span>
-                        </button>
+                    {showActions && (
+                        <>
+                            {/* Check In/Out Buttons */}
+                            {asset.status === 'available' && hasPermission('asset.items.checkout') && (
+                                <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
+                                    <FiLogOut /> <span>Check Out</span>
+                                </button>
+                            )}
+                            {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
+                                <button className="btn btn-warning" onClick={() => setShowCheckInModal(true)} title="Check In">
+                                    <FiLogIn /> <span>Check In</span>
+                                </button>
+                            )}
+
+                            {hasPermission('asset.items.edit') && (
+                                <button className="btn btn-outline" onClick={() => setShowEditModal(true)} title="Edit">
+                                    <FiEdit2 /> <span>Edit</span>
+                                </button>
+                            )}
+                            {hasPermission('asset.items.delete') && (
+                                <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
+                                    <FiTrash2 /> <span>Delete</span>
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

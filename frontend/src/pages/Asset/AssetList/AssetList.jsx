@@ -8,7 +8,9 @@ import AssetModal from './AssetModal';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import CheckOutModal from './CheckOutModal';
 import CheckInModal from './CheckInModal';
+import QRCodeModal from './QRCodeModal';
 import Toast from '../../../components/Toast/Toast';
+import { BsQrCode } from 'react-icons/bs';
 import {
     FiPlus,
     FiSearch,
@@ -44,7 +46,12 @@ const AssetList = () => {
     // Check In/Out State
     const [showCheckOutModal, setShowCheckOutModal] = useState(false);
     const [showCheckInModal, setShowCheckInModal] = useState(false);
+
     const [selectedTransactionAsset, setSelectedTransactionAsset] = useState(null);
+
+    // QR Modal State
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [qrAsset, setQrAsset] = useState(null);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +102,11 @@ const AssetList = () => {
     const handleCheckIn = (asset) => {
         setSelectedTransactionAsset(asset);
         setShowCheckInModal(true);
+    };
+
+    const handleQRClick = (asset) => {
+        setQrAsset(asset);
+        setShowQRModal(true);
     };
 
     const handleTransactionSuccess = () => {
@@ -278,6 +290,13 @@ const AssetList = () => {
                                                             <FiLogIn />
                                                         </button>
                                                     )}
+                                                    <button
+                                                        className="btn-icon"
+                                                        title="QR Code"
+                                                        onClick={() => handleQRClick(asset)}
+                                                    >
+                                                        <BsQrCode />
+                                                    </button>
                                                     {hasPermission('asset.items.view') && (
                                                         <button
                                                             className="btn-icon"
@@ -377,6 +396,13 @@ const AssetList = () => {
                                                         <FiLogIn /> <span>Check In</span>
                                                     </button>
                                                 )}
+                                                <button
+                                                    className="action-btn"
+                                                    onClick={() => handleQRClick(asset)}
+                                                    title="QR Code"
+                                                >
+                                                    <BsQrCode /> <span>QR Code</span>
+                                                </button>
                                                 {hasPermission('asset.items.view') && (
                                                     <button
                                                         className="action-btn view"
@@ -461,6 +487,14 @@ const AssetList = () => {
                 onSuccess={handleTransactionSuccess}
                 assetId={selectedTransactionAsset?.id}
                 assetName={selectedTransactionAsset?.asset_name}
+            />
+
+            <QRCodeModal
+                isOpen={showQRModal}
+                onClose={() => setShowQRModal(false)}
+                assetId={qrAsset?.id}
+                assetName={qrAsset?.asset_name}
+                assetTag={qrAsset?.asset_tag}
             />
         </div>
     );

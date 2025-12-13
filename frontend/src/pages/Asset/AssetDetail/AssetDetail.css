@@ -113,4 +113,18 @@
         display: none;
         /* Hide text on mobile */
     }
+
+    /* Exception for guest login button: show text and make it full width */
+    .user-detail.asset-detail-override .header-actions button.btn-login-guest {
+        grid-column: 1 / -1;
+        /* Span all columns */
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .user-detail.asset-detail-override .header-actions button.btn-login-guest span {
+        display: inline;
+        /* Show text */
+    }
 }

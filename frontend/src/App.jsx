@@ -54,6 +54,7 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route path="/asset/scan/:id" element={<AssetDetail readOnly={true} />} />
 
           {/* Protected routes */}
           <Route
