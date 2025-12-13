@@ -1,43 +1,38 @@
 ---
-description: Deploying Asset Check Out Updates
+description: Deploying QR Code Feature Updates
 ---
-# How to Deploy Update (Assert Check Out Feature)
+# How to Deploy Update (QR Code Feature)
 
-You need to update both the backend code and the database schema on your server.
+This update includes a new public API endpoint for scanning and the QR code generation library for the frontend.
 
 ## 1. Update Codebase
-Pull the latest changes from your git repository on the server:
+Pull the latest changes from the git repository on the server:
 ```bash
 cd /path/to/your/project
 git pull origin main
 ```
 
-## 2. Update Database Schema
-Run the initialization script, which will now automatically execute all migrations.
+## 2. Update Frontend Dependencies & Build
+You added `react-qr-code`, so you MUST install dependencies before building.
 ```bash
-cd backend
-npm run init-db
-```
-Or if you want to run them manually:
-```bash
-node database/migrations/001_checkout_to_asset.js
-node database/migrations/002_add_from_asset_id.js
+cd frontend
+npm install
+npm run build
 ```
 
 ## 3. Restart Backend Service
-Restart your Node.js backend to apply the API changes.
+A new public route was added to `backend/routes/asset.js`.
 ```bash
-# Example if using PM2
+cd ../backend
+# No new dependencies in backend, but good practice to check
+npm install 
+# Restart PM2
 pm2 restart all
-# Or if running directly
-# Ctrl+C to stop, then npm start
 ```
 
-## 4. Rebuild Frontend (If production build)
-If you are serving a built version of the frontend:
-```bash
-cd ../frontend
-npm install
-npm run build
-# Copy dist/ to your web server directory if necessary
-```
+## 4. Database
+**No database schema changes** were made in this update. You do not need to run migrations.
+
+## 5. Verify
+-   Visit `/asset/items` and check for the "Show QR" button.
+-   Scan a code to test the public scan URL.

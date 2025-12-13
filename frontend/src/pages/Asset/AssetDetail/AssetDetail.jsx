@@ -1,10 +1,10 @@
 import './AssetDetail.css';
-import '../../SysAdmin/UserDetail.css'; // Import UserDetail styles to ensure exact match
+import '../../SysAdmin/UserDetail.css';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
-import AssetModal from '../AssetList/AssetModal'; // Reusing existing modal
+import AssetModal from '../AssetList/AssetModal';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 import CheckOutModal from '../AssetList/CheckOutModal';
@@ -33,6 +33,7 @@ import {
 const AssetDetail = ({ readOnly = false }) => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { hasPermission, isAuthenticated } = useAuth();
     const [asset, setAsset] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -52,8 +53,6 @@ const AssetDetail = ({ readOnly = false }) => {
     const fetchAssetDetail = async () => {
         try {
             setLoading(true);
-            // If logged in, use the authenticated endpoint even for scan route to get full details/history if needed
-            // If guest (readOnly true AND not authenticated), use public endpoint
             const endpoint = (readOnly && !isAuthenticated) ? `/asset/public/${id}` : `/asset/assets/${id}`;
             const response = await axios.get(endpoint);
             if (response.data.success) {
@@ -78,7 +77,7 @@ const AssetDetail = ({ readOnly = false }) => {
         setToastMessage('Asset status updated successfully!');
         setShowToast(true);
         fetchAssetDetail();
-        fetchAssetDetail(); // Refresh data
+        fetchAssetDetail();
     };
 
     const handleDeleteClick = () => {
@@ -101,7 +100,7 @@ const AssetDetail = ({ readOnly = false }) => {
 
     if (loading) {
         return (
-            <div className="user-detail"> {/* Use user-detail class for loading state too */}
+            <div className="user-detail">
                 <div className="loading-container">
                     <div className="loading-spinner" />
                     <p>Loading asset details...</p>
@@ -124,12 +123,10 @@ const AssetDetail = ({ readOnly = false }) => {
         );
     }
 
-    // Determine if actions should be shown:
-    // Show if it is NOT readOnly (normal view) OR if it IS readOnly (scan view) but user IS authenticated
     const showActions = !readOnly || isAuthenticated;
 
     return (
-        <div className="user-detail asset-detail-override"> {/* Adopt user-detail styles */}
+        <div className="user-detail asset-detail-override">
             <div className="page-header">
                 <div className="header-left">
                     <button className="btn btn-outline" onClick={() => navigate(readOnly && !isAuthenticated ? '/login' : '/asset/items')}>
@@ -143,14 +140,13 @@ const AssetDetail = ({ readOnly = false }) => {
                 <div className="header-actions">
                     {/* Show Login button for guests in read-only mode */}
                     {readOnly && !isAuthenticated && (
-                        <button className="btn btn-primary btn-login-guest" onClick={() => navigate('/login')} title="Login">
+                        <button className="btn btn-primary btn-login-guest" onClick={() => navigate('/login', { state: { from: location } })} title="Login">
                             <FiUser /> <span>Login</span>
                         </button>
                     )}
 
                     {showActions && (
                         <>
-                            {/* Check In/Out Buttons */}
                             {asset.status === 'available' && hasPermission('asset.items.checkout') && (
                                 <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
                                     <FiLogOut /> <span>Check Out</span>

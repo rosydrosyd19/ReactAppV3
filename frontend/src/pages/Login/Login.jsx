@@ -1,6 +1,6 @@
 import './Login.css';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -13,6 +13,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,7 +23,8 @@ const Login = () => {
         const result = await login(username, password, rememberMe);
 
         if (result.success) {
-            navigate('/modules');
+            const from = location.state?.from?.pathname || '/modules';
+            navigate(from, { replace: true });
         } else {
             setError(result.message);
         }
@@ -94,8 +96,6 @@ const Login = () => {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
-
-
             </div>
         </div>
     );
