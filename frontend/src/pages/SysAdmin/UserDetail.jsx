@@ -16,7 +16,9 @@ import {
     FiTrash2,
     FiCheckCircle,
     FiXCircle,
-    FiClock
+    FiClock,
+    FiPackage,
+    FiEye
 } from 'react-icons/fi';
 
 const UserDetail = () => {
@@ -202,6 +204,53 @@ const UserDetail = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Assigned Assets Card */}
+                <div className="card">
+                    <div className="card-header">
+                        <h2><FiPackage /> Assigned Assets</h2>
+                    </div>
+                    <div className="card-body">
+                        {user.assigned_assets && user.assigned_assets.length > 0 ? (
+                            <div className="table-container">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Asset Tag</th>
+                                            <th>Asset Name</th>
+                                            <th>Category</th>
+                                            <th>Location</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {user.assigned_assets.map(asset => (
+                                            <tr key={asset.id}>
+                                                <td>{asset.asset_tag}</td>
+                                                <td>{asset.asset_name}</td>
+                                                <td>{asset.category_name}</td>
+                                                <td>{asset.location_name || '-'}</td>
+                                                <td>
+                                                    <button
+                                                        className="btn-icon"
+                                                        onClick={() => navigate(`/asset/items/${asset.id}`, { state: { from: `/sysadmin/users/${id}` } })}
+                                                        title="View Asset Detail"
+                                                    >
+                                                        <FiEye />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="empty-state-small">
+                                <p>No assets assigned to this user</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 {/* System Information Card */}
                 <div className="card">

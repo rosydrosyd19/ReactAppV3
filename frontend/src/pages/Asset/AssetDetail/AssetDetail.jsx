@@ -131,7 +131,16 @@ const AssetDetail = ({ readOnly = false }) => {
         <div className="user-detail asset-detail-override">
             <div className="page-header">
                 <div className="header-left">
-                    <button className="btn btn-outline" onClick={() => navigate(readOnly && !isAuthenticated ? '/login' : '/asset/items')}>
+                    <button
+                        className="btn btn-outline"
+                        onClick={() => {
+                            if (location.state?.from) {
+                                navigate(location.state.from);
+                            } else {
+                                navigate(readOnly && !isAuthenticated ? '/login' : '/asset/items');
+                            }
+                        }}
+                    >
                         <FiArrowLeft /> <span>{readOnly && !isAuthenticated ? 'Login' : 'Back'}</span>
                     </button>
                     <div>

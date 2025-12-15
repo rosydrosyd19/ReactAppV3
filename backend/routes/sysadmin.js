@@ -65,6 +65,19 @@ router.get('/users/:id', checkPermission('sysadmin.users.view'), async (req, res
         user.roles = roles;
         user.direct_permissions = permissions;
 
+        // Get assigned assets
+        const assets = await db.query(`
+            SELECT 
+                a.id, a.asset_tag, a.asset_name, a.status, 
+                c.category_name, l.location_name
+            FROM asset_items a
+            LEFT JOIN asset_categories c ON a.category_id = c.id
+            LEFT JOIN asset_locations l ON a.location_id = l.id
+            WHERE a.assigned_to = ? AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)
+        `, [req.params.id]);
+
+        user.assigned_assets = assets;
+
         res.json({ success: true, data: user });
     } catch (error) {
         console.error('Get user error:', error);
