@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiSave, FiUpload, FiXCircle } from 'react-icons/fi';
 import axios from '../../../utils/axios';
+import SearchableSelect from '../../../components/Form/SearchableSelect';
 import './AssetModal.css';
 
 const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
@@ -159,6 +160,13 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
         }));
     };
 
+    const handleSelectChange = (name, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -260,34 +268,22 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
 
                                 <div className="form-group">
                                     <label className="form-label">Category <span className="required">*</span> </label>
-                                    <select
-                                        name="category_id"
-                                        value={formData.category_id}
-                                        onChange={handleChange}
-                                        className="form-select"
-                                        required
-                                    >
-                                        <option value="">Select Category</option>
-                                        {categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.category_name}</option>
-                                        ))}
-                                    </select>
+                                    <SearchableSelect
+                                        options={categories.map(c => ({ value: c.id, label: c.category_name }))}
+                                        value={Number(formData.category_id)}
+                                        onChange={(value) => handleSelectChange('category_id', value)}
+                                        placeholder="Select Category"
+                                    />
                                 </div>
 
                                 <div className="form-group">
                                     <label className="form-label">Location <span className="required">*</span></label>
-                                    <select
-                                        name="location_id"
-                                        value={formData.location_id}
-                                        onChange={handleChange}
-                                        className="form-select"
-                                        required
-                                    >
-                                        <option value="">Select Location</option>
-                                        {locations.map(loc => (
-                                            <option key={loc.id} value={loc.id}>{loc.location_name}</option>
-                                        ))}
-                                    </select>
+                                    <SearchableSelect
+                                        options={locations.map(l => ({ value: l.id, label: l.location_name }))}
+                                        value={Number(formData.location_id)}
+                                        onChange={(value) => handleSelectChange('location_id', value)}
+                                        placeholder="Select Location"
+                                    />
                                 </div>
 
                                 <div className="form-section-title">Status & Condition</div>
@@ -367,17 +363,12 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
 
                                 <div className="form-group">
                                     <label className="form-label">Supplier</label>
-                                    <select
-                                        name="supplier_id"
-                                        value={formData.supplier_id}
-                                        onChange={handleChange}
-                                        className="form-select"
-                                    >
-                                        <option value="">Select Supplier</option>
-                                        {suppliers.map(sup => (
-                                            <option key={sup.id} value={sup.id}>{sup.supplier_name}</option>
-                                        ))}
-                                    </select>
+                                    <SearchableSelect
+                                        options={suppliers.map(s => ({ value: s.id, label: s.supplier_name }))}
+                                        value={Number(formData.supplier_id)}
+                                        onChange={(value) => handleSelectChange('supplier_id', value)}
+                                        placeholder="Select Supplier"
+                                    />
                                 </div>
 
                                 <div className="form-row">
