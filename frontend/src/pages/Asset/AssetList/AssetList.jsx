@@ -9,6 +9,7 @@ import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import CheckOutModal from './CheckOutModal';
 import CheckInModal from './CheckInModal';
 import QRCodeModal from './QRCodeModal';
+import BulkQRModal from './BulkQRModal';
 import Toast from '../../../components/Toast/Toast';
 import { BsQrCode } from 'react-icons/bs';
 import {
@@ -53,9 +54,12 @@ const AssetList = () => {
     const [showQRModal, setShowQRModal] = useState(false);
     const [qrAsset, setQrAsset] = useState(null);
 
-    // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    // Bulk Action State
+    const [selectedAssets, setSelectedAssets] = useState(new Set());
+    const [showBulkQRModal, setShowBulkQRModal] = useState(false);
 
     const toggleMobileItem = (id) => {
         setExpandedItemId(expandedItemId === id ? null : id);
@@ -169,10 +173,40 @@ const AssetList = () => {
         setShowAssetModal(true);
     };
 
+
+
     const handleModalSuccess = (action) => {
         setToastMessage(`Asset ${action} successfully`);
         setShowToast(true);
         fetchAssets();
+    };
+
+    // Bulk Actions Logic
+    const toggleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allIds = new Set(currentItems.map(asset => asset.id));
+            setSelectedAssets(allIds);
+        } else {
+            setSelectedAssets(new Set());
+        }
+    };
+
+    const toggleSelectAsset = (id) => {
+        const newSelected = new Set(selectedAssets);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedAssets(newSelected);
+    };
+
+    const handleBulkQRClick = () => {
+        setShowBulkQRModal(true);
+    };
+
+    const getSelectedAssetsList = () => {
+        return assets.filter(a => selectedAssets.has(a.id));
     };
 
     return (
@@ -191,6 +225,28 @@ const AssetList = () => {
 
             <div className="card">
                 <div className="filters-bar">
+                    {/* Bulk Actions Menu (conditionally rendered) */}
+                    {selectedAssets.size > 0 && (
+                        <div className="bulk-actions" style={{
+                            background: 'var(--bg-secondary)',
+                            padding: '10px 15px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '15px',
+                            marginBottom: '10px',
+                            border: '1px solid var(--border-color)'
+                        }}>
+                            <span style={{ fontWeight: 'bold' }}>{selectedAssets.size} selected</span>
+                            <button className="btn btn-outline btn-sm" onClick={handleBulkQRClick}>
+                                <BsQrCode /> Print QR Codes
+                            </button>
+                            <button className="btn btn-text btn-sm" onClick={() => setSelectedAssets(new Set())}>
+                                Clear Selection
+                            </button>
+                        </div>
+                    )}
+
                     <div className="search-form">
                         <div className="input-with-icon">
                             <FiSearch />
@@ -246,6 +302,13 @@ const AssetList = () => {
                             <table className="table">
                                 <thead>
                                     <tr>
+                                        <th style={{ width: '40px' }}>
+                                            <input
+                                                type="checkbox"
+                                                onChange={toggleSelectAll}
+                                                checked={currentItems.length > 0 && selectedAssets.size === currentItems.length}
+                                            />
+                                        </th>
                                         <th>Asset Tag</th>
                                         <th>Name</th>
                                         <th>Category</th>
@@ -257,7 +320,14 @@ const AssetList = () => {
                                 </thead>
                                 <tbody>
                                     {currentItems.map((asset) => (
-                                        <tr key={asset.id}>
+                                        <tr key={asset.id} className={selectedAssets.has(asset.id) ? 'selected-row' : ''}>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedAssets.has(asset.id)}
+                                                    onChange={() => toggleSelectAsset(asset.id)}
+                                                />
+                                            </td>
                                             <td>
                                                 <strong>{asset.asset_tag}</strong>
                                             </td>
@@ -495,6 +565,12 @@ const AssetList = () => {
                 assetId={qrAsset?.id}
                 assetName={qrAsset?.asset_name}
                 assetTag={qrAsset?.asset_tag}
+            />
+
+            <BulkQRModal
+                isOpen={showBulkQRModal}
+                onClose={() => setShowBulkQRModal(false)}
+                assets={getSelectedAssetsList()}
             />
         </div>
     );

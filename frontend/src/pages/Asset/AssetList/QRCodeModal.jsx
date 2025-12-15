@@ -10,19 +10,64 @@ const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag }) => {
 
     const handlePrint = () => {
         const printWindow = window.open('', '', 'height=600,width=600');
-        printWindow.document.write('<html><head><title>Asset QR Code</title>');
-        printWindow.document.write('</head><body style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">');
-        printWindow.document.write(`<h2>${assetName}</h2>`);
-        printWindow.document.write(`<p>${assetTag}</p>`);
-        // We need to render the SVG string or image here. 
-        // Since react-qr-code renders an SVG, we can't easily grab it string-wise without ref. 
-        // For simplicity in this iteration, we'll just rely on the user printing the current modal or improve print later.
-        // Actually, a better way for print is to use media print CSS or a dedicated print component.
-        // Let's keep it simple: just show the QR and let them screenshot/print page for now, or use a window print on the modal content?
-        // Let's stick to just displaying it clearly.
-        printWindow.document.write('</body></html>');
-        printWindow.print();
-        printWindow.close();
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Asset QR Code - ${assetTag}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            margin: 0;
+                            text-align: center;
+                        }
+                        .qr-container {
+                            border: 2px solid #000;
+                            padding: 20px;
+                            border-radius: 10px;
+                        }
+                        h2 { margin: 10px 0 5px; font-size: 18px; }
+                        p { margin: 5px 0; font-size: 14px; color: #555; }
+                        .tag { font-weight: bold; font-size: 16px; margin-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="qr-container">
+                        <h2>${assetName}</h2>
+                        <div id="qr-code"></div>
+                        <p class="tag">${assetTag}</p>
+                    </div>
+                </body>
+            </html>
+        `);
+
+        // Grab the SVG from the modal
+        // We look for the SVG inside the modal's content
+        // Since the modal is rendered in the DOM, we can query it relative to the document or give it an ID
+        // The modal content has specific styles, we can target the QRCode component wrapper
+        // Let's add an ID to the wrapper in the JSX to make it easier, or just query generically if unique enough.
+        // The QRCode component is inside a div with background white.
+        const qrSvg = document.querySelector('#modal-qr-wrap svg');
+
+        if (qrSvg) {
+            const printQrDiv = printWindow.document.getElementById('qr-code');
+            printQrDiv.innerHTML = qrSvg.outerHTML;
+            // Adjust size for print
+            const svg = printQrDiv.querySelector('svg');
+            svg.style.width = '200px';
+            svg.style.height = '200px';
+        }
+
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 500);
     };
 
     return (
@@ -77,15 +122,18 @@ const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag }) => {
 
                 <h2 style={{ fontSize: '1.25rem', marginBottom: '20px', color: 'var(--text-primary)' }}>Asset QR Code</h2>
 
-                <div style={{
-                    padding: '16px',
-                    background: 'white', // KEEP WHITE for QR contrast
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '12px',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    justifyContent: 'center'
-                }}>
+                <div
+                    id="modal-qr-wrap"
+                    style={{
+                        padding: '16px',
+                        background: 'white', // KEEP WHITE for QR contrast
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '12px',
+                        marginBottom: '16px',
+                        display: 'flex',
+                        justifyContent: 'center'
+                    }}
+                >
                     <QRCode
                         size={200}
                         style={{ height: "auto", maxWidth: "100%", width: "200px" }}
@@ -107,6 +155,18 @@ const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag }) => {
                 }}>
                     {assetTag}
                 </span>
+
+                <button
+                    onClick={handlePrint}
+                    className="btn btn-outline"
+                    style={{
+                        width: '100%',
+                        justifyContent: 'center',
+                        marginBottom: '10px'
+                    }}
+                >
+                    <FiPrinter /> Print QR
+                </button>
 
                 <button
                     onClick={onClose}

@@ -29,7 +29,8 @@ import {
     FiImage,
     FiLogOut,
     FiLogIn,
-    FiClock
+    FiClock,
+    FiPrinter
 } from 'react-icons/fi';
 
 const AssetDetail = ({ readOnly = false }) => {
@@ -98,6 +99,64 @@ const AssetDetail = ({ readOnly = false }) => {
         } finally {
             setShowDeleteModal(false);
         }
+    };
+
+    const handlePrintQR = () => {
+        const printWindow = window.open('', '', 'width=600,height=600');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print QR Code - ${asset.asset_tag}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            margin: 0;
+                            text-align: center;
+                        }
+                        .qr-container {
+                            border: 2px solid #000;
+                            padding: 20px;
+                            border-radius: 10px;
+                        }
+                        h2 { margin: 10px 0 5px; font-size: 18px; }
+                        p { margin: 5px 0; font-size: 14px; color: #555; }
+                        .tag { font-weight: bold; font-size: 16px; margin-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="qr-container">
+                        <h2>${asset.asset_name}</h2>
+                        <div id="qr-code"></div>
+                        <p class="tag">${asset.asset_tag}</p>
+                    </div>
+                </body>
+            </html>
+        `);
+
+        // We need to render the QR code into the print window
+        // An easy way is to use the SVG string from the main window or re-render using a library
+        // Since we are using react-qr-code (SVG), we can grab the outerHTML of the SVG in the document
+        const qrSvg = document.querySelector('.qr-code-wrapper svg');
+        if (qrSvg) {
+            const printQrDiv = printWindow.document.getElementById('qr-code');
+            printQrDiv.innerHTML = qrSvg.outerHTML;
+            // Adjust size for print
+            const svg = printQrDiv.querySelector('svg');
+            svg.style.width = '200px';
+            svg.style.height = '200px';
+        }
+
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => { // Wait for content to render
+            printWindow.print();
+            printWindow.close();
+        }, 500);
     };
 
     if (loading) {
@@ -211,7 +270,7 @@ const AssetDetail = ({ readOnly = false }) => {
                             <div className="media-qr-section">
                                 <label className="media-label">QR Code</label>
                                 <div className="qr-container">
-                                    <div className="qr-code-wrapper">
+                                    <div className="qr-code-wrapper" id="printable-qr">
                                         <QRCode
                                             value={`${window.location.origin}/asset/scan/${asset.id}`}
                                             size={128}
@@ -219,6 +278,13 @@ const AssetDetail = ({ readOnly = false }) => {
                                             viewBox={`0 0 256 256`}
                                         />
                                     </div>
+                                    <button
+                                        className="btn btn-outline btn-sm"
+                                        style={{ marginTop: '10px', width: '100%' }}
+                                        onClick={handlePrintQR}
+                                    >
+                                        <FiPrinter /> Print QR
+                                    </button>
                                     <p className="qr-help-text">Scan to view details</p>
                                 </div>
                             </div>
