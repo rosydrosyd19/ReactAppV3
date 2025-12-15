@@ -40,6 +40,29 @@ router.get('/public/:id', async (req, res) => {
         // I will keep it similar to internal but maybe omit cost/warranty if that's sensitive?
         // Let's assume full read-only detail is fine for now as per "menampilkan detail asset".
 
+        // Fetch history for public view as well
+        const history = await db.query(`
+          SELECT 
+            h.*,
+            u.username as performed_by_username,
+            fu.username as from_user_username,
+            tu.username as to_user_username,
+            fl.location_name as from_location_name,
+            tl.location_name as to_location_name,
+            ta.asset_name as to_asset_name
+          FROM asset_history h
+          LEFT JOIN sysadmin_users u ON h.performed_by = u.id
+          LEFT JOIN sysadmin_users fu ON h.from_user_id = fu.id
+          LEFT JOIN sysadmin_users tu ON h.to_user_id = tu.id
+          LEFT JOIN asset_locations fl ON h.from_location_id = fl.id
+          LEFT JOIN asset_locations tl ON h.to_location_id = tl.id
+          LEFT JOIN asset_items ta ON h.to_asset_id = ta.id
+          WHERE h.asset_id = ?
+          ORDER BY h.action_date DESC
+        `, [req.params.id]);
+
+        asset.history = history;
+
         res.json({ success: true, data: asset });
     } catch (error) {
         console.error('Get public asset error:', error);
