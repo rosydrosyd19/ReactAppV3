@@ -5,9 +5,12 @@ Menu baru List IP Address
 
 Menu baru Accessories
 
-Menu baru Components
+Tambahkan fitur view detail pada components list
+Ubah fitur delete jadi soft delet pada components list
 
 Menu baru Licenses
+
+Menu baru Maintenence Modul Asset
 
 buat master untuk CRUD Category, Location dan Supplier
 

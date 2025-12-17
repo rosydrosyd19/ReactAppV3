@@ -167,13 +167,15 @@
 
 @media (max-width: 768px) {
     .asset-modal {
-        max-width: 100%;
-        width: 100%;
-        margin: 0;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        height: 90vh;
-        /* Match AddUserModal approach roughly but keep defined height */
-        max-height: 95vh;
+        max-width: 95%;
+        /* Slightly wider than category but still centered */
+        width: 95%;
+        margin: 0 auto;
+        border-radius: 12px;
+        /* Uniform radius */
+        height: auto;
+        max-height: 90vh;
+        /* Max height to fit screen */
     }
 
     .form-row {
@@ -183,22 +185,22 @@
 
     .asset-modal .modal-body {
         padding: 16px;
-        padding-bottom: 2rem;
-        /* Ensure scrolling area is constrained correctly */
-        max-height: calc(95vh - 180px);
+        padding-bottom: 1.5rem;
+        /* Remove complex calc, let flex/max-height handle it */
+        max-height: none;
     }
 
-    /* Modal Footer - Sticky di bawah dengan ruang untuk bottom nav */
+    /* Modal Footer - Static aligned, no sticky */
     .asset-modal .modal-footer {
         flex-shrink: 0;
-        position: sticky;
-        bottom: 0;
+        position: static;
+        bottom: auto;
         background: var(--bg-color);
+        /* Or bg-secondary if preferred, stick to existing */
         border-top: 1px solid var(--border-color);
         padding: 1rem;
-        padding-bottom: calc(1rem + 65px);
-        /* Reduced padding as requested */
-        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 12px 12px;
+        box-shadow: none;
         z-index: 10;
         gap: 1rem;
     }

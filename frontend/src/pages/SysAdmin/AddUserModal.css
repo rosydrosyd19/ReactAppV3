@@ -142,12 +142,11 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .add-user-modal {
-        max-width: 100%;
-        margin: 0;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        height: 90vh;
-        /* Fixed height for consistency */
-        max-height: 95vh;
+        max-width: 95%;
+        margin: 0 auto;
+        border-radius: var(--radius-lg);
+        height: auto;
+        max-height: 90vh;
         display: flex;
         flex-direction: column;
     }
@@ -162,28 +161,25 @@
         gap: 1.5rem;
     }
 
-    /* Modal Body - Scrollable dengan tinggi terbatas */
+    /* Modal Body */
     .add-user-modal .modal-body {
         flex: 1;
         overflow-y: auto;
-        max-height: calc(95vh - 230px);
-        /* Kurangi lebih banyak untuk bottom nav */
+        max-height: none;
         padding: 1rem;
-        padding-bottom: 2rem;
-        /* Extra padding di bawah */
+        padding-bottom: 1.5rem;
     }
 
-    /* Modal Footer - Sticky di bawah dengan ruang untuk bottom nav */
+    /* Modal Footer */
     .add-user-modal .modal-footer {
         flex-shrink: 0;
-        position: sticky;
-        bottom: 0;
+        position: static;
+        bottom: auto;
         background: var(--bg-color);
         border-top: 1px solid var(--border-color);
         padding: 1rem;
-        padding-bottom: calc(1rem + 65px);
-        /* Match AssetModal manual adjustment */
-        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        box-shadow: none;
         z-index: 10;
         gap: 1rem;
     }

@@ -536,7 +536,8 @@ router.get('/categories', checkPermission('asset.items.view'), async (req, res) 
         const categories = await db.query(`
       SELECT c.*, COUNT(a.id) as asset_count
       FROM asset_categories c
-      LEFT JOIN asset_items a ON c.id = a.category_id
+      LEFT JOIN asset_items a ON c.id = a.category_id AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)
+      WHERE (c.is_deleted = FALSE OR c.is_deleted IS NULL)
       GROUP BY c.id
       ORDER BY c.category_name
     `);
@@ -627,7 +628,7 @@ router.put('/categories/:id', checkPermission('asset.categories.manage'), async 
 
 router.delete('/categories/:id', checkPermission('asset.categories.manage'), async (req, res) => {
     try {
-        await db.query('DELETE FROM asset_categories WHERE id = ?', [req.params.id]);
+        await db.query('UPDATE asset_categories SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
         console.error('Delete category error:', error);
