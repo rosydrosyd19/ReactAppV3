@@ -425,6 +425,11 @@
         color: var(--danger-color);
     }
 
+    .action-btn.secondary {
+        background-color: var(--secondary-color, #64748b);
+        color: white;
+    }
+
     .action-btn.qr-code {
         background-color: var(--info-color);
         color: white;
