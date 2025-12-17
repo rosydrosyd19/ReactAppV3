@@ -230,21 +230,13 @@ const AssetDetail = ({ readOnly = false }) => {
 
     const showActions = !readOnly || isAuthenticated;
 
-    // Filter history for display
-    const maintenanceEvents = asset?.history?.filter(h => h.action_type === 'maintenance') || [];
+    // Filter history for display (exclude maintenance from general history)
     const generalHistory = asset?.history?.filter(h => h.action_type !== 'maintenance') || [];
 
-    // Use maintenanceRecords (detailed) if available, otherwise fallback to maintenanceEvents (from history)
-    // For authenticated users, maintenanceRecords is fetched. For guests, we use history.
-    const displayMaintenance = maintenanceRecords.length > 0 ? maintenanceRecords : maintenanceEvents.map(evt => ({
-        id: evt.id, // History ID, mostly placeholder here
-        maintenance_date: evt.action_date,
-        maintenance_type: 'maintenance', // default as history logs 'maintenance'
-        description: evt.notes,
-        performed_by: evt.performed_by_username,
-        cost: null, // History doesn't have cost
-        status: 'completed' // Assume completed if in history, or generic
-    }));
+    // Use maintenanceRecords (from state if auth, or from asset details if guest)
+    const displayMaintenance = maintenanceRecords.length > 0
+        ? maintenanceRecords
+        : (asset?.maintenance_records || []);
 
     return (
         <div className="user-detail asset-detail-override">
@@ -443,7 +435,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                             <th>Type</th>
                                             <th>Description</th>
                                             <th>Performed By</th>
-                                            <th>Cost</th>
+                                            {isAuthenticated && <th>Cost</th>}
                                             <th>Status</th>
                                             {hasPermission('asset.maintenance.manage') && <th>Action</th>}
                                         </tr>
@@ -455,7 +447,9 @@ const AssetDetail = ({ readOnly = false }) => {
                                                 <td style={{ textTransform: 'capitalize' }}>{record.maintenance_type}</td>
                                                 <td>{record.description}</td>
                                                 <td>{record.performed_by || '-'}</td>
-                                                <td>{record.cost ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(record.cost) : '-'}</td>
+                                                {isAuthenticated && (
+                                                    <td>{record.cost ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(record.cost) : '-'}</td>
+                                                )}
                                                 <td>
                                                     <span className={`badge ${record.status === 'completed' ? 'badge-success' :
                                                         record.status === 'in_progress' ? 'badge-warning' :
@@ -516,7 +510,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                                 )}
 
                                                 <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', gap: '1rem' }}>
-                                                    {record.cost && (
+                                                    {isAuthenticated && record.cost && (
                                                         <span>
                                                             <strong>Cost: </strong>
                                                             {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(record.cost)}

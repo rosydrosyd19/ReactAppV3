@@ -61,7 +61,15 @@ router.get('/public/:id', async (req, res) => {
           ORDER BY h.action_date DESC
         `, [req.params.id]);
 
+        // Fetch maintenance records for public view
+        const maintenance = await db.query(`
+          SELECT * FROM asset_maintenance 
+          WHERE asset_id = ? 
+          ORDER BY maintenance_date DESC
+        `, [req.params.id]);
+
         asset.history = history;
+        asset.maintenance_records = maintenance;
 
         res.json({ success: true, data: asset });
     } catch (error) {
