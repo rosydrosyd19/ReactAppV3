@@ -11,19 +11,22 @@ const MobileBottomNav = () => {
     };
 
     // Flatten menu items for bottom nav (including children)
+    // Flatten menu items for bottom nav (including children)
     const flattenedItems = [];
+    const hiddenPaths = ['/asset/categories', '/asset/locations'];
+
     menuItems.forEach(item => {
         if (!item.show) return;
 
         // Add parent if it has a path (like Dashboard)
-        if (item.path) {
+        if (item.path && !hiddenPaths.includes(item.path)) {
             flattenedItems.push(item);
         }
 
         // Add children
         if (item.children) {
             item.children.forEach(child => {
-                if (child.show) {
+                if (child.show && !hiddenPaths.includes(child.path)) {
                     flattenedItems.push(child);
                 }
             });

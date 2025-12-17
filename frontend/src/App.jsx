@@ -11,6 +11,7 @@ import UserDetail from './pages/SysAdmin/UserDetail'; // New
 import AssetList from './pages/Asset/AssetList/AssetList';
 import AssetDetail from './pages/Asset/AssetDetail/AssetDetail'; // New
 import ModuleSelection from './pages/Modules/ModuleSelection';
+import Profile from './pages/Profile/Profile'; // New
 
 
 // Protected Route Component
@@ -77,6 +78,7 @@ function App() {
             {/* MainLayout routes (with sidebar) */}
             <Route index element={<Navigate to="/modules" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
 
             {/* Sysadmin routes */}
             <Route path="sysadmin">

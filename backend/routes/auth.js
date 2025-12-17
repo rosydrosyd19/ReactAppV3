@@ -5,6 +5,7 @@ const db = require('../config/database');
 const { logActivity } = require('../middleware/logger');
 
 const router = express.Router();
+const { verifyToken } = require('../middleware/auth');
 
 // Login
 router.post('/login', async (req, res) => {
@@ -192,6 +193,63 @@ router.get('/verify', async (req, res) => {
 
     } catch (error) {
         res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+});
+
+// Update Profile
+router.put('/profile', verifyToken, async (req, res) => {
+    try {
+        const { full_name, email, phone, password, new_password } = req.body;
+        const userId = req.user.id;
+
+        // Get current user to verify password if changing it
+        const [user] = await db.query('SELECT * FROM sysadmin_users WHERE id = ?', [userId]);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        let query = 'UPDATE sysadmin_users SET full_name = ?, email = ?, phone = ?';
+        let params = [full_name, email, phone];
+
+        // If changing password
+        if (new_password) {
+            if (!password) {
+                return res.status(400).json({ success: false, message: 'Current password is required to set new password' });
+            }
+
+            const isValid = await bcrypt.compare(password, user.password);
+            if (!isValid) {
+                return res.status(400).json({ success: false, message: 'Invalid current password' });
+            }
+
+            const hashedPassword = await bcrypt.hash(new_password, 10);
+            query += ', password = ?';
+            params.push(hashedPassword);
+        }
+
+        query += ' WHERE id = ?';
+        params.push(userId);
+
+        await db.query(query, params);
+
+        // Fetch updated user
+        const [updatedUser] = await db.query(
+            'SELECT id, username, email, full_name, phone FROM sysadmin_users WHERE id = ?',
+            [userId]
+        );
+
+        await logActivity(userId, 'UPDATE_PROFILE', 'sysadmin', 'user', userId, { full_name, email, phone }, req);
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: { user: updatedUser }
+        });
+
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ success: false, message: 'Error updating profile' });
     }
 });
 

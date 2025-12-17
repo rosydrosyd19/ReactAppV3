@@ -42,16 +42,29 @@ const Sidebar = ({ isOpen, onClose }) => {
                                     {/* Removed Section Title as requested */}
                                     {item.children.map((child, childIndex) => {
                                         if (!child.show) return null;
+
+                                        // Check if we need to render a group header
+                                        const showGroupHeader = child.group && (
+                                            childIndex === 0 ||
+                                            item.children[childIndex - 1].group !== child.group
+                                        );
+
                                         return (
-                                            <Link
-                                                key={childIndex}
-                                                to={child.path}
-                                                className={`menu-item ${isActive(child.path) ? 'active' : ''}`}
-                                                onClick={handleItemClick}
-                                            >
-                                                {child.icon}
-                                                <span>{child.title}</span>
-                                            </Link>
+                                            <div key={childIndex}>
+                                                {showGroupHeader && (
+                                                    <div className="menu-group-title">
+                                                        {child.group}
+                                                    </div>
+                                                )}
+                                                <Link
+                                                    to={child.path}
+                                                    className={`menu-item ${isActive(child.path) ? 'active' : ''}`}
+                                                    onClick={handleItemClick}
+                                                >
+                                                    {child.icon}
+                                                    <span>{child.title}</span>
+                                                </Link>
+                                            </div>
                                         );
                                     })}
                                 </div>

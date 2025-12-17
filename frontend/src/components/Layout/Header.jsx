@@ -72,6 +72,14 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
                                     <div className="user-email">{user?.email}</div>
                                 </div>
                                 <div className="user-menu-divider" />
+                                <button className="user-menu-item" onClick={() => {
+                                    setShowUserMenu(false);
+                                    navigate('/profile');
+                                }}>
+                                    <FiUser />
+                                    <span>Profile</span>
+                                </button>
+                                <div className="user-menu-divider" />
                                 <button className="user-menu-item" onClick={logout}>
                                     <FiLogOut />
                                     <span>Logout</span>
