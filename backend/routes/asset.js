@@ -546,16 +546,50 @@ router.get('/categories', checkPermission('asset.items.view'), async (req, res) 
     }
 });
 
+// Helper to generate unique code
+const generateCode = async (tableName, codeColumn, name) => {
+    const baseCode = name.substring(0, 3).toUpperCase();
+
+    // Find latest code with this prefix
+    // We order by length first then value to ensure proper sorting (e.g. ABC9 vs ABC10)
+    const result = await db.query(
+        `SELECT ${codeColumn} FROM ${tableName} 
+         WHERE ${codeColumn} REGEXP ? 
+         ORDER BY LENGTH(${codeColumn}) DESC, ${codeColumn} DESC LIMIT 1`,
+        [`^${baseCode}[0-9]*$`]
+    );
+
+    if (result.length === 0) {
+        return baseCode;
+    }
+
+    const lastCode = result[0][codeColumn];
+    if (lastCode === baseCode) {
+        return `${baseCode}1`;
+    }
+
+    const numPart = lastCode.replace(baseCode, '');
+    const nextNum = parseInt(numPart) + 1;
+    return `${baseCode}${nextNum}`;
+};
+
 router.post('/categories', checkPermission('asset.categories.manage'), async (req, res) => {
     try {
         const { category_name, description, icon } = req.body;
 
+        const existing = await db.query('SELECT id FROM asset_categories WHERE category_name = ?', [category_name]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Category name already exists' });
+        }
+
+        const category_code = await generateCode('asset_categories', 'category_code', category_name);
+
         const result = await db.query(
-            'INSERT INTO asset_categories (category_name, description, icon) VALUES (?, ?, ?)',
-            [category_name, description, icon]
+            'INSERT INTO asset_categories (category_name, category_code, description, icon) VALUES (?, ?, ?, ?)',
+            [category_name, category_code, description || null, icon || null]
         );
 
-        res.status(201).json({ success: true, data: { id: result.insertId } });
+        res.status(201).json({ success: true, data: { id: result.insertId.toString(), code: category_code } });
     } catch (error) {
         console.error('Create category error:', error);
         res.status(500).json({ success: false, message: 'Error creating category' });
@@ -566,9 +600,14 @@ router.put('/categories/:id', checkPermission('asset.categories.manage'), async 
     try {
         const { category_name, description, icon } = req.body;
 
+        const existing = await db.query('SELECT id FROM asset_categories WHERE category_name = ? AND id != ?', [category_name, req.params.id]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Category name already exists' });
+        }
+
         await db.query(
             'UPDATE asset_categories SET category_name = ?, description = ?, icon = ? WHERE id = ?',
-            [category_name, description, icon, req.params.id]
+            [category_name, description || null, icon || null, req.params.id]
         );
 
         res.json({ success: true, message: 'Category updated successfully' });
@@ -618,13 +657,20 @@ router.post('/locations', checkPermission('asset.locations.manage'), async (req,
     try {
         const { location_name, address, city, state, postal_code, country, parent_location_id } = req.body;
 
+        const existing = await db.query('SELECT id FROM asset_locations WHERE location_name = ?', [location_name]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Location name already exists' });
+        }
+
+        const location_code = await generateCode('asset_locations', 'location_code', location_name);
+
         const result = await db.query(
-            `INSERT INTO asset_locations (location_name, address, city, state, postal_code, country, parent_location_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [location_name, address, city, state, postal_code, country, parent_location_id]
+            `INSERT INTO asset_locations (location_name, location_code, address, city, state, postal_code, country, parent_location_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [location_name, location_code, address || null, city || null, state || null, postal_code || null, country || null, parent_location_id || null]
         );
 
-        res.status(201).json({ success: true, data: { id: result.insertId } });
+        res.status(201).json({ success: true, data: { id: result.insertId.toString(), code: location_code } });
     } catch (error) {
         console.error('Create location error:', error);
         res.status(500).json({ success: false, message: 'Error creating location' });
@@ -635,11 +681,16 @@ router.put('/locations/:id', checkPermission('asset.locations.manage'), async (r
     try {
         const { location_name, address, city, state, postal_code, country, parent_location_id } = req.body;
 
+        const existing = await db.query('SELECT id FROM asset_locations WHERE location_name = ? AND id != ?', [location_name, req.params.id]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Location name already exists' });
+        }
+
         await db.query(
             `UPDATE asset_locations 
        SET location_name = ?, address = ?, city = ?, state = ?, postal_code = ?, country = ?, parent_location_id = ?
        WHERE id = ?`,
-            [location_name, address, city, state, postal_code, country, parent_location_id, req.params.id]
+            [location_name, address || null, city || null, state || null, postal_code || null, country || null, parent_location_id || null, req.params.id]
         );
 
         res.json({ success: true, message: 'Location updated successfully' });
@@ -675,13 +726,21 @@ router.post('/suppliers', checkPermission('asset.suppliers.manage'), async (req,
     try {
         const { supplier_name, contact_person, email, phone, address, website, notes } = req.body;
 
+        const existing = await db.query('SELECT id FROM asset_suppliers WHERE supplier_name = ?', [supplier_name]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Supplier name already exists' });
+        }
+
+        // Note: Check if supplier_code column exists before enabling code generation for suppliers
+        // const supplier_code = await generateCode('asset_suppliers', 'supplier_code', supplier_name);
+
         const result = await db.query(
             `INSERT INTO asset_suppliers (supplier_name, contact_person, email, phone, address, website, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [supplier_name, contact_person, email, phone, address, website, notes]
+            [supplier_name, contact_person || null, email || null, phone || null, address || null, website || null, notes || null]
         );
 
-        res.status(201).json({ success: true, data: { id: result.insertId } });
+        res.status(201).json({ success: true, data: { id: result.insertId.toString() } });
     } catch (error) {
         console.error('Create supplier error:', error);
         res.status(500).json({ success: false, message: 'Error creating supplier' });

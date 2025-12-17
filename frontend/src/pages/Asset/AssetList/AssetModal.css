@@ -78,7 +78,8 @@
 }
 
 .modal-content {
-    background: var(--card-bg); /* Use theme variable */
+    background: var(--card-bg);
+    /* Use theme variable */
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
@@ -207,4 +208,59 @@
         padding: 12px;
         justify-content: center;
     }
+}
+
+/* Quick Add Button Alignment */
+.btn-quick-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    padding: 0;
+    font-size: 1.2rem;
+    height: auto;
+    /* Let flex stretch handle it */
+    min-height: 42px;
+    /* Fallback */
+    border-radius: 6px;
+    /* Match form inputs */
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-quick-add:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.input-group-with-button {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    /* This forces equal height */
+}
+
+/* Ensure SearchableSelect fills height */
+.input-group-with-button>div:first-child {
+    flex: 1;
+    display: flex;
+    /* Helps container stretch */
+}
+
+.input-group-with-button .searchable-select-container {
+    height: 100%;
+}
+
+.input-group-with-button .searchable-select-input-wrapper {
+    height: 100%;
+}
+
+.input-group-with-button .searchable-select-input {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }

@@ -1,6 +1,6 @@
 ## New Feature 
-buat Quick Add Icon pada add asset pada field Category
-, Location dan Supplier
+buat Quick Add Icon pada add asset pada field Category, Location dan Supplier  
+--- Quick Add Icon asset pada field Category, Location dan Supplier
 
 buat master untuk CRUD Category, Location dan Supplier
 
