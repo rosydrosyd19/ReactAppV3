@@ -817,20 +817,44 @@ router.post('/maintenance', checkPermission('asset.maintenance.manage'), async (
             `INSERT INTO asset_maintenance 
        (asset_id, maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date, status, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [asset_id, maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date, status, req.user.id]
+            [asset_id, maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date || null, status, req.user.id]
         );
 
+        // If maintenance is active (in_progress or scheduled), update asset status to maintenance
+        // But typically only 'in_progress' implies the asset is physically under maintenance and unavailable.
+        // Let's assume 'in_progress' and 'scheduled' might both mean it's being worked on or about to be.
+        // For strict availability, usually only 'in_progress' makes it unavailable.
+        // However, let's follow the plan: "creating maintenance... updates ... to maintenance"
+        // I'll stick to 'in_progress' making it unavailable ('maintenance' status). 
+        // 'scheduled' might just be a plan, asset could still be used?
+        // Let's assume 'in_progress' triggers asset status change.
+
+        console.log('Maintenance record created with ID:', result.insertId);
+
+        let statusNote = '';
+        if (status === 'in_progress') {
+            console.log('Updating asset status to maintenance...');
+            await db.query("UPDATE asset_items SET status = 'maintenance' WHERE id = ?", [asset_id]);
+            statusNote = ' (Asset status updated to maintenance)';
+        }
+
         // Log in asset history
+        console.log('Inserting into asset_history...');
         await db.query(
             `INSERT INTO asset_history (asset_id, action_type, performed_by, notes)
        VALUES (?, 'maintenance', ?, ?)`,
-            [asset_id, req.user.id, `Maintenance record added: ${maintenance_type}`]
+            [asset_id, req.user.id, `Maintenance record added: ${maintenance_type} - ${status}${statusNote}`]
         );
+        console.log('History record inserted.');
 
-        res.status(201).json({ success: true, data: { id: result.insertId } });
+        res.status(201).json({ success: true, data: { id: result.insertId.toString() } });
     } catch (error) {
         console.error('Create maintenance error:', error);
-        res.status(500).json({ success: false, message: 'Error creating maintenance record' });
+        res.status(500).json({
+            success: false,
+            message: 'Error creating maintenance record',
+            error: error.message
+        });
     }
 });
 
@@ -841,6 +865,13 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.manage'), asyn
             cost, description, next_maintenance_date, status
         } = req.body;
 
+        // Get old status to compare
+        const [oldRecord] = await db.query('SELECT status, asset_id FROM asset_maintenance WHERE id = ?', [req.params.id]);
+
+        if (!oldRecord) {
+            return res.status(404).json({ success: false, message: 'Maintenance record not found' });
+        }
+
         await db.query(
             `UPDATE asset_maintenance 
        SET maintenance_type = ?, maintenance_date = ?, performed_by = ?, cost = ?, 
@@ -848,6 +879,26 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.manage'), asyn
        WHERE id = ?`,
             [maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date, status, req.params.id]
         );
+
+        // Handle Asset Status Changes
+        // If changing TO completed, set asset to 'available'
+        if (status === 'completed' && oldRecord.status !== 'completed') {
+            await db.query("UPDATE asset_items SET status = 'available' WHERE id = ?", [oldRecord.asset_id]);
+            await db.query(
+                `INSERT INTO asset_history (asset_id, action_type, performed_by, notes)
+                 VALUES (?, 'maintenance', ?, ?)`,
+                [oldRecord.asset_id, req.user.id, `Maintenance completed. Asset available.`]
+            );
+        }
+        // If changing TO in_progress, set asset to 'maintenance'
+        else if (status === 'in_progress' && oldRecord.status !== 'in_progress') {
+            await db.query("UPDATE asset_items SET status = 'maintenance' WHERE id = ?", [oldRecord.asset_id]);
+            await db.query(
+                `INSERT INTO asset_history (asset_id, action_type, performed_by, notes)
+                 VALUES (?, 'maintenance', ?, ?)`,
+                [oldRecord.asset_id, req.user.id, `Maintenance in progress. Asset set to maintenance mode.`]
+            );
+        }
 
         res.json({ success: true, message: 'Maintenance record updated successfully' });
     } catch (error) {

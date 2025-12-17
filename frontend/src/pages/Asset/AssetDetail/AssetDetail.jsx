@@ -9,6 +9,7 @@ import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 import CheckOutModal from '../AssetList/CheckOutModal';
 import CheckInModal from '../AssetList/CheckInModal';
+import MaintenanceModal from '../AssetList/MaintenanceModal';
 import { BsQrCode } from 'react-icons/bs'; // Correctly imported
 import QRCode from 'react-qr-code';
 import {
@@ -41,7 +42,10 @@ const AssetDetail = ({ readOnly = false }) => {
     const [asset, setAsset] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+    const [maintenanceRecord, setMaintenanceRecord] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
@@ -51,7 +55,21 @@ const AssetDetail = ({ readOnly = false }) => {
 
     useEffect(() => {
         fetchAssetDetail();
+        fetchMaintenanceRecords();
     }, [id, isAuthenticated]);
+
+    const fetchMaintenanceRecords = async () => {
+        try {
+            if (isAuthenticated) {
+                const response = await axios.get('/asset/maintenance', { params: { asset_id: id } });
+                if (response.data.success) {
+                    setMaintenanceRecords(response.data.data);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching maintenance records:', error);
+        }
+    };
 
     const fetchAssetDetail = async () => {
         try {
@@ -80,7 +98,33 @@ const AssetDetail = ({ readOnly = false }) => {
         setToastMessage('Asset status updated successfully!');
         setShowToast(true);
         fetchAssetDetail();
+    };
+
+    const handleMaintenanceClick = () => {
+        if (asset.status === 'maintenance') {
+            // Find the active maintenance record (in_progress)
+            const activeRecord = maintenanceRecords.find(r => r.status === 'in_progress');
+            if (activeRecord) {
+                setMaintenanceRecord(activeRecord);
+                setShowMaintenanceModal(true);
+                return;
+            }
+        }
+        setMaintenanceRecord(null);
+        setShowMaintenanceModal(true);
+    };
+
+    const handleEditMaintenance = (record) => {
+        setMaintenanceRecord(record);
+        setShowMaintenanceModal(true);
+    };
+
+    const handleMaintenanceSuccess = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
         fetchAssetDetail();
+        fetchMaintenanceRecords();
+        setMaintenanceRecord(null);
     };
 
     const handleDeleteClick = () => {
@@ -186,6 +230,22 @@ const AssetDetail = ({ readOnly = false }) => {
 
     const showActions = !readOnly || isAuthenticated;
 
+    // Filter history for display
+    const maintenanceEvents = asset?.history?.filter(h => h.action_type === 'maintenance') || [];
+    const generalHistory = asset?.history?.filter(h => h.action_type !== 'maintenance') || [];
+
+    // Use maintenanceRecords (detailed) if available, otherwise fallback to maintenanceEvents (from history)
+    // For authenticated users, maintenanceRecords is fetched. For guests, we use history.
+    const displayMaintenance = maintenanceRecords.length > 0 ? maintenanceRecords : maintenanceEvents.map(evt => ({
+        id: evt.id, // History ID, mostly placeholder here
+        maintenance_date: evt.action_date,
+        maintenance_type: 'maintenance', // default as history logs 'maintenance'
+        description: evt.notes,
+        performed_by: evt.performed_by_username,
+        cost: null, // History doesn't have cost
+        status: 'completed' // Assume completed if in history, or generic
+    }));
+
     return (
         <div className="user-detail asset-detail-override">
             <div className="page-header">
@@ -225,6 +285,13 @@ const AssetDetail = ({ readOnly = false }) => {
                             {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
                                 <button className="btn btn-warning" onClick={() => setShowCheckInModal(true)} title="Check In">
                                     <FiLogIn /> <span>Check In</span>
+                                </button>
+                            )}
+
+                            {(asset.status === 'available' || asset.status === 'maintenance') && hasPermission('asset.maintenance.manage') && (
+                                <button className="btn btn-outline" onClick={handleMaintenanceClick} title={asset.status === 'maintenance' ? "Update Maintenance" : "Schedule Maintenance"}>
+                                    <FiTool className={asset.status === 'maintenance' ? 'text-warning' : ''} />
+                                    <span>{asset.status === 'maintenance' ? "Update Maintenance" : "Maintenance"}</span>
                                 </button>
                             )}
 
@@ -361,15 +428,131 @@ const AssetDetail = ({ readOnly = false }) => {
                     </div>
                 </div>
 
+                {/* Maintenance History Card */}
+                {displayMaintenance.length > 0 && (
+                    <div className="card">
+                        <div className="card-header">
+                            <h2><FiTool /> Maintenance Records</h2>
+                        </div>
+                        <div className="card-body">
+                            <div className="table-responsive maintenance-desktop-table">
+                                <table className="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Performed By</th>
+                                            <th>Cost</th>
+                                            <th>Status</th>
+                                            {hasPermission('asset.maintenance.manage') && <th>Action</th>}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {displayMaintenance.map((record) => (
+                                            <tr key={record.id}>
+                                                <td>{new Date(record.maintenance_date).toLocaleDateString()}</td>
+                                                <td style={{ textTransform: 'capitalize' }}>{record.maintenance_type}</td>
+                                                <td>{record.description}</td>
+                                                <td>{record.performed_by || '-'}</td>
+                                                <td>{record.cost ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(record.cost) : '-'}</td>
+                                                <td>
+                                                    <span className={`badge ${record.status === 'completed' ? 'badge-success' :
+                                                        record.status === 'in_progress' ? 'badge-warning' :
+                                                            record.status === 'cancelled' ? 'badge-danger' : 'badge-primary'
+                                                        }`}>
+                                                        {record.status}
+                                                    </span>
+                                                </td>
+                                                {hasPermission('asset.maintenance.manage') && (
+                                                    <td>
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => handleEditMaintenance(record)}
+                                                            title="Edit Maintenance"
+                                                        >
+                                                            <FiEdit2 />
+                                                        </button>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile View for Maintenance Records */}
+                            <div className="maintenance-mobile-list">
+                                <div className="history-timeline">
+                                    {displayMaintenance.map((record) => (
+                                        <div key={record.id} className="history-item">
+                                            <div className="history-icon type-maintenance">
+                                                <FiTool />
+                                            </div>
+                                            <div className="history-content">
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                                                    <span className="history-title" style={{ textTransform: 'capitalize', margin: 0 }}>
+                                                        {record.maintenance_type} Maintenance
+                                                    </span>
+                                                    <span className={`badge ${record.status === 'completed' ? 'badge-success' :
+                                                        record.status === 'in_progress' ? 'badge-warning' :
+                                                            record.status === 'cancelled' ? 'badge-danger' : 'badge-primary'
+                                                        }`}>
+                                                        {record.status}
+                                                    </span>
+                                                </div>
+
+                                                <div className="history-meta">
+                                                    <span className="history-date">
+                                                        {new Date(record.maintenance_date).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="history-user">
+                                                        by {record.performed_by || '-'}
+                                                    </span>
+                                                </div>
+
+                                                {record.description && (
+                                                    <p className="history-notes">{record.description}</p>
+                                                )}
+
+                                                <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', gap: '1rem' }}>
+                                                    {record.cost && (
+                                                        <span>
+                                                            <strong>Cost: </strong>
+                                                            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(record.cost)}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {hasPermission('asset.maintenance.manage') && (
+                                                    <div style={{ marginTop: '0.75rem' }}>
+                                                        <button
+                                                            className="btn btn-outline btn-sm"
+                                                            onClick={() => handleEditMaintenance(record)}
+                                                            style={{ width: '100%' }}
+                                                        >
+                                                            <FiEdit2 /> Edit Record
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Asset History Card - Show for both authenticated and public/read-only */}
                 <div className="card">
                     <div className="card-header">
                         <h2><FiClock /> Asset History</h2>
                     </div>
                     <div className="card-body">
-                        {asset.history && asset.history.length > 0 ? (
+                        {generalHistory.length > 0 ? (
                             <div className="history-timeline">
-                                {asset.history.map((record, index) => (
+                                {generalHistory.map((record, index) => (
                                     <div key={index} className="history-item">
                                         <div className={`history-icon type-${record.action_type}`}>
                                             {record.action_type === 'checkout' && <FiLogOut />}
@@ -377,7 +560,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                             {record.action_type === 'create' && <FiCheckCircle />}
                                             {record.action_type === 'update' && <FiEdit2 />}
                                             {record.action_type === 'delete' && <FiTrash2 />}
-                                            {record.action_type === 'maintenance' && <FiTool />}
+                                            {/* maintenance is filtered out */}
                                         </div>
                                         <div className="history-content">
                                             <p className="history-title">
@@ -531,6 +714,15 @@ const AssetDetail = ({ readOnly = false }) => {
                 onSuccess={handleTransactionSuccess}
                 assetId={id}
                 assetName={asset.asset_name}
+            />
+
+            <MaintenanceModal
+                isOpen={showMaintenanceModal}
+                onClose={() => setShowMaintenanceModal(false)}
+                onSuccess={handleMaintenanceSuccess}
+                assetId={id}
+                maintenanceId={maintenanceRecord?.id}
+                initialData={maintenanceRecord}
             />
         </div >
     );

@@ -264,3 +264,20 @@
     display: flex;
     align-items: center;
 }
+
+/* Input Icon Text (Currency) */
+.input-icon-text {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-weight: 500;
+    pointer-events: none;
+    font-size: 0.9rem;
+}
+
+/* Ensure input has enough padding for the "Rp" text */
+.input-with-icon-left input.form-input {
+    padding-left: 40px !important;
+}

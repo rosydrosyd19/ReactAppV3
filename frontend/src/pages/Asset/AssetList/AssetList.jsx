@@ -10,19 +10,22 @@ import CheckOutModal from './CheckOutModal';
 import CheckInModal from './CheckInModal';
 import QRCodeModal from './QRCodeModal';
 import BulkQRModal from './BulkQRModal';
+import MaintenanceModal from './MaintenanceModal';
 import Toast from '../../../components/Toast/Toast';
 import { BsQrCode } from 'react-icons/bs';
 import {
+    FiTool,
     FiPlus,
     FiSearch,
     FiFilter,
     FiEdit2,
     FiTrash2,
+    FiLogIn,
     FiEye,
     FiPackage,
     FiChevronDown,
     FiLogOut,
-    FiLogIn
+    FiMoreVertical
 } from 'react-icons/fi';
 
 const AssetList = () => {
@@ -44,6 +47,30 @@ const AssetList = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [assetToDelete, setAssetToDelete] = useState(null);
 
+    const [activeDropdownId, setActiveDropdownId] = useState(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (activeDropdownId && !event.target.closest('.action-dropdown-container')) {
+                setActiveDropdownId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [activeDropdownId]);
+
+    const toggleDropdown = (id) => {
+        if (activeDropdownId === id) {
+            setActiveDropdownId(null);
+        } else {
+            setActiveDropdownId(id);
+        }
+    };
+
     // Check In/Out State
     const [showCheckOutModal, setShowCheckOutModal] = useState(false);
     const [showCheckInModal, setShowCheckInModal] = useState(false);
@@ -53,6 +80,11 @@ const AssetList = () => {
     // QR Modal State
     const [showQRModal, setShowQRModal] = useState(false);
     const [qrAsset, setQrAsset] = useState(null);
+
+    // Maintenance Modal State
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+    const [maintenanceAsset, setMaintenanceAsset] = useState(null);
+    const [maintenanceRecord, setMaintenanceRecord] = useState(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -111,6 +143,38 @@ const AssetList = () => {
     const handleQRClick = (asset) => {
         setQrAsset(asset);
         setShowQRModal(true);
+    };
+
+    const handleMaintenanceClick = async (asset) => {
+        setMaintenanceAsset(asset);
+        setMaintenanceRecord(null); // Default to new
+
+        // If already in maintenance, try to find active record to edit
+        if (asset.status === 'maintenance') {
+            try {
+                const response = await axios.get('/asset/maintenance', { params: { asset_id: asset.id } });
+                if (response.data.success) {
+                    // Find first record that is not completed or cancelled
+                    const activeRecord = response.data.data.find(m => m.status === 'in_progress' || m.status === 'scheduled');
+                    if (activeRecord) {
+                        setMaintenanceRecord(activeRecord);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch active maintenance", err);
+                // Fallback to creating new one if fetch fails, or maybe show error? 
+                // Creating new is safer fallback to avoid blocking user.
+            }
+        }
+        setShowMaintenanceModal(true);
+    };
+
+    const handleMaintenanceSuccess = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        fetchAssets();
+        setMaintenanceAsset(null);
+        setMaintenanceRecord(null);
     };
 
     const handleTransactionSuccess = () => {
@@ -342,31 +406,7 @@ const AssetList = () => {
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
-                                                    {asset.status === 'available' && hasPermission('asset.items.checkout') && (
-                                                        <button
-                                                            className="btn-icon btn-primary"
-                                                            title="Check Out"
-                                                            onClick={() => handleCheckOut(asset)}
-                                                        >
-                                                            <FiLogOut />
-                                                        </button>
-                                                    )}
-                                                    {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
-                                                        <button
-                                                            className="btn-icon btn-warning"
-                                                            title="Check In"
-                                                            onClick={() => handleCheckIn(asset)}
-                                                        >
-                                                            <FiLogIn />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        className="btn-icon"
-                                                        title="QR Code"
-                                                        onClick={() => handleQRClick(asset)}
-                                                    >
-                                                        <BsQrCode />
-                                                    </button>
+                                                    {/* Primary Actions (View, Edit, Delete) */}
                                                     {hasPermission('asset.items.view') && (
                                                         <button
                                                             className="btn-icon"
@@ -394,6 +434,64 @@ const AssetList = () => {
                                                             <FiTrash2 />
                                                         </button>
                                                     )}
+
+                                                    {/* Dropdown for Secondary Actions */}
+                                                    <div className="action-dropdown-container" style={{ position: 'relative' }}>
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => toggleDropdown(asset.id)}
+                                                            title="More Actions"
+                                                        >
+                                                            <FiMoreVertical />
+                                                        </button>
+                                                        {activeDropdownId === asset.id && (
+                                                            <div className="action-dropdown-menu">
+                                                                {asset.status === 'available' && hasPermission('asset.items.checkout') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleCheckOut(asset);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiLogOut className="text-primary" /> Check Out
+                                                                    </button>
+                                                                )}
+                                                                {asset.status === 'assigned' && hasPermission('asset.items.checkin') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleCheckIn(asset);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiLogIn className="text-warning" /> Check In
+                                                                    </button>
+                                                                )}
+                                                                {(asset.status === 'available' || asset.status === 'maintenance') && hasPermission('asset.maintenance.manage') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleMaintenanceClick(asset);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiTool className={asset.status === 'maintenance' ? 'text-warning' : ''} />
+                                                                        {asset.status === 'maintenance' ? "Update Maintenance" : "Maintenance"}
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    className="dropdown-item"
+                                                                    onClick={() => {
+                                                                        handleQRClick(asset);
+                                                                        setActiveDropdownId(null);
+                                                                    }}
+                                                                >
+                                                                    <BsQrCode /> QR Code
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -464,6 +562,15 @@ const AssetList = () => {
                                                         title="Check In"
                                                     >
                                                         <FiLogIn /> <span>Check In</span>
+                                                    </button>
+                                                )}
+                                                {(asset.status === 'available' || asset.status === 'maintenance') && hasPermission('asset.maintenance.manage') && (
+                                                    <button
+                                                        className={`action-btn ${asset.status === 'maintenance' ? 'warning' : 'secondary'}`}
+                                                        onClick={() => handleMaintenanceClick(asset)}
+                                                        title="Maintenance"
+                                                    >
+                                                        <FiTool /> <span>{asset.status === 'maintenance' ? 'Update Maint.' : 'Maintenance'}</span>
                                                     </button>
                                                 )}
                                                 <button
@@ -571,6 +678,15 @@ const AssetList = () => {
                 isOpen={showBulkQRModal}
                 onClose={() => setShowBulkQRModal(false)}
                 assets={getSelectedAssetsList()}
+            />
+
+            <MaintenanceModal
+                isOpen={showMaintenanceModal}
+                onClose={() => setShowMaintenanceModal(false)}
+                onSuccess={handleMaintenanceSuccess}
+                assetId={maintenanceAsset?.id}
+                maintenanceId={maintenanceRecord?.id}
+                initialData={maintenanceRecord}
             />
         </div>
     );

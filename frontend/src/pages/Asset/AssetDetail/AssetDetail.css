@@ -333,3 +333,83 @@
     margin-top: 0.25rem;
     font-style: italic;
 }
+
+/* Maintenance Mobile View Styles */
+.maintenance-mobile-list {
+    display: none;
+    flex-direction: column;
+    /* Remove gap to let timeline handle spacing if needed, but gap is fine inside timeline */
+}
+
+.maintenance-card-mobile {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+}
+
+.maintenance-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.maintenance-type {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+}
+
+.maintenance-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.maintenance-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.maintenance-desc {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.maintenance-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.maintenance-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+    .maintenance-desktop-table {
+        display: none;
+    }
+
+    .maintenance-mobile-list {
+        display: flex;
+    }
+
+    /* Ensure padding is consistent */
+    .user-detail.asset-detail-override .card-body {
+        padding: 1rem;
+    }
+}
