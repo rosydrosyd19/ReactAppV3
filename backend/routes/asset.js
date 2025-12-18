@@ -657,7 +657,7 @@ router.delete('/categories/:id', checkPermission('asset.categories.manage'), asy
 router.get('/locations', checkPermission('asset.items.view'), async (req, res) => {
     try {
         const locations = await db.query(`
-      SELECT l.*, COUNT(a.id) as asset_count, p.location_name as parent_location_name
+      SELECT l.*, COUNT(CASE WHEN a.is_deleted = 0 OR a.is_deleted IS NULL THEN a.id END) as asset_count, p.location_name as parent_location_name
       FROM asset_locations l
       LEFT JOIN asset_items a ON l.id = a.location_id
       LEFT JOIN asset_locations p ON l.parent_location_id = p.id
@@ -675,6 +675,26 @@ router.get('/locations', checkPermission('asset.items.view'), async (req, res) =
         console.error('Get locations error:', error);
         require('fs').appendFileSync('error_log.txt', `[${new Date().toISOString()}] Locations Error: ${error.stack || error.message}\n`);
         res.status(500).json({ success: false, message: 'Error fetching locations' });
+    }
+});
+
+router.get('/locations/:id', checkPermission('asset.items.view'), async (req, res) => {
+    try {
+        const [location] = await db.query(`
+            SELECT l.*, p.location_name as parent_location_name
+            FROM asset_locations l
+            LEFT JOIN asset_locations p ON l.parent_location_id = p.id
+            WHERE l.id = ?
+        `, [req.params.id]);
+
+        if (!location) {
+            return res.status(404).json({ success: false, message: 'Location not found' });
+        }
+
+        res.json({ success: true, data: location });
+    } catch (error) {
+        console.error('Get location error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching location' });
     }
 });
 

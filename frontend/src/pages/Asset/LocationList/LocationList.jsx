@@ -84,11 +84,7 @@ const LocationList = () => {
     // CategoryList has view detail page. Let's redirect to a detail page if it exists or just keep it simple.
     // The plan mentioned View Detail, but let's stick to Edit for now or create a placeholder handleViewClick.
     const handleViewClick = (id) => {
-        // navigate(`/asset/locations/${id}`); 
-        // For now, let's just use Edit as View since we don't have a detailed view page planned yet in detail.
-        // Or we can just show a toast "Coming soon"
-        // navigate(`/asset/locations/${id}`); // We haven't implemented LocationDetail yet.
-        console.log("View location", id);
+        navigate(`/asset/locations/${id}`);
     };
 
     const handleDeleteClick = (location) => {
@@ -183,7 +179,6 @@ const LocationList = () => {
                                                 <div className="action-buttons">
                                                     {hasPermission('asset.locations.manage') && (
                                                         <>
-                                                            {/* 
                                                             <button
                                                                 className="btn-icon"
                                                                 title="View Details"
@@ -191,7 +186,6 @@ const LocationList = () => {
                                                             >
                                                                 <FiEye />
                                                             </button>
-                                                            */}
                                                             <button
                                                                 className="btn-icon"
                                                                 title="Edit"
@@ -265,14 +259,12 @@ const LocationList = () => {
 
                                             {hasPermission('asset.locations.manage') && (
                                                 <div className="mobile-actions">
-                                                    {/* 
                                                     <button
                                                         className="action-btn view"
                                                         onClick={() => handleViewClick(loc.id)}
                                                     >
                                                         <FiEye /> <span>View</span>
                                                     </button>
-                                                    */}
                                                     <button
                                                         className="action-btn edit"
                                                         onClick={() => handleEditClick(loc)}
