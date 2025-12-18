@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
@@ -21,6 +21,7 @@ import './CategoryDetail.css';
 const CategoryDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { hasPermission } = useAuth();
 
     // Data states
@@ -210,7 +211,7 @@ const CategoryDetail = () => {
                                                 <button
                                                     className="btn-icon"
                                                     title="View Details"
-                                                    onClick={() => navigate(`/asset/items/${asset.id}`)}
+                                                    onClick={() => navigate(`/asset/items/${asset.id}`, { state: { from: location.pathname } })}
                                                 >
                                                     <FiEye />
                                                 </button>
@@ -234,7 +235,7 @@ const CategoryDetail = () => {
                 <div className="mobile-assets-list">
                     {assets.length > 0 ? (
                         assets.map(asset => (
-                            <div key={asset.id} className="mobile-asset-card" onClick={() => navigate(`/asset/items/${asset.id}`)}>
+                            <div key={asset.id} className="mobile-asset-card" onClick={() => navigate(`/asset/items/${asset.id}`, { state: { from: location.pathname } })}>
                                 <div className="mobile-card-header">
                                     <div className="mobile-card-title">
                                         <span className="mobile-asset-tag">{asset.asset_tag}</span>
@@ -270,7 +271,7 @@ const CategoryDetail = () => {
                                         className="btn btn-outline btn-sm"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/asset/items/${asset.id}`);
+                                            navigate(`/asset/items/${asset.id}`, { state: { from: location.pathname } });
                                         }}
                                     >
                                         <FiEye /> View Details
