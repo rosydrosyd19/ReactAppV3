@@ -661,6 +661,7 @@ router.get('/locations', checkPermission('asset.items.view'), async (req, res) =
       FROM asset_locations l
       LEFT JOIN asset_items a ON l.id = a.location_id
       LEFT JOIN asset_locations p ON l.parent_location_id = p.id
+      WHERE (l.is_deleted = 0 OR l.is_deleted IS NULL)
       GROUP BY l.id
       ORDER BY l.location_name
     `);
@@ -684,7 +685,7 @@ router.get('/locations/:id', checkPermission('asset.items.view'), async (req, re
             SELECT l.*, p.location_name as parent_location_name
             FROM asset_locations l
             LEFT JOIN asset_locations p ON l.parent_location_id = p.id
-            WHERE l.id = ?
+            WHERE l.id = ? AND (l.is_deleted = 0 OR l.is_deleted IS NULL)
         `, [req.params.id]);
 
         if (!location) {
@@ -747,7 +748,7 @@ router.put('/locations/:id', checkPermission('asset.locations.manage'), async (r
 
 router.delete('/locations/:id', checkPermission('asset.locations.manage'), async (req, res) => {
     try {
-        await db.query('DELETE FROM asset_locations WHERE id = ?', [req.params.id]);
+        await db.query('UPDATE asset_locations SET is_deleted = 1 WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Location deleted successfully' });
     } catch (error) {
         console.error('Delete location error:', error);
