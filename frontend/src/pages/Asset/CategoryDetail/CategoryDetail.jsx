@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
     FiArrowLeft,
     FiEdit2,
@@ -12,15 +13,27 @@ import {
     FiEye,
     FiMapPin
 } from 'react-icons/fi';
+import CategoryModal from '../CategoryList/CategoryModal';
+import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
+import Toast from '../../../components/Toast/Toast';
 import './CategoryDetail.css';
 
 const CategoryDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { hasPermission } = useAuth();
+
+    // Data states
     const [category, setCategory] = useState(null);
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Modal states
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     useEffect(() => {
         fetchCategoryData();
@@ -49,6 +62,37 @@ const CategoryDetail = () => {
         }
     };
 
+    const handleEditClick = () => {
+        setShowEditModal(true);
+    };
+
+    const handleDeleteClick = () => {
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        try {
+            await axios.delete(`/asset/categories/${id}`);
+            setToastMessage('Category deleted successfully');
+            setShowToast(true);
+            setTimeout(() => {
+                navigate('/asset/categories');
+            }, 1000);
+        } catch (error) {
+            console.error('Error deleting category:', error);
+            // Optionally show error toast
+        } finally {
+            setShowDeleteModal(false);
+        }
+    };
+
+    const handleEditSuccess = () => {
+        setToastMessage('Category updated successfully');
+        setShowToast(true);
+        fetchCategoryData();
+        setShowEditModal(false);
+    };
+
     if (loading) return (
         <div className="loading-container">
             <div className="loading-spinner" />
@@ -73,8 +117,8 @@ const CategoryDetail = () => {
             {/* Header */}
             <div className="detail-header">
                 <div className="header-left">
-                    <button className="btn btn-outline" onClick={() => navigate('/asset/categories')}>
-                        <FiArrowLeft /> Back
+                    <button className="btn btn-outline back-btn" onClick={() => navigate('/asset/categories')}>
+                        <FiArrowLeft /> <span className="back-text">Back</span>
                     </button>
                     <div className="header-title" style={{ marginTop: '0rem' }}>
                         <h1>
@@ -86,15 +130,20 @@ const CategoryDetail = () => {
                     </div>
                 </div>
 
-                {/* Actions - Can add edit/delete here later if needed */}
+                {/* Actions */}
                 <div className="header-actions">
-                    {/* Placeholder for future actions */}
+                    <button className="btn btn-outline" onClick={handleEditClick}>
+                        <FiEdit2 /> Edit
+                    </button>
+                    <button className="btn btn-danger" onClick={handleDeleteClick}>
+                        <FiTrash2 /> Delete
+                    </button>
                 </div>
             </div>
 
             {/* Stats Overview */}
             <div className="stats-grid">
-                <div className="stat-card">
+                <div className="stat-card mobile-border-free">
                     <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6' }}>
                         <FiBox />
                     </div>
@@ -104,7 +153,7 @@ const CategoryDetail = () => {
                     </div>
                 </div>
 
-                <div className="stat-card">
+                <div className="stat-card mobile-border-free">
                     <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
                         <FiDollarSign />
                     </div>
@@ -116,9 +165,9 @@ const CategoryDetail = () => {
             </div>
 
             {/* Assets List Table */}
-            <div className="content-section">
-                <div className="section-header">
-                    <h2>Assets in this Category</h2>
+            <div className="card">
+                <div className="card-header">
+                    <h2><FiBox /> Assets in this Category</h2>
                     {/* Could add search filter here specifically for this table */}
                 </div>
                 <div className="assets-table-wrapper">
@@ -237,6 +286,31 @@ const CategoryDetail = () => {
                     )}
                 </div>
             </div>
+
+            <CategoryModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                onSuccess={handleEditSuccess}
+                category={category}
+            />
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                title="Delete Category"
+                message={`Are you sure you want to delete "${category.category_name}"?`}
+                confirmText="Delete"
+                type="danger"
+            />
+
+            {showToast && (
+                <Toast
+                    message={toastMessage}
+                    type="success"
+                    onClose={() => setShowToast(false)}
+                />
+            )}
         </div>
     );
 };
