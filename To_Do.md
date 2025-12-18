@@ -5,8 +5,7 @@ Menu baru List IP Address
 
 Menu baru Accessories
 
-Tambahkan fitur view detail pada components list
-Ubah fitur delete jadi soft delet pada components list
+Tambahkan fitur view detail pada Categories list ---
 
 Menu baru Licenses
 

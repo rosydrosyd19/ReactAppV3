@@ -8,7 +8,9 @@ import {
     FiBox,
     FiDollarSign,
     FiGrid,
-    FiSearch
+    FiSearch,
+    FiEye,
+    FiMapPin
 } from 'react-icons/fi';
 import './CategoryDetail.css';
 
@@ -74,7 +76,7 @@ const CategoryDetail = () => {
                     <button className="btn btn-outline" onClick={() => navigate('/asset/categories')}>
                         <FiArrowLeft /> Back
                     </button>
-                    <div className="header-title" style={{ marginTop: '1rem' }}>
+                    <div className="header-title" style={{ marginTop: '0rem' }}>
                         <h1>
                             <FiGrid className="text-primary" />
                             {category.category_name}
@@ -130,14 +132,15 @@ const CategoryDetail = () => {
                                 <th>Location</th>
                                 <th>Assigned To</th>
                                 <th>Cost</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {assets.length > 0 ? (
                                 assets.map(asset => (
-                                    <tr key={asset.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/asset/items/${asset.id}`)}>
+                                    <tr key={asset.id}>
                                         <td>
-                                            <span className="asset-link">{asset.asset_tag}</span>
+                                            {asset.asset_tag}
                                         </td>
                                         <td>{asset.asset_name}</td>
                                         <td>{asset.model || '-'}</td>
@@ -153,11 +156,22 @@ const CategoryDetail = () => {
                                                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(asset.purchase_cost)
                                                 : '-'}
                                         </td>
+                                        <td onClick={(e) => e.stopPropagation()}>
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="btn-icon"
+                                                    title="View Details"
+                                                    onClick={() => navigate(`/asset/items/${asset.id}`)}
+                                                >
+                                                    <FiEye />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                                    <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
                                         <FiBox style={{ fontSize: '2rem', marginBottom: '0.5rem', display: 'block', margin: '0 auto 0.5rem' }} />
                                         No assets found in this category
                                     </td>
@@ -165,6 +179,62 @@ const CategoryDetail = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Assets List */}
+                <div className="mobile-assets-list">
+                    {assets.length > 0 ? (
+                        assets.map(asset => (
+                            <div key={asset.id} className="mobile-asset-card" onClick={() => navigate(`/asset/items/${asset.id}`)}>
+                                <div className="mobile-card-header">
+                                    <div className="mobile-card-title">
+                                        <span className="mobile-asset-tag">{asset.asset_tag}</span>
+                                        <h3 className="mobile-asset-name">{asset.asset_name}</h3>
+                                    </div>
+                                    <span className={`status-badge ${asset.status}`}>
+                                        {asset.status}
+                                    </span>
+                                </div>
+                                <div className="mobile-card-body">
+                                    <div className="mobile-info-row">
+                                        <FiBox className="text-secondary" /> <span>{asset.model || '-'}</span>
+                                    </div>
+                                    <div className="mobile-info-row">
+                                        <FiMapPin className="text-secondary" /> <span>{asset.location_name || '-'}</span>
+                                    </div>
+                                    <div className="mobile-info-row">
+                                        <FiDollarSign className="text-secondary" />
+                                        <span>
+                                            {asset.purchase_cost
+                                                ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(asset.purchase_cost)
+                                                : '-'}
+                                        </span>
+                                    </div>
+                                    {asset.assigned_to_username && (
+                                        <div className="mobile-info-row">
+                                            <FiArrowLeft className="text-secondary" /> <span>{asset.assigned_to_username}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mobile-card-actions">
+                                    <button
+                                        className="btn btn-outline btn-sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/asset/items/${asset.id}`);
+                                        }}
+                                    >
+                                        <FiEye /> View Details
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="empty-state">
+                            <FiBox />
+                            <p>No assets found in this category</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

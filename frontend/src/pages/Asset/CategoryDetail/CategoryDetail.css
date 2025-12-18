@@ -1,5 +1,5 @@
 .category-detail-container {
-    padding: 2rem;
+    padding: 0rem 2rem;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -27,8 +27,8 @@
 }
 
 .category-code-badge {
-    background: var(--primary-light);
-    color: var(--primary-color);
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--text-secondary);
     padding: 0.25rem 0.75rem;
     border-radius: 6px;
     font-size: 0.9rem;
@@ -177,6 +177,34 @@
     color: #EF4444;
 }
 
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Mobile Assets List */
+.mobile-assets-list {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .category-detail-container {
         padding: 1rem;
@@ -201,5 +229,90 @@
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+
+    /* Table Toggle */
+    .assets-table-wrapper {
+        display: none;
+    }
+
+    .mobile-assets-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    /* Card Styling */
+    .mobile-asset-card {
+        background: var(--bg-card);
+        /* or just use standard bg */
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .mobile-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .mobile-card-title {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .mobile-asset-tag {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .mobile-asset-name {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .mobile-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-info-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+    .mobile-info-row svg {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .mobile-card-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .mobile-card-actions button {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
     }
 }

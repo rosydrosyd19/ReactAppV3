@@ -555,6 +555,22 @@ router.get('/categories', checkPermission('asset.items.view'), async (req, res) 
     }
 });
 
+// Get single category
+router.get('/categories/:id', checkPermission('asset.items.view'), async (req, res) => {
+    try {
+        const [category] = await db.query('SELECT * FROM asset_categories WHERE id = ?', [req.params.id]);
+
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+
+        res.json({ success: true, data: category });
+    } catch (error) {
+        console.error('Get category error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching category' });
+    }
+});
+
 // Helper to generate unique code
 const generateCode = async (tableName, codeColumn, name) => {
     const baseCode = name.substring(0, 3).toUpperCase();

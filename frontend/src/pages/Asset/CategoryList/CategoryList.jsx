@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiTag, FiChevronDown, FiBox } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiTag, FiChevronDown, FiBox, FiEye } from 'react-icons/fi';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import Pagination from '../../../components/Pagination/Pagination';
@@ -11,6 +11,7 @@ import './CategoryList.css';
 
 const CategoryList = () => {
     const { hasPermission } = useAuth();
+    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -76,6 +77,10 @@ const CategoryList = () => {
     const handleEditClick = (category) => {
         setSelectedCategory(category);
         setShowModal(true);
+    };
+
+    const handleViewClick = (id) => {
+        navigate(`/asset/categories/${id}`);
     };
 
     const handleDeleteClick = (category) => {
@@ -170,6 +175,13 @@ const CategoryList = () => {
                                                         <>
                                                             <button
                                                                 className="btn-icon"
+                                                                title="View Details"
+                                                                onClick={() => handleViewClick(cat.id)}
+                                                            >
+                                                                <FiEye />
+                                                            </button>
+                                                            <button
+                                                                className="btn-icon"
                                                                 title="Edit"
                                                                 onClick={() => handleEditClick(cat)}
                                                             >
@@ -233,6 +245,12 @@ const CategoryList = () => {
 
                                             {hasPermission('asset.categories.manage') && (
                                                 <div className="mobile-actions">
+                                                    <button
+                                                        className="action-btn view"
+                                                        onClick={() => handleViewClick(cat.id)}
+                                                    >
+                                                        <FiEye /> <span>View</span>
+                                                    </button>
                                                     <button
                                                         className="action-btn edit"
                                                         onClick={() => handleEditClick(cat)}

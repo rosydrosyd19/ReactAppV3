@@ -257,8 +257,8 @@
 
     .mobile-actions {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        /* Only 2 actions for categories: Edit, Delete */
+        grid-template-columns: repeat(3, 1fr);
+        /* Edit, Delete, View */
         gap: 8px;
     }
 
@@ -287,5 +287,11 @@
     .action-btn.delete {
         background-color: rgba(239, 68, 68, 0.1);
         color: var(--danger-color);
+    }
+
+    .action-btn.view {
+        background-color: var(--bg-tertiary);
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
     }
 }
