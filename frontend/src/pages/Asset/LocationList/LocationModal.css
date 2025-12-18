@@ -1,0 +1,106 @@
+.location-modal {
+    max-width: 600px;
+    /* Smaller than user modal since simplified */
+}
+
+/* Form Grid - 1 Column is enough for categories usually, but let's keep it flexible */
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-input:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+textarea.form-input {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Modal Body */
+.location-modal .modal-body {
+    padding: 1.5rem;
+}
+
+/* Modal Footer */
+.location-modal .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+@media (max-width: 768px) {
+    .location-modal {
+        max-width: 90%;
+        /* Use slightly less than 100% to show margin from edges */
+        margin: 0 auto;
+        border-radius: var(--radius-lg);
+        /* Rounded corners on all sides */
+        height: auto;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        /* Removed position absolute and bottom 0 to allow centering by overlay */
+    }
+
+    .location-modal .modal-body {
+        overflow-y: auto;
+        padding-bottom: 1.5rem;
+        /* Standard padding */
+    }
+
+    .location-modal .modal-footer {
+        position: static;
+        /* No longer sticky bottom of screen */
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        /* Match modal corners */
+    }
+}

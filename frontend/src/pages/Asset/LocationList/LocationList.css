@@ -1,0 +1,297 @@
+.location-list {
+    padding-bottom: 2rem;
+}
+
+/* Reusing generic page-header from UserList style if global, 
+   but defining here to ensure independence */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Search Section */
+.search-section {
+    margin-bottom: 1.5rem;
+}
+
+.input-with-icon {
+    position: relative;
+    width: 100%;
+}
+
+.input-with-icon svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 18px;
+}
+
+.input-with-icon .form-input {
+    padding-left: 40px;
+    width: 100%;
+}
+
+/* Desktop Table */
+.desktop-table {
+    display: block;
+    overflow-x: auto;
+}
+
+.mobile-cards,
+.mobile-list {
+    display: none;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.btn-icon.btn-danger:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.loading-container,
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.empty-state svg {
+    font-size: 48px;
+    margin-bottom: 1rem;
+    color: var(--text-tertiary);
+}
+
+.empty-state h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+/* Mobile List Design (matching UserList) */
+@media (max-width: 768px) {
+    .location-list {
+        padding-bottom: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 0 1rem;
+    }
+
+    .page-header .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .search-section {
+        margin: 0 1rem 1rem 1rem;
+    }
+
+    .card {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .desktop-table {
+        display: none;
+    }
+
+    .mobile-list {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-color);
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-list-item {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .mobile-list-main {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        gap: 12px;
+        cursor: pointer;
+        background: var(--bg-color);
+    }
+
+    .mobile-location-icon {
+        width: 40px;
+        height: 40px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+
+    .mobile-location-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .location-primary-text {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+    }
+
+    .location-code-badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 6px;
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border-radius: 4px;
+        margin-left: 8px;
+        font-weight: 500;
+    }
+
+    .location-secondary-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mobile-expand-icon {
+        color: var(--text-tertiary);
+        font-size: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .rotated {
+        transform: rotate(180deg);
+    }
+
+    .mobile-list-details {
+        background-color: var(--bg-secondary);
+        padding: 16px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .detail-item.full-width {
+        grid-column: span 2;
+    }
+
+    .label {
+        font-size: 11px;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .value {
+        font-size: 14px;
+        color: var(--text-primary);
+        word-break: break-word;
+    }
+
+    .mobile-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        /* Edit, Delete, View */
+        gap: 8px;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        border: none;
+    }
+
+    .action-btn.edit {
+        background-color: var(--bg-tertiary);
+        /* or primary color */
+        color: var(--text-primary);
+        /* or white */
+        border: 1px solid var(--border-color);
+    }
+
+    .action-btn.delete {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .action-btn.view {
+        background-color: var(--bg-tertiary);
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+    }
+}
