@@ -1,6 +1,17 @@
 .location-modal {
     max-width: 600px;
-    /* Smaller than user modal since simplified */
+    height: 90vh;
+    /* Fixed height for sticky footer effect */
+    display: flex;
+    flex-direction: column;
+}
+
+.location-modal form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Form Grid - 1 Column is enough for categories usually, but let's keep it flexible */
@@ -60,11 +71,15 @@ textarea.form-input {
 
 /* Modal Body */
 .location-modal .modal-body {
+    flex: 1;
+    overflow-y: auto;
     padding: 1.5rem;
 }
 
 /* Modal Footer */
 .location-modal .modal-footer {
+    flex-shrink: 0;
+    /* Prevent shrinking */
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-color);
     display: flex;
@@ -81,8 +96,10 @@ textarea.form-input {
         margin: 0 auto;
         border-radius: var(--radius-lg);
         /* Rounded corners on all sides */
-        height: auto;
-        max-height: 90vh;
+        border-radius: var(--radius-lg);
+        /* Rounded corners on all sides */
+        height: 90vh;
+        /* Fixed height on mobile too */
         display: flex;
         flex-direction: column;
         /* Removed position absolute and bottom 0 to allow centering by overlay */
@@ -95,6 +112,7 @@ textarea.form-input {
     }
 
     .location-modal .modal-footer {
+        flex-shrink: 0;
         position: static;
         /* No longer sticky bottom of screen */
         background: var(--bg-secondary);

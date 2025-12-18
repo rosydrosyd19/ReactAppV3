@@ -8,6 +8,7 @@ import {
     FiTool,
     FiSettings,
     FiActivity,
+    FiTruck,
 } from 'react-icons/fi';
 
 export const useMenu = () => {
@@ -83,6 +84,13 @@ export const useMenu = () => {
                     path: '/asset/locations',
                     icon: <FiMapPin />,
                     show: hasPermission('asset.locations.manage'),
+                    group: 'Master',
+                },
+                {
+                    title: 'Suppliers',
+                    path: '/asset/suppliers',
+                    icon: <FiTruck />,
+                    show: hasPermission('asset.suppliers.manage'),
                     group: 'Master',
                 },
                 {

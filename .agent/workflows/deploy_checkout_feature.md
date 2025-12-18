@@ -1,6 +1,7 @@
 ---
 description: Deploying QR Code Feature Updates
 ---
+
 # How to Deploy Update (QR Code Feature)
 
 This update includes a new public API endpoint for scanning and the QR code generation library for the frontend.
@@ -32,6 +33,7 @@ pm2 restart all
 
 ## 4. Database
 **No database schema changes** were made in this update. You do not need to run migrations.
+node database/migrations/add-location-soft-delete.js
 
 ## 5. Verify
 -   Visit `/asset/items` and check for the "Show QR" button.

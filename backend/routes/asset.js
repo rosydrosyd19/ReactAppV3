@@ -760,7 +760,7 @@ router.delete('/locations/:id', checkPermission('asset.locations.manage'), async
 
 router.get('/suppliers', checkPermission('asset.items.view'), async (req, res) => {
     try {
-        const suppliers = await db.query('SELECT * FROM asset_suppliers ORDER BY supplier_name');
+        const suppliers = await db.query('SELECT * FROM asset_suppliers WHERE is_deleted = 0 ORDER BY supplier_name');
         res.json({ success: true, data: suppliers });
     } catch (error) {
         console.error('Get suppliers error:', error);
@@ -772,7 +772,7 @@ router.post('/suppliers', checkPermission('asset.suppliers.manage'), async (req,
     try {
         const { supplier_name, contact_person, email, phone, address, website, notes } = req.body;
 
-        const existing = await db.query('SELECT id FROM asset_suppliers WHERE supplier_name = ?', [supplier_name]);
+        const existing = await db.query('SELECT id FROM asset_suppliers WHERE supplier_name = ? AND is_deleted = 0', [supplier_name]);
         if (existing.length > 0) {
             return res.status(400).json({ success: false, message: 'Supplier name already exists' });
         }
@@ -813,7 +813,8 @@ router.put('/suppliers/:id', checkPermission('asset.suppliers.manage'), async (r
 
 router.delete('/suppliers/:id', checkPermission('asset.suppliers.manage'), async (req, res) => {
     try {
-        await db.query('DELETE FROM asset_suppliers WHERE id = ?', [req.params.id]);
+        // Soft delete
+        await db.query('UPDATE asset_suppliers SET is_deleted = 1 WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Supplier deleted successfully' });
     } catch (error) {
         console.error('Delete supplier error:', error);
