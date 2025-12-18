@@ -87,7 +87,7 @@ router.use(verifyToken);
 // Get all assets
 router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
     try {
-        const { status, category_id, location_id, search } = req.query;
+        const { status, category_id, location_id, supplier_id, search } = req.query;
 
         let query = `
       SELECT 
@@ -124,6 +124,11 @@ router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
         if (location_id) {
             query += ' AND a.location_id = ?';
             params.push(location_id);
+        }
+
+        if (supplier_id) {
+            query += ' AND a.supplier_id = ?';
+            params.push(supplier_id);
         }
 
         if (search) {
@@ -764,7 +769,21 @@ router.get('/suppliers', checkPermission('asset.items.view'), async (req, res) =
         res.json({ success: true, data: suppliers });
     } catch (error) {
         console.error('Get suppliers error:', error);
-        res.status(500).json({ success: false, message: 'Error fetching suppliers' });
+    }
+});
+
+router.get('/suppliers/:id', checkPermission('asset.items.view'), async (req, res) => {
+    try {
+        const [supplier] = await db.query('SELECT * FROM asset_suppliers WHERE id = ? AND (is_deleted = 0 OR is_deleted IS NULL)', [req.params.id]);
+
+        if (!supplier) {
+            return res.status(404).json({ success: false, message: 'Supplier not found' });
+        }
+
+        res.json({ success: true, data: supplier });
+    } catch (error) {
+        console.error('Get supplier error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching supplier' });
     }
 });
 

@@ -13,6 +13,7 @@ import AssetDetail from './pages/Asset/AssetDetail/AssetDetail'; // New
 import CategoryDetail from './pages/Asset/CategoryDetail/CategoryDetail';
 import CategoryList from './pages/Asset/CategoryList/CategoryList'; // New
 import SupplierList from './pages/Asset/SupplierList/SupplierList'; // New
+import SupplierDetail from './pages/Asset/SupplierList/SupplierDetail'; // New
 import LocationList from './pages/Asset/LocationList/LocationList'; // New
 import LocationDetail from './pages/Asset/LocationList/LocationDetail'; // New
 import ModuleSelection from './pages/Modules/ModuleSelection';
@@ -102,6 +103,7 @@ function App() {
               <Route path="categories" element={<CategoryList />} />
               <Route path="categories/:id" element={<CategoryDetail />} />
               <Route path="suppliers" element={<SupplierList />} />
+              <Route path="suppliers/:id" element={<SupplierDetail />} />
               <Route path="locations" element={<LocationList />} />
               <Route path="locations/:id" element={<LocationDetail />} />
               <Route path="maintenance" element={<div className="card"><h2>Maintenance</h2><p>Coming soon...</p></div>} />

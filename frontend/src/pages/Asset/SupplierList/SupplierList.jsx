@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiTruck, FiChevronDown, FiPhone, FiMail } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiTruck, FiChevronDown, FiPhone, FiMail, FiEye } from 'react-icons/fi';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import Pagination from '../../../components/Pagination/Pagination';
@@ -10,6 +11,7 @@ import './SupplierList.css';
 
 const SupplierList = () => {
     const { hasPermission } = useAuth();
+    const navigate = useNavigate();
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -76,6 +78,10 @@ const SupplierList = () => {
     const handleEditClick = (supplier) => {
         setSelectedSupplier(supplier);
         setShowModal(true);
+    };
+
+    const handleViewClick = (id) => {
+        navigate(`/asset/suppliers/${id}`);
     };
 
     const handleDeleteClick = (supplier) => {
@@ -170,6 +176,13 @@ const SupplierList = () => {
                                                         <>
                                                             <button
                                                                 className="btn-icon"
+                                                                title="View Details"
+                                                                onClick={() => handleViewClick(supplier.id)}
+                                                            >
+                                                                <FiEye />
+                                                            </button>
+                                                            <button
+                                                                className="btn-icon"
                                                                 title="Edit"
                                                                 onClick={() => handleEditClick(supplier)}
                                                             >
@@ -242,6 +255,12 @@ const SupplierList = () => {
 
                                             {hasPermission('asset.suppliers.manage') && (
                                                 <div className="mobile-actions">
+                                                    <button
+                                                        className="action-btn view"
+                                                        onClick={() => handleViewClick(supplier.id)}
+                                                    >
+                                                        <FiEye /> <span>View</span>
+                                                    </button>
                                                     <button
                                                         className="action-btn edit"
                                                         onClick={() => handleEditClick(supplier)}
