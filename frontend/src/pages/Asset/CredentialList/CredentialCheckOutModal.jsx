@@ -3,19 +3,23 @@ import { FiX, FiUser, FiFileText, FiLogOut } from 'react-icons/fi';
 import SearchableSelect from '../../../components/Form/SearchableSelect';
 import axios from '../../../utils/axios';
 
-const CredentialCheckOutModal = ({ isOpen, onClose, onSuccess, credentialId, credentialName, assignedUserIds = [] }) => {
+const CredentialCheckOutModal = ({ isOpen, onClose, onSuccess, credentialId, credentialName, assignedUserIds = [], assignedAssetIds = [] }) => {
+    const [targetType, setTargetType] = useState('user'); // 'user' or 'asset'
     const [users, setUsers] = useState([]);
+    const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
-        user_id: '',
+        target_id: '',
         notes: ''
     });
 
     useEffect(() => {
         if (isOpen) {
             fetchUsers();
-            setFormData({ user_id: '', notes: '' });
+            fetchAssets();
+            setFormData({ target_id: '', notes: '' });
+            setTargetType('user');
         }
     }, [isOpen]);
 
@@ -33,16 +37,38 @@ const CredentialCheckOutModal = ({ isOpen, onClose, onSuccess, credentialId, cre
         }
     };
 
+    const fetchAssets = async () => {
+        try {
+            setLoading(true);
+            // Fetch assets, preferably only available ones but all works for selection
+            const response = await axios.get('/asset/assets');
+            if (response.data.success) {
+                setAssets(response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching assets:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.user_id) return;
+        if (!formData.target_id) return;
 
         try {
             setSubmitting(true);
-            const response = await axios.post(`/asset/credentials/${credentialId}/checkout`, {
-                user_id: formData.user_id,
+            const payload = {
                 notes: formData.notes
-            });
+            };
+
+            if (targetType === 'user') {
+                payload.user_id = formData.target_id;
+            } else {
+                payload.asset_id = formData.target_id;
+            }
+
+            const response = await axios.post(`/asset/credentials/${credentialId}/checkout`, payload);
 
             if (response.data.success) {
                 onSuccess();
@@ -58,8 +84,9 @@ const CredentialCheckOutModal = ({ isOpen, onClose, onSuccess, credentialId, cre
 
     if (!isOpen) return null;
 
-    // Filter out users who already have this credential assigned
+    // Filter lists
     const availableUsers = users.filter(u => !assignedUserIds.includes(String(u.id)));
+    const availableAssets = assets.filter(a => !assignedAssetIds.includes(String(a.id)));
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -72,22 +99,52 @@ const CredentialCheckOutModal = ({ isOpen, onClose, onSuccess, credentialId, cre
                 </div>
                 <div className="modal-body">
                     <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
-                        Check out <strong>{credentialName}</strong> to a user.
+                        Check out <strong>{credentialName}</strong> to a target.
                     </p>
+
+                    <div className="checkout-type-toggle">
+                        <button
+                            type="button"
+                            className={`toggle-btn ${targetType === 'user' ? 'active' : ''}`}
+                            onClick={() => { setTargetType('user'); setFormData(prev => ({ ...prev, target_id: '' })); }}
+                        >
+                            <FiUser /> User
+                        </button>
+                        <button
+                            type="button"
+                            className={`toggle-btn ${targetType === 'asset' ? 'active' : ''}`}
+                            onClick={() => { setTargetType('asset'); setFormData(prev => ({ ...prev, target_id: '' })); }}
+                        >
+                            <FiFileText /> Asset
+                        </button>
+                    </div>
 
                     <form onSubmit={handleSubmit} id="checkout-form">
                         <div className="form-group">
-                            <label>Assign User <span style={{ color: 'var(--danger-color)' }}>*</span></label>
-                            <SearchableSelect
-                                icon={FiUser}
-                                options={availableUsers.map(u => ({
-                                    value: u.id,
-                                    label: `${u.full_name} (${u.username})`
-                                }))}
-                                value={formData.user_id}
-                                onChange={(value) => setFormData({ ...formData, user_id: value })}
-                                placeholder="Search and select user..."
-                            />
+                            <label>Assign to {targetType === 'user' ? 'User' : 'Asset'} <span style={{ color: 'var(--danger-color)' }}>*</span></label>
+                            {targetType === 'user' ? (
+                                <SearchableSelect
+                                    icon={FiUser}
+                                    options={availableUsers.map(u => ({
+                                        value: u.id,
+                                        label: `${u.full_name} (${u.username})`
+                                    }))}
+                                    value={formData.target_id}
+                                    onChange={(value) => setFormData({ ...formData, target_id: value })}
+                                    placeholder="Search and select user..."
+                                />
+                            ) : (
+                                <SearchableSelect
+                                    icon={FiFileText}
+                                    options={availableAssets.map(a => ({
+                                        value: a.id,
+                                        label: `${a.asset_name} (${a.asset_tag})`
+                                    }))}
+                                    value={formData.target_id}
+                                    onChange={(value) => setFormData({ ...formData, target_id: value })}
+                                    placeholder="Search and select asset..."
+                                />
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -113,7 +170,7 @@ const CredentialCheckOutModal = ({ isOpen, onClose, onSuccess, credentialId, cre
                         type="submit"
                         form="checkout-form"
                         className="btn btn-primary"
-                        disabled={submitting || !formData.user_id}
+                        disabled={submitting || !formData.target_id}
                     >
                         {submitting ? 'Saving...' : <><FiLogOut /> Check Out</>}
                     </button>

@@ -23,7 +23,8 @@ import {
     FiBox,
     FiCheckCircle,
     FiLogOut,
-    FiMoreVertical
+    FiMoreVertical,
+    FiExternalLink
 } from 'react-icons/fi';
 import './CredentialList.css';
 
@@ -238,18 +239,36 @@ const CredentialList = () => {
     };
 
     const getAssignedUsers = (item) => {
-        if (!item.assigned_ids) return [];
-        // Note: This relies on the order being consistent from Group Concat.
-        // Backend uses SEPARATOR ', ' for names/usernames.
-        const ids = item.assigned_ids.toString().split(',');
-        const names = item.assigned_names ? item.assigned_names.split(', ') : [];
-        const usernames = item.assigned_usernames ? item.assigned_usernames.split(', ') : [];
+        const assignments = [];
 
-        return ids.map((id, index) => ({
-            id: id,
-            name: names[index] || usernames[index] || 'Unknown',
-            username: usernames[index] || ''
-        }));
+        if (item.assigned_ids) {
+            const ids = item.assigned_ids.toString().split(',');
+            const names = item.assigned_names ? item.assigned_names.split(', ') : [];
+            const usernames = item.assigned_usernames ? item.assigned_usernames.split(', ') : [];
+
+            ids.forEach((id, index) => {
+                assignments.push({
+                    id: id,
+                    name: names[index] || usernames[index] || 'Unknown User',
+                    type: 'user'
+                });
+            });
+        }
+
+        if (item.assigned_asset_ids) {
+            const ids = item.assigned_asset_ids.toString().split(',');
+            const names = item.assigned_asset_names ? item.assigned_asset_names.split(', ') : [];
+
+            ids.forEach((id, index) => {
+                assignments.push({
+                    id: id,
+                    name: names[index] || 'Unknown Asset',
+                    type: 'asset'
+                });
+            });
+        }
+
+        return assignments;
     };
 
     const getCategoryIcon = (category) => {
@@ -354,9 +373,10 @@ const CredentialList = () => {
                                                                 href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="platform-url"
+                                                                className="platform-url-icon"
+                                                                title={item.url}
                                                             >
-                                                                {item.url}
+                                                                <FiExternalLink />
                                                             </a >
                                                         )}
                                                     </div >
@@ -406,11 +426,19 @@ const CredentialList = () => {
                                                 </span>
                                             </td>
                                             <td>
-                                                {item.assigned_names ? (
-                                                    <div style={{ fontSize: '13px' }}>
-                                                        <strong>{item.assigned_names}</strong>
-                                                    </div>
-                                                ) : '-'}
+                                                <div className="assigned-info" style={{ fontSize: '13px' }}>
+                                                    {item.assigned_names && (
+                                                        <div>
+                                                            <strong>Pop: {item.assigned_names}</strong>
+                                                        </div>
+                                                    )}
+                                                    {item.assigned_asset_names && (
+                                                        <div>
+                                                            <strong>Asset: {item.assigned_asset_names}</strong>
+                                                        </div>
+                                                    )}
+                                                    {!item.assigned_names && !item.assigned_asset_names && '-'}
+                                                </div>
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
@@ -564,27 +592,26 @@ const CredentialList = () => {
                                                 <div className="mobile-actions">
                                                     {hasPermission('asset.credentials.manage') && (
                                                         <>
-                                                            {item.status === 'available' ? (
-                                                                <button
-                                                                    className="action-btn checkout"
-                                                                    style={{ backgroundColor: '#2563eb', color: 'white', gridColumn: 'span 2' }}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleOpenCheckOut(item);
-                                                                    }}
-                                                                >
-                                                                    <FiLogOut /> Check Out
-                                                                </button>
-                                                            ) : (
+                                                            <button
+                                                                className="action-btn checkout"
+                                                                style={{ backgroundColor: '#2563eb', color: 'white', gridColumn: item.status !== 'available' ? 'span 1' : 'span 2' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleOpenCheckOut(item);
+                                                                }}
+                                                            >
+                                                                <FiLogOut /> <span>Check Out</span>
+                                                            </button>
+                                                            {item.status !== 'available' && (
                                                                 <button
                                                                     className="action-btn checkin"
-                                                                    style={{ backgroundColor: '#10b981', color: 'white', gridColumn: 'span 2' }}
+                                                                    style={{ backgroundColor: '#10b981', color: 'white' }}
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleOpenCheckIn(item);
                                                                     }}
                                                                 >
-                                                                    <FiCheckCircle /> Check In
+                                                                    <FiCheckCircle /> <span>Check In</span>
                                                                 </button>
                                                             )}
                                                             <button
@@ -627,6 +654,7 @@ const CredentialList = () => {
                 credentialId={selectedCredential?.id}
                 credentialName={selectedCredential?.platform_name}
                 assignedUserIds={selectedCredential?.assigned_ids ? selectedCredential.assigned_ids.toString().split(',') : []}
+                assignedAssetIds={selectedCredential?.assigned_asset_ids ? selectedCredential.assigned_asset_ids.toString().split(',') : []}
             />
 
             <CredentialCheckInModal

@@ -13,11 +13,14 @@ router.get('/', authenticateToken, checkPermission('asset.credentials.view'), as
             SELECT c.*, u.username as created_by_name,
                    GROUP_CONCAT(au.id) as assigned_ids,
                    GROUP_CONCAT(au.username SEPARATOR ', ') as assigned_usernames,
-                   GROUP_CONCAT(COALESCE(au.full_name, au.username) SEPARATOR ', ') as assigned_names
+                   GROUP_CONCAT(COALESCE(au.full_name, au.username) SEPARATOR ', ') as assigned_names,
+                   GROUP_CONCAT(ai.id) as assigned_asset_ids,
+                   GROUP_CONCAT(ai.asset_name SEPARATOR ', ') as assigned_asset_names
             FROM asset_credentials c
             LEFT JOIN sysadmin_users u ON c.created_by = u.id
             LEFT JOIN asset_credential_assignments aca ON c.id = aca.credential_id
             LEFT JOIN sysadmin_users au ON aca.user_id = au.id
+            LEFT JOIN asset_items ai ON aca.asset_id = ai.id
             WHERE (c.is_deleted = FALSE OR c.is_deleted IS NULL)
         `;
         const params = [];
@@ -60,11 +63,14 @@ router.get('/:id', authenticateToken, checkPermission('asset.credentials.view'),
             SELECT c.*, u.username as created_by_name,
                    GROUP_CONCAT(au.id) as assigned_ids,
                    GROUP_CONCAT(au.username SEPARATOR ', ') as assigned_usernames,
-                   GROUP_CONCAT(COALESCE(au.full_name, au.username) SEPARATOR ', ') as assigned_names
+                   GROUP_CONCAT(COALESCE(au.full_name, au.username) SEPARATOR ', ') as assigned_names,
+                   GROUP_CONCAT(ai.id) as assigned_asset_ids,
+                   GROUP_CONCAT(ai.asset_name SEPARATOR ', ') as assigned_asset_names
             FROM asset_credentials c
             LEFT JOIN sysadmin_users u ON c.created_by = u.id
             LEFT JOIN asset_credential_assignments aca ON c.id = aca.credential_id
             LEFT JOIN sysadmin_users au ON aca.user_id = au.id
+            LEFT JOIN asset_items ai ON aca.asset_id = ai.id
             WHERE c.id = ? AND (c.is_deleted = FALSE OR c.is_deleted IS NULL)
             GROUP BY c.id
         `, [req.params.id]);
@@ -75,9 +81,18 @@ router.get('/:id', authenticateToken, checkPermission('asset.credentials.view'),
 
         // Fetch detailed assignments for this credential to return as a clean array
         const assignments = await db.query(`
-            SELECT u.id, u.username, u.full_name, aca.assigned_at
+            SELECT 
+                aca.id as assignment_id,
+                aca.assigned_at,
+                u.id as user_id, 
+                u.username, 
+                u.full_name,
+                ai.id as asset_id,
+                ai.asset_name,
+                ai.asset_tag
             FROM asset_credential_assignments aca
-            JOIN sysadmin_users u ON aca.user_id = u.id
+            LEFT JOIN sysadmin_users u ON aca.user_id = u.id
+            LEFT JOIN asset_items ai ON aca.asset_id = ai.id
             WHERE aca.credential_id = ?
         `, [req.params.id]);
 
@@ -163,8 +178,13 @@ router.post('/:id/checkout', authenticateToken, checkPermission('asset.credentia
     try {
         await connection.beginTransaction();
 
-        const { user_id, notes } = req.body;
+        const { user_id, asset_id, notes } = req.body;
         const credentialId = req.params.id;
+
+        if (!user_id && !asset_id) {
+            await connection.rollback();
+            return res.status(400).json({ success: false, message: 'Either user_id or asset_id is required' });
+        }
 
         // Verify credential exists
         const rows = await connection.query(
@@ -177,24 +197,39 @@ router.post('/:id/checkout', authenticateToken, checkPermission('asset.credentia
             return res.status(404).json({ success: false, message: 'Credential not found' });
         }
 
-        // Check if already assigned to this user
-        const existingAssignment = await connection.query(
-            'SELECT id FROM asset_credential_assignments WHERE credential_id = ? AND user_id = ?',
-            [credentialId, user_id]
-        );
+        // Check for duplicates
+        let existingAssignment;
+        if (user_id) {
+            existingAssignment = await connection.query(
+                'SELECT id FROM asset_credential_assignments WHERE credential_id = ? AND user_id = ?',
+                [credentialId, user_id]
+            );
+        } else {
+            existingAssignment = await connection.query(
+                'SELECT id FROM asset_credential_assignments WHERE credential_id = ? AND asset_id = ?',
+                [credentialId, asset_id]
+            );
+        }
 
         if (existingAssignment.length > 0) {
             await connection.rollback();
-            return res.status(400).json({ success: false, message: 'This credential is already assigned to this user' });
+            return res.status(400).json({ success: false, message: 'This credential is already assigned to this target' });
         }
 
         // Add assignment
-        await connection.query(
-            'INSERT INTO asset_credential_assignments (credential_id, user_id) VALUES (?, ?)',
-            [credentialId, user_id]
-        );
+        if (user_id) {
+            await connection.query(
+                'INSERT INTO asset_credential_assignments (credential_id, user_id) VALUES (?, ?)',
+                [credentialId, user_id]
+            );
+        } else {
+            await connection.query(
+                'INSERT INTO asset_credential_assignments (credential_id, asset_id) VALUES (?, ?)',
+                [credentialId, asset_id]
+            );
+        }
 
-        // Update credential status (it remains 'assigned' if at least one person has it)
+        // Update credential status
         await connection.query(
             'UPDATE asset_credentials SET status = ? WHERE id = ?',
             ['assigned', credentialId]
@@ -202,9 +237,9 @@ router.post('/:id/checkout', authenticateToken, checkPermission('asset.credentia
 
         // Record history
         await connection.query(`
-            INSERT INTO asset_credential_history (credential_id, action_type, performed_by, to_user_id, notes)
-            VALUES (?, 'checkout', ?, ?, ?)
-        `, [credentialId, req.user.id, user_id, notes]);
+            INSERT INTO asset_credential_history (credential_id, action_type, performed_by, to_user_id, to_asset_id, notes)
+            VALUES (?, 'checkout', ?, ?, ?, ?)
+        `, [credentialId, req.user.id, user_id || null, asset_id || null, notes]);
 
         await connection.commit();
         res.json({ success: true, message: 'Credential checked out successfully' });
@@ -228,12 +263,12 @@ router.post('/:id/checkin', authenticateToken, checkPermission('asset.credential
     try {
         await connection.beginTransaction();
 
-        const { notes, user_id } = req.body; // user_id OPTIONAL for single assignment, REQUIRED for multiple
+        const { notes, user_id, asset_id } = req.body;
         const credentialId = req.params.id;
 
         // Get current assignments
         const assignments = await connection.query(
-            'SELECT user_id FROM asset_credential_assignments WHERE credential_id = ? FOR UPDATE',
+            'SELECT user_id, asset_id FROM asset_credential_assignments WHERE credential_id = ? FOR UPDATE',
             [credentialId]
         );
 
@@ -242,54 +277,74 @@ router.post('/:id/checkin', authenticateToken, checkPermission('asset.credential
             return res.json({ success: true, message: 'Credential is already available' });
         }
 
-        let userIdsToCheckIn = [];
+        let targetsToCheckIn = []; // Array of { type: 'user'|'asset', id: int }
 
         if (user_id) {
-            // Specific user check-in
-            userIdsToCheckIn.push(user_id);
+            targetsToCheckIn.push({ type: 'user', id: user_id });
+        } else if (asset_id) {
+            targetsToCheckIn.push({ type: 'asset', id: asset_id });
         } else {
-            // No user specified
+            // No target specified
             if (assignments.length === 1) {
                 // Only one assignee, safe to infer
-                userIdsToCheckIn.push(assignments[0].user_id);
+                const assign = assignments[0];
+                if (assign.user_id) targetsToCheckIn.push({ type: 'user', id: assign.user_id });
+                if (assign.asset_id) targetsToCheckIn.push({ type: 'asset', id: assign.asset_id });
             } else {
                 // Ambiguous!
                 await connection.rollback();
 
                 // Fetch details for the response
                 const detailedAssignments = await connection.query(`
-                    SELECT u.id, u.username, u.full_name 
+                    SELECT 
+                        aca.id,
+                        u.id as user_id, u.username, u.full_name,
+                        ai.id as asset_id, ai.asset_name, ai.asset_tag
                     FROM asset_credential_assignments aca 
-                    JOIN sysadmin_users u ON aca.user_id = u.id 
+                    LEFT JOIN sysadmin_users u ON aca.user_id = u.id 
+                    LEFT JOIN asset_items ai ON aca.asset_id = ai.id
                     WHERE aca.credential_id = ?
                 `, [credentialId]);
 
                 return res.status(400).json({
                     success: false,
-                    message: 'Multiple users assigned. Please specify who to check in.',
-                    requires_user_selection: true,
-                    assigned_users: detailedAssignments
+                    message: 'Multiple assignments found. Please specify who to check in.',
+                    requires_selection: true,
+                    assignments: detailedAssignments
                 });
             }
         }
 
         // Process Check-ins
-        for (const uid of userIdsToCheckIn) {
-            // Verify this user is actually assigned
-            const isAssigned = assignments.find(a => a.user_id == uid);
+        for (const target of targetsToCheckIn) {
+            // Verify assignment exists
+            let isAssigned;
+            if (target.type === 'user') {
+                isAssigned = assignments.find(a => a.user_id == target.id);
+            } else {
+                isAssigned = assignments.find(a => a.asset_id == target.id);
+            }
+
             if (!isAssigned) continue;
 
             // Remove assignment
-            await connection.query(
-                'DELETE FROM asset_credential_assignments WHERE credential_id = ? AND user_id = ?',
-                [credentialId, uid]
-            );
+            if (target.type === 'user') {
+                await connection.query(
+                    'DELETE FROM asset_credential_assignments WHERE credential_id = ? AND user_id = ?',
+                    [credentialId, target.id]
+                );
+            } else {
+                await connection.query(
+                    'DELETE FROM asset_credential_assignments WHERE credential_id = ? AND asset_id = ?',
+                    [credentialId, target.id]
+                );
+            }
 
             // Record history
             await connection.query(`
-                INSERT INTO asset_credential_history (credential_id, action_type, performed_by, to_user_id, notes)
-                VALUES (?, 'checkin', ?, ?, ?)
-            `, [credentialId, req.user.id, uid, notes]);
+                INSERT INTO asset_credential_history (credential_id, action_type, performed_by, to_user_id, to_asset_id, notes)
+                VALUES (?, 'checkin', ?, ?, ?, ?)
+            `, [credentialId, req.user.id, target.type === 'user' ? target.id : null, target.type === 'asset' ? target.id : null, notes]);
         }
 
         // Check if any assignments remain

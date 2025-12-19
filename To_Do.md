@@ -1,7 +1,6 @@
 ## New Feature 
-add-credential-assignments-table
-add-credential-checkout-support
-pada menu account & password tambahkan fitur cekin/cekout untuk di berikan ke asset atau ke user
+tambahakan credential apa saja yang sudah di assign ke user di halaman /profile, user detail (asset yang di assign ke user) dan asset detail yang di assign ke asset (asset yang di assign ke asset)
+
 
 Menu baru List IP Address
 
