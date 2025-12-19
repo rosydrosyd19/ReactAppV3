@@ -105,9 +105,10 @@ router.post('/login', async (req, res) => {
 
     } catch (error) {
         console.error('Login error:', error);
+        require('fs').writeFileSync('debug_login_error.txt', JSON.stringify(error, Object.getOwnPropertyNames(error), 2) + '\n' + error.stack);
         res.status(500).json({
             success: false,
-            message: 'Server error during login'
+            message: 'Server error during login: ' + error.message
         });
     }
 });

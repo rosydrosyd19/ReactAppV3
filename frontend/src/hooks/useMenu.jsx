@@ -73,6 +73,13 @@ export const useMenu = () => {
                     group: 'Main',
                 },
                 {
+                    title: 'Credentials',
+                    path: '/asset/credentials',
+                    icon: <FiShield />,
+                    show: hasPermission('asset.credentials.view'),
+                    group: 'Main',
+                },
+                {
                     title: 'Categories',
                     path: '/asset/categories',
                     icon: <FiTool />,
@@ -98,7 +105,7 @@ export const useMenu = () => {
                     path: '/asset/maintenance',
                     icon: <FiTool />,
                     show: hasPermission('asset.maintenance.view'),
-                    group: 'Transaksi',
+                    group: 'Transaction',
                 },
             ],
         },
