@@ -27,7 +27,9 @@ router.get('/', authenticateToken, checkPermission('asset.credentials.view'), as
 
         query += ` ORDER BY c.created_at DESC`;
 
-        const [rows] = await db.query(query, params);
+
+
+        const rows = await db.query(query, params);
         res.json({ success: true, data: rows });
     } catch (error) {
         console.error('Error fetching credentials:', error);
@@ -38,7 +40,7 @@ router.get('/', authenticateToken, checkPermission('asset.credentials.view'), as
 // Get credential by ID
 router.get('/:id', authenticateToken, checkPermission('asset.credentials.view'), async (req, res) => {
     try {
-        const [rows] = await db.query(`
+        const rows = await db.query(`
             SELECT c.*, u.username as created_by_name 
             FROM asset_credentials c
             LEFT JOIN sysadmin_users u ON c.created_by = u.id
@@ -65,7 +67,7 @@ router.post('/', authenticateToken, checkPermission('asset.credentials.manage'),
             return res.status(400).json({ success: false, message: 'Platform name is required' });
         }
 
-        const [result] = await db.query(`
+        const result = await db.query(`
             INSERT INTO asset_credentials (platform_name, username, password, url, category, description, created_by)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `, [platform_name, username, password, url, category || 'other', description, req.user.id]);
@@ -73,11 +75,12 @@ router.post('/', authenticateToken, checkPermission('asset.credentials.manage'),
         res.status(201).json({
             success: true,
             message: 'Credential created successfully',
-            data: { id: result.insertId }
+            data: { id: result.insertId ? result.insertId.toString() : null }
         });
     } catch (error) {
         console.error('Error creating credential:', error);
-        res.status(500).json({ success: false, message: 'Failed to create credential' });
+        require('fs').writeFileSync('debug_credential_error.txt', JSON.stringify({ message: error.message, stack: error.stack }, null, 2));
+        res.status(500).json({ success: false, message: 'Failed to create credential: ' + error.message });
     }
 });
 

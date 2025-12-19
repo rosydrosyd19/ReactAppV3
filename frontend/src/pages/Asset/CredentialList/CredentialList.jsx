@@ -55,7 +55,7 @@ const CredentialList = () => {
 
             const response = await axios.get('/asset/credentials', { params });
             if (response.data.success) {
-                setCredentials(response.data.data);
+                setCredentials(Array.isArray(response.data.data) ? response.data.data : []);
             }
         } catch (error) {
             console.error('Error fetching credentials:', error);
@@ -125,10 +125,17 @@ const CredentialList = () => {
         setShowToast(true);
     };
 
+    // Mobile State
+    const [expandedItemId, setExpandedItemId] = useState(null);
+
+    const toggleMobileItem = (id) => {
+        setExpandedItemId(expandedItemId === id ? null : id);
+    };
+
     // Pagination Logic
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = credentials.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = Array.isArray(credentials) ? credentials.slice(indexOfFirstItem, indexOfLastItem) : [];
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -195,7 +202,7 @@ const CredentialList = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="table-responsive">
+                        <div className="desktop-table">
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -286,6 +293,92 @@ const CredentialList = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Mobile List View */}
+                        <div className="mobile-list">
+                            {currentItems.map((cred) => (
+                                <div key={cred.id} className="mobile-list-item">
+                                    <div className="mobile-list-main" onClick={() => toggleMobileItem(cred.id)}>
+                                        <div className="mobile-item-icon">
+                                            <FiShield />
+                                        </div>
+                                        <div className="mobile-item-info">
+                                            <div className="item-primary-text">
+                                                <span className="platform-name">{cred.platform_name}</span>
+                                                <span className="category-badge-small">
+                                                    {cred.category ? cred.category.replace('_', ' ') : 'Other'}
+                                                </span>
+                                            </div>
+                                            <div className="item-secondary-text">{cred.username || 'No username'}</div>
+                                        </div>
+                                    </div>
+
+                                    {expandedItemId === cred.id && (
+                                        <div className="mobile-list-details">
+                                            <div className="detail-grid">
+                                                <div className="detail-item full-width">
+                                                    <span className="label">Password</span>
+                                                    <div className="password-wrapper mobile-password">
+                                                        <span className="password-text">
+                                                            {visiblePasswords[cred.id] ? cred.password : '••••••••'}
+                                                        </span>
+                                                        <div className="mobile-password-actions">
+                                                            <button
+                                                                className="btn-icon-small"
+                                                                onClick={() => togglePasswordVisibility(cred.id)}
+                                                            >
+                                                                {visiblePasswords[cred.id] ? <FiEyeOff /> : <FiEye />}
+                                                            </button>
+                                                            <button
+                                                                className="btn-icon-small"
+                                                                onClick={() => copyToClipboard(cred.password)}
+                                                            >
+                                                                <FiCopy />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {cred.url && (
+                                                    <div className="detail-item full-width">
+                                                        <span className="label">URL</span>
+                                                        <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`} target="_blank" rel="noopener noreferrer" className="mobile-link">
+                                                            {cred.url}
+                                                        </a>
+                                                    </div>
+                                                )}
+
+                                                {cred.description && (
+                                                    <div className="detail-item full-width">
+                                                        <span className="label">Description</span>
+                                                        <span className="value">{cred.description}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="mobile-actions">
+                                                {hasPermission('asset.credentials.manage') && (
+                                                    <>
+                                                        <button
+                                                            className="action-btn edit"
+                                                            onClick={() => handleEditClick(cred.id)}
+                                                        >
+                                                            <FiEdit2 /> <span>Edit</span>
+                                                        </button>
+                                                        <button
+                                                            className="action-btn delete"
+                                                            onClick={() => handleDeleteClick(cred)}
+                                                        >
+                                                            <FiTrash2 /> <span>Delete</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
 
                         <Pagination

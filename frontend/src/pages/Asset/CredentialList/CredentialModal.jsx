@@ -178,7 +178,7 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId }) => {
                     </div>
 
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>
+                        <button type="button" className="btn btn-outline" onClick={onClose}>
                             Cancel
                         </button>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
