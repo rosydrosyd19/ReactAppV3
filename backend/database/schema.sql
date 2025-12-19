@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS asset_items (
 CREATE TABLE IF NOT EXISTS asset_history (
   id INT AUTO_INCREMENT PRIMARY KEY,
   asset_id INT NOT NULL,
-  action_type ENUM('checkout', 'checkin', 'transfer', 'maintenance', 'update', 'retire') NOT NULL,
+  action_type ENUM('checkout', 'checkin', 'transfer', 'maintenance', 'update', 'retire', 'delete') NOT NULL,
   performed_by INT,
   from_user_id INT,
   to_user_id INT,
