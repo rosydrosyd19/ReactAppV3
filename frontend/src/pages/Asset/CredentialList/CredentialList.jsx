@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import CredentialModal from './CredentialModal';
+import CredentialCheckOutModal from './CredentialCheckOutModal';
+import CredentialCheckInModal from './CredentialCheckInModal';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 import Pagination from '../../../components/Pagination/Pagination';
@@ -14,7 +16,14 @@ import {
     FiEye,
     FiEyeOff,
     FiCopy,
-    FiShield
+    FiShield,
+    FiMonitor,
+    FiDatabase,
+    FiMail,
+    FiBox,
+    FiCheckCircle,
+    FiLogOut,
+    FiMoreVertical
 } from 'react-icons/fi';
 import './CredentialList.css';
 
@@ -34,6 +43,25 @@ const CredentialList = () => {
     // Toast State
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+
+    const [isCheckOutModalOpen, setIsCheckOutModalOpen] = useState(false);
+    const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+    // Close dropdown when clicking outside
+    const [selectedCredential, setSelectedCredential] = useState(null);
+    const [activeDropdownId, setActiveDropdownId] = useState(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (activeDropdownId && !event.target.closest('.action-dropdown-container')) {
+                setActiveDropdownId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [activeDropdownId]);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -172,12 +200,71 @@ const CredentialList = () => {
         setExpandedItemId(expandedItemId === id ? null : id);
     };
 
+    const toggleDropdown = (id) => {
+        setActiveDropdownId(activeDropdownId === id ? null : id);
+    };
+
     // Pagination Logic
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = Array.isArray(credentials) ? credentials.slice(indexOfFirstItem, indexOfLastItem) : [];
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const handleOpenCheckOut = (credential) => {
+        setSelectedCredential(credential);
+        setIsCheckOutModalOpen(true);
+    };
+
+    const handleOpenCheckIn = (credential) => {
+        setSelectedCredential(credential);
+        setIsCheckInModalOpen(true);
+    };
+
+    const handleCloseCheckOut = () => {
+        setIsCheckOutModalOpen(false);
+        setSelectedCredential(null);
+    };
+
+    const handleCloseCheckIn = () => {
+        setIsCheckInModalOpen(false);
+        setSelectedCredential(null);
+    };
+
+    const handleActionSuccess = () => {
+        fetchCredentials();
+        setToastMessage('Action successfully completed');
+        setShowToast(true);
+    };
+
+    const getAssignedUsers = (item) => {
+        if (!item.assigned_ids) return [];
+        // Note: This relies on the order being consistent from Group Concat.
+        // Backend uses SEPARATOR ', ' for names/usernames.
+        const ids = item.assigned_ids.toString().split(',');
+        const names = item.assigned_names ? item.assigned_names.split(', ') : [];
+        const usernames = item.assigned_usernames ? item.assigned_usernames.split(', ') : [];
+
+        return ids.map((id, index) => ({
+            id: id,
+            name: names[index] || usernames[index] || 'Unknown',
+            username: usernames[index] || ''
+        }));
+    };
+
+    const getCategoryIcon = (category) => {
+        switch (category) {
+            case 'social_media':
+                return <FiMonitor />;
+            case 'storage':
+                return <FiDatabase />;
+            case 'email':
+                return <FiMail />;
+            case 'other':
+            default:
+                return <FiBox />;
+        }
+    };
 
     return (
         <div className="credential-list">
@@ -249,27 +336,40 @@ const CredentialList = () => {
                                         <th>Platform</th>
                                         <th>Username</th>
                                         <th>Password</th>
-                                        <th>URL</th>
                                         <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Assigned To</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {currentItems.map((cred) => (
-                                        <tr key={cred.id}>
+                                    {currentItems.map((item) => (
+                                        <tr key={item.id}>
                                             <td>
                                                 <div className="platform-info">
-                                                    <strong>{cred.platform_name}</strong>
-                                                </div>
-                                            </td>
+                                                    <div>
+                                                        <div className="platform-name">{item.platform_name}</div>
+                                                        {item.url && (
+                                                            <a
+                                                                href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="platform-url"
+                                                            >
+                                                                {item.url}
+                                                            </a >
+                                                        )}
+                                                    </div >
+                                                </div >
+                                            </td >
                                             <td>
                                                 <div className="copy-wrapper">
-                                                    {cred.username}
-                                                    {cred.username && (
+                                                    {item.username}
+                                                    {item.username && (
                                                         <FiCopy
                                                             className="copy-icon"
                                                             title="Copy username"
-                                                            onClick={() => copyToClipboard(cred.username)}
+                                                            onClick={() => copyToClipboard(item.username)}
                                                         />
                                                     )}
                                                 </div>
@@ -277,18 +377,18 @@ const CredentialList = () => {
                                             <td>
                                                 <div className="password-wrapper">
                                                     <span className="password-text">
-                                                        {visiblePasswords[cred.id] ? cred.password : '••••••••'}
+                                                        {visiblePasswords[item.id] ? item.password : '••••••••'}
                                                     </span>
                                                     <button
                                                         className="btn-icon-small"
-                                                        onClick={() => togglePasswordVisibility(cred.id)}
-                                                        title={visiblePasswords[cred.id] ? "Hide" : "Show"}
+                                                        onClick={() => togglePasswordVisibility(item.id)}
+                                                        title={visiblePasswords[item.id] ? "Hide" : "Show"}
                                                     >
-                                                        {visiblePasswords[cred.id] ? <FiEyeOff /> : <FiEye />}
+                                                        {visiblePasswords[item.id] ? <FiEyeOff /> : <FiEye />}
                                                     </button>
                                                     <button
                                                         className="btn-icon-small"
-                                                        onClick={() => copyToClipboard(cred.password)}
+                                                        onClick={() => copyToClipboard(item.password)}
                                                         title="Copy password"
                                                     >
                                                         <FiCopy />
@@ -296,16 +396,21 @@ const CredentialList = () => {
                                                 </div>
                                             </td>
                                             <td>
-                                                {cred.url ? (
-                                                    <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`} target="_blank" rel="noopener noreferrer">
-                                                        Link
-                                                    </a>
-                                                ) : '-'}
+                                                <span className={`badge badge-secondary`} style={{ textTransform: 'capitalize' }}>
+                                                    {item.category ? item.category.replace('_', ' ') : 'Other'}
+                                                </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-secondary" style={{ textTransform: 'capitalize' }}>
-                                                    {cred.category ? cred.category.replace('_', ' ') : 'Other'}
+                                                <span className={`status-badge ${item.status || 'available'}`}>
+                                                    {item.status || 'available'}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                {item.assigned_names ? (
+                                                    <div style={{ fontSize: '13px' }}>
+                                                        <strong>{item.assigned_names}</strong>
+                                                    </div>
+                                                ) : '-'}
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
@@ -314,112 +419,195 @@ const CredentialList = () => {
                                                             <button
                                                                 className="btn-icon"
                                                                 title="Edit"
-                                                                onClick={() => handleEditClick(cred.id)}
+                                                                onClick={() => handleEditClick(item.id)}
                                                             >
                                                                 <FiEdit2 />
                                                             </button>
                                                             <button
                                                                 className="btn-icon btn-danger"
                                                                 title="Delete"
-                                                                onClick={() => handleDeleteClick(cred)}
+                                                                onClick={() => handleDeleteClick(item)}
                                                             >
                                                                 <FiTrash2 />
                                                             </button>
+
+                                                            <div className="action-dropdown-container" style={{ position: 'relative' }}>
+                                                                <button
+                                                                    className="btn-icon"
+                                                                    onClick={() => toggleDropdown(item.id)}
+                                                                    title="More Actions"
+                                                                >
+                                                                    <FiMoreVertical />
+                                                                </button>
+                                                                {activeDropdownId === item.id && (
+                                                                    <div className="action-dropdown-menu">
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                handleOpenCheckOut(item);
+                                                                                setActiveDropdownId(null);
+                                                                            }}
+                                                                        >
+                                                                            <FiLogOut className="text-primary" /> Check Out
+                                                                        </button>
+                                                                        {item.status !== 'available' && (
+                                                                            <button
+                                                                                className="dropdown-item"
+                                                                                onClick={() => {
+                                                                                    handleOpenCheckIn(item);
+                                                                                    setActiveDropdownId(null);
+                                                                                }}
+                                                                            >
+                                                                                <FiCheckCircle className="text-warning" /> Check In
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </>
                                                     )}
                                                 </div>
                                             </td>
-                                        </tr>
+                                        </tr >
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </tbody >
+                            </table >
+                        </div >
 
                         {/* Mobile List View */}
-                        <div className="mobile-list">
-                            {currentItems.map((cred) => (
-                                <div key={cred.id} className="mobile-list-item">
-                                    <div className="mobile-list-main" onClick={() => toggleMobileItem(cred.id)}>
-                                        <div className="mobile-item-icon">
-                                            <FiShield />
-                                        </div>
-                                        <div className="mobile-item-info">
-                                            <div className="item-primary-text">
-                                                <span className="platform-name">{cred.platform_name}</span>
-                                                <span className="category-badge-small">
-                                                    {cred.category ? cred.category.replace('_', ' ') : 'Other'}
-                                                </span>
+                        < div className="mobile-list" >
+                            {
+                                currentItems.map((item) => (
+                                    <div key={item.id} className="mobile-list-item">
+                                        <div className="mobile-list-main" onClick={() => toggleMobileItem(item.id)}>
+                                            <div className="mobile-item-icon">
+                                                {getCategoryIcon(item.category)}
                                             </div>
-                                            <div className="item-secondary-text">{cred.username || 'No username'}</div>
+                                            <div className="mobile-item-info">
+                                                <div className="item-primary-text">
+                                                    <span className="platform-name">{item.platform_name}</span>
+                                                    <span className="category-badge-small">
+                                                        {item.category ? item.category.replace('_', ' ') : 'Other'}
+                                                    </span>
+                                                </div>
+                                                <div className="item-secondary-text">{item.username || 'No username'}</div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {expandedItemId === cred.id && (
-                                        <div className="mobile-list-details">
-                                            <div className="detail-grid">
-                                                <div className="detail-item full-width">
-                                                    <span className="label">Password</span>
-                                                    <div className="password-wrapper mobile-password">
-                                                        <span className="password-text">
-                                                            {visiblePasswords[cred.id] ? cred.password : '••••••••'}
-                                                        </span>
-                                                        <div className="mobile-password-actions">
-                                                            <button
-                                                                className="btn-icon-small"
-                                                                onClick={() => togglePasswordVisibility(cred.id)}
-                                                            >
-                                                                {visiblePasswords[cred.id] ? <FiEyeOff /> : <FiEye />}
-                                                            </button>
-                                                            <button
-                                                                className="btn-icon-small"
-                                                                onClick={() => copyToClipboard(cred.password)}
-                                                            >
-                                                                <FiCopy />
-                                                            </button>
+                                        {expandedItemId === item.id && (
+                                            <div className="mobile-list-details">
+                                                <div className="detail-grid">
+                                                    <div className="detail-item full-width">
+                                                        <span className="label">Password</span>
+                                                        <div className="password-wrapper mobile-password">
+                                                            <span className="password-text">
+                                                                {visiblePasswords[item.id] ? item.password : '••••••••'}
+                                                            </span>
+                                                            <div className="mobile-password-actions">
+                                                                <button
+                                                                    className="btn-icon-small"
+                                                                    onClick={() => togglePasswordVisibility(item.id)}
+                                                                >
+                                                                    {visiblePasswords[item.id] ? <FiEyeOff /> : <FiEye />}
+                                                                </button>
+                                                                <button
+                                                                    className="btn-icon-small"
+                                                                    onClick={() => copyToClipboard(item.password)}
+                                                                >
+                                                                    <FiCopy />
+                                                                </button>
+                                                            </div>
                                                         </div>
+                                                    </div>
+
+                                                    {item.url && (
+                                                        <div className="detail-item full-width">
+                                                            <span className="label">URL</span>
+                                                            <a
+                                                                href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="mobile-link"
+                                                            >
+                                                                {item.url}
+                                                            </a>
+                                                        </div>
+                                                    )}
+
+                                                    {item.description && (
+                                                        <div className="detail-item full-width">
+                                                            <span className="label">Description</span>
+                                                            <span className="value">{item.description}</span>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="detail-item">
+                                                        <span className="label">Status</span>
+                                                        <span className={`status-badge ${item.status || 'available'}`} style={{ width: 'fit-content' }}>
+                                                            {item.status || 'available'}
+                                                        </span>
+                                                    </div>
+                                                    {item.assigned_names && (
+                                                        <div className="detail-item">
+                                                            <span className="label">Assigned To</span>
+                                                            <span className="value">{item.assigned_names}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="detail-item">
+                                                        <span className="label">Category</span>
+                                                        <span className="value" style={{ textTransform: 'capitalize' }}>
+                                                            {item.category.replace('_', ' ')}
+                                                        </span>
                                                     </div>
                                                 </div>
 
-                                                {cred.url && (
-                                                    <div className="detail-item full-width">
-                                                        <span className="label">URL</span>
-                                                        <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`} target="_blank" rel="noopener noreferrer" className="mobile-link">
-                                                            {cred.url}
-                                                        </a>
-                                                    </div>
-                                                )}
-
-                                                {cred.description && (
-                                                    <div className="detail-item full-width">
-                                                        <span className="label">Description</span>
-                                                        <span className="value">{cred.description}</span>
-                                                    </div>
-                                                )}
+                                                <div className="mobile-actions">
+                                                    {hasPermission('asset.credentials.manage') && (
+                                                        <>
+                                                            {item.status === 'available' ? (
+                                                                <button
+                                                                    className="action-btn checkout"
+                                                                    style={{ backgroundColor: '#2563eb', color: 'white', gridColumn: 'span 2' }}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOpenCheckOut(item);
+                                                                    }}
+                                                                >
+                                                                    <FiLogOut /> Check Out
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    className="action-btn checkin"
+                                                                    style={{ backgroundColor: '#10b981', color: 'white', gridColumn: 'span 2' }}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOpenCheckIn(item);
+                                                                    }}
+                                                                >
+                                                                    <FiCheckCircle /> Check In
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                className="action-btn edit"
+                                                                onClick={() => handleEditClick(item.id)}
+                                                            >
+                                                                <FiEdit2 /> <span>Edit</span>
+                                                            </button>
+                                                            <button
+                                                                className="action-btn delete"
+                                                                onClick={() => handleDeleteClick(item)}
+                                                            >
+                                                                <FiTrash2 /> <span>Delete</span>
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
-
-                                            <div className="mobile-actions">
-                                                {hasPermission('asset.credentials.manage') && (
-                                                    <>
-                                                        <button
-                                                            className="action-btn edit"
-                                                            onClick={() => handleEditClick(cred.id)}
-                                                        >
-                                                            <FiEdit2 /> <span>Edit</span>
-                                                        </button>
-                                                        <button
-                                                            className="action-btn delete"
-                                                            onClick={() => handleDeleteClick(cred)}
-                                                        >
-                                                            <FiTrash2 /> <span>Delete</span>
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                                        )}
+                                    </div>
+                                ))
+                            }
+                        </div >
 
                         <Pagination
                             currentPage={currentPage}
@@ -430,7 +618,25 @@ const CredentialList = () => {
                         />
                     </>
                 )}
-            </div>
+            </div >
+
+            <CredentialCheckOutModal
+                isOpen={isCheckOutModalOpen}
+                onClose={handleCloseCheckOut}
+                onSuccess={handleActionSuccess}
+                credentialId={selectedCredential?.id}
+                credentialName={selectedCredential?.platform_name}
+                assignedUserIds={selectedCredential?.assigned_ids ? selectedCredential.assigned_ids.toString().split(',') : []}
+            />
+
+            <CredentialCheckInModal
+                isOpen={isCheckInModalOpen}
+                onClose={handleCloseCheckIn}
+                onSuccess={handleActionSuccess}
+                credentialId={selectedCredential?.id}
+                credentialName={selectedCredential?.platform_name}
+                assignedUsers={selectedCredential ? getAssignedUsers(selectedCredential) : []}
+            />
 
             <CredentialModal
                 isOpen={showModal}
@@ -439,13 +645,15 @@ const CredentialList = () => {
                 credentialId={selectedCredentialId}
             />
 
-            {showToast && (
-                <Toast
-                    message={toastMessage}
-                    type="success"
-                    onClose={() => setShowToast(false)}
-                />
-            )}
+            {
+                showToast && (
+                    <Toast
+                        message={toastMessage}
+                        type="success"
+                        onClose={() => setShowToast(false)}
+                    />
+                )
+            }
 
             <ConfirmationModal
                 isOpen={showDeleteModal}
@@ -456,7 +664,7 @@ const CredentialList = () => {
                 confirmText="Delete"
                 type="danger"
             />
-        </div>
+        </div >
     );
 };
 

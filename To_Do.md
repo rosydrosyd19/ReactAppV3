@@ -1,5 +1,6 @@
 ## New Feature 
-Menu baru Account & Password
+add-credential-assignments-table
+add-credential-checkout-support
 pada menu account & password tambahkan fitur cekin/cekout untuk di berikan ke asset atau ke user
 
 Menu baru List IP Address
