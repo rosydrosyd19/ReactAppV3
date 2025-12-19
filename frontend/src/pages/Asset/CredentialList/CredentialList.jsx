@@ -119,10 +119,50 @@ const CredentialList = () => {
         }));
     };
 
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
-        setToastMessage('Copied to clipboard!');
-        setShowToast(true);
+    const copyToClipboard = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(text);
+                setToastMessage('Copied to clipboard!');
+                setShowToast(true);
+            } catch (err) {
+                console.error('Failed to copy credentials: ', err);
+                fallbackCopyTextToClipboard(text);
+            }
+        } else {
+            fallbackCopyTextToClipboard(text);
+        }
+    };
+
+    const fallbackCopyTextToClipboard = (text) => {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            var successful = document.execCommand('copy');
+            if (successful) {
+                setToastMessage('Copied to clipboard!');
+                setShowToast(true);
+            } else {
+                setToastMessage('Failed to copy');
+                setShowToast(true);
+            }
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+            setToastMessage('Failed to copy');
+            setShowToast(true);
+        }
+
+        document.body.removeChild(textArea);
     };
 
     // Mobile State

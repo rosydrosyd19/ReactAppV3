@@ -23,8 +23,8 @@ app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOAD_DIR |
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/sysadmin', require('./routes/sysadmin'));
-app.use('/api/asset', require('./routes/asset'));
 app.use('/api/asset/credentials', require('./routes/assetCredentials'));
+app.use('/api/asset', require('./routes/asset'));
 
 // Health check
 app.get('/api/health', (req, res) => {
