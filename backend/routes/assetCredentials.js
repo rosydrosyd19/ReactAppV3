@@ -11,7 +11,7 @@ router.get('/', authenticateToken, checkPermission('asset.credentials.view'), as
             SELECT c.*, u.username as created_by_name 
             FROM asset_credentials c
             LEFT JOIN sysadmin_users u ON c.created_by = u.id
-            WHERE 1=1
+            WHERE (c.is_deleted = FALSE OR c.is_deleted IS NULL)
         `;
         const params = [];
 
@@ -44,7 +44,7 @@ router.get('/:id', authenticateToken, checkPermission('asset.credentials.view'),
             SELECT c.*, u.username as created_by_name 
             FROM asset_credentials c
             LEFT JOIN sysadmin_users u ON c.created_by = u.id
-            WHERE c.id = ?
+            WHERE c.id = ? AND (c.is_deleted = FALSE OR c.is_deleted IS NULL)
         `, [req.params.id]);
 
         if (rows.length === 0) {
@@ -109,7 +109,7 @@ router.put('/:id', authenticateToken, checkPermission('asset.credentials.manage'
 // Delete credential
 router.delete('/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
     try {
-        await db.query('DELETE FROM asset_credentials WHERE id = ?', [req.params.id]);
+        await db.query('UPDATE asset_credentials SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Credential deleted successfully' });
     } catch (error) {
         console.error('Error deleting credential:', error);
