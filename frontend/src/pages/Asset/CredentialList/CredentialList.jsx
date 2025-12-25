@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import CredentialModal from './CredentialModal';
@@ -29,6 +30,7 @@ import {
 import './CredentialList.css';
 
 const CredentialList = () => {
+    const navigate = useNavigate();
     const { hasPermission } = useAuth();
     const [credentials, setCredentials] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -446,6 +448,13 @@ const CredentialList = () => {
                                                         <>
                                                             <button
                                                                 className="btn-icon"
+                                                                title="View Details"
+                                                                onClick={() => navigate(`/asset/credentials/${item.id}`)}
+                                                            >
+                                                                <FiEye />
+                                                            </button>
+                                                            <button
+                                                                className="btn-icon"
                                                                 title="Edit"
                                                                 onClick={() => handleEditClick(item.id)}
                                                             >
@@ -469,6 +478,15 @@ const CredentialList = () => {
                                                                 </button>
                                                                 {activeDropdownId === item.id && (
                                                                     <div className="action-dropdown-menu">
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                navigate(`/asset/credentials/${item.id}`);
+                                                                                setActiveDropdownId(null);
+                                                                            }}
+                                                                        >
+                                                                            <FiEye /> View Details
+                                                                        </button>
                                                                         <button
                                                                             className="dropdown-item"
                                                                             onClick={() => {
@@ -593,8 +611,18 @@ const CredentialList = () => {
                                                     {hasPermission('asset.credentials.manage') && (
                                                         <>
                                                             <button
+                                                                className="action-btn view"
+                                                                style={{ backgroundColor: '#6366f1', color: 'white' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    navigate(`/asset/credentials/${item.id}`);
+                                                                }}
+                                                            >
+                                                                <FiEye /> <span>View</span>
+                                                            </button>
+                                                            <button
                                                                 className="action-btn checkout"
-                                                                style={{ backgroundColor: '#2563eb', color: 'white', gridColumn: item.status !== 'available' ? 'span 1' : 'span 2' }}
+                                                                style={{ backgroundColor: '#2563eb', color: 'white' }}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleOpenCheckOut(item);
