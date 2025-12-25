@@ -4,6 +4,29 @@ const db = require('../config/database');
 const { verifyToken: authenticateToken, checkPermission } = require('../middleware/auth');
 
 // Get all credentials
+router.get('/my-assignments', authenticateToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT c.*, aca.assigned_at
+            FROM asset_credentials c
+            INNER JOIN asset_credential_assignments aca ON c.id = aca.credential_id
+            WHERE aca.user_id = ? AND (c.is_deleted = FALSE OR c.is_deleted IS NULL)
+            ORDER BY aca.assigned_at DESC
+        `;
+
+        const rows = await db.query(query, [req.user.id]);
+
+        const safeRows = JSON.parse(JSON.stringify(rows, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+        ));
+
+        res.json({ success: true, data: safeRows });
+    } catch (error) {
+        console.error('Error fetching my assignments:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch assignments' });
+    }
+});
+
 router.get('/', authenticateToken, checkPermission('asset.credentials.view'), async (req, res) => {
     try {
         const { search, category } = req.query;

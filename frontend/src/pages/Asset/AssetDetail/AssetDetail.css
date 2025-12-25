@@ -409,7 +409,31 @@
     }
 
     /* Ensure padding is consistent */
+    /* Ensure padding is consistent */
     .user-detail.asset-detail-override .card-body {
         padding: 1rem;
+    }
+
+    /* Generic Desktop/Mobile toggle for tables */
+    .desktop-table-view {
+        display: none;
+        /* Hidden on mobile */
+    }
+
+    .mobile-list-view {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Default state (Desktop) - Wrapped to prevent overriding mobile styles */
+@media (min-width: 769px) {
+    .mobile-list-view {
+        display: none;
+    }
+
+    .desktop-table-view {
+        display: block;
     }
 }

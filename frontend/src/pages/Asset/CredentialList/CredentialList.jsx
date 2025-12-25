@@ -359,7 +359,6 @@ const CredentialList = () => {
                                         <th>Password</th>
                                         <th>Category</th>
                                         <th>Status</th>
-                                        <th>Assigned To</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -426,21 +425,6 @@ const CredentialList = () => {
                                                 <span className={`status-badge ${item.status || 'available'}`}>
                                                     {item.status || 'available'}
                                                 </span>
-                                            </td>
-                                            <td>
-                                                <div className="assigned-info" style={{ fontSize: '13px' }}>
-                                                    {item.assigned_names && (
-                                                        <div>
-                                                            <strong>Pop: {item.assigned_names}</strong>
-                                                        </div>
-                                                    )}
-                                                    {item.assigned_asset_names && (
-                                                        <div>
-                                                            <strong>Asset: {item.assigned_asset_names}</strong>
-                                                        </div>
-                                                    )}
-                                                    {!item.assigned_names && !item.assigned_asset_names && '-'}
-                                                </div>
                                             </td>
                                             <td>
                                                 <div className="action-buttons">

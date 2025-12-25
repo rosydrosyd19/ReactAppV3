@@ -31,8 +31,27 @@ import {
     FiLogOut,
     FiLogIn,
     FiClock,
-    FiPrinter
+    FiPrinter,
+    FiLock,
+    FiEye,
+    FiEyeOff
 } from 'react-icons/fi';
+
+const PasswordReveal = ({ password }) => {
+    const [visible, setVisible] = useState(false);
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>{visible ? password : '••••••••'}</span>
+            <button
+                type="button"
+                onClick={() => setVisible(!visible)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '4px' }}
+            >
+                {visible ? <FiEyeOff /> : <FiEye />}
+            </button>
+        </div>
+    );
+};
 
 const AssetDetail = ({ readOnly = false }) => {
     const { id } = useParams();
@@ -264,6 +283,8 @@ const AssetDetail = ({ readOnly = false }) => {
     const displayMaintenance = maintenanceRecords.length > 0
         ? maintenanceRecords
         : (asset?.maintenance_records || []);
+
+    const childAssets = asset?.child_assets || [];
 
     return (
         <div className="user-detail asset-detail-override">
@@ -671,6 +692,166 @@ const AssetDetail = ({ readOnly = false }) => {
                         </div>
                     )
                 }
+
+                {/* Child Assets / Assigned Assets Card */}
+                {childAssets.length > 0 && (
+                    <div className="card">
+                        <div className="card-header">
+                            <h2><FiPackage /> Assigned Assets</h2>
+                        </div>
+                        <div className="card-body">
+                            {/* Desktop Table View */}
+                            <div className="table-responsive desktop-table-view">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Asset Tag</th>
+                                            <th>Asset Name</th>
+                                            <th>Category</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {childAssets.map(child => (
+                                            <tr key={child.id}>
+                                                <td>{child.asset_tag}</td>
+                                                <td>{child.asset_name}</td>
+                                                <td>{child.category_name}</td>
+                                                <td>{child.location_name || '-'}</td>
+                                                <td>
+                                                    <span className={`status-badge-sm ${child.status}`}>
+                                                        {child.status}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className="btn-icon"
+                                                        onClick={() => navigate(`/asset/items/${child.id}`)}
+                                                        title="View Asset"
+                                                    >
+                                                        <FiArrowLeft style={{ transform: 'rotate(180deg)' }} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile List View */}
+                            <div className="mobile-list-view">
+                                {childAssets.map(child => (
+                                    <div key={child.id} className="maintenance-card-mobile">
+                                        <div className="maintenance-card-header">
+                                            <div className="maintenance-type">
+                                                <FiPackage /> {child.asset_name}
+                                            </div>
+                                            <span className={`status-badge-sm ${child.status}`}>
+                                                {child.status}
+                                            </span>
+                                        </div>
+                                        <div className="maintenance-card-body">
+                                            <div className="maintenance-date">
+                                                <FiHash /> <span>{child.asset_tag}</span>
+                                            </div>
+                                            <div className="maintenance-meta">
+                                                <span><FiTag /> {child.category_name}</span>
+                                                {child.location_name && <span><FiMapPin /> {child.location_name}</span>}
+                                            </div>
+                                            <button
+                                                className="btn btn-outline btn-sm"
+                                                onClick={() => navigate(`/asset/items/${child.id}`)}
+                                                style={{ marginTop: '0.5rem', width: '100%' }}
+                                            >
+                                                <FiEye /> View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Assigned Credentials Card - Hide in readOnly mode (Scan) */}
+                {!readOnly && asset.assigned_credentials && asset.assigned_credentials.length > 0 && (
+                    <div className="card">
+                        <div className="card-header">
+                            <h2><FiLock /> Assigned Credentials</h2>
+                        </div>
+                        <div className="card-body">
+                            {/* Desktop Table View */}
+                            <div className="table-responsive desktop-table-view">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Platform</th>
+                                            <th>Username</th>
+                                            <th>URL</th>
+                                            <th>Password</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {asset.assigned_credentials.map(cred => (
+                                            <tr key={cred.id}>
+                                                <td>{cred.platform_name}</td>
+                                                <td>{cred.username}</td>
+                                                <td>
+                                                    {cred.url ? (
+                                                        <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>
+                                                            {cred.url}
+                                                        </a>
+                                                    ) : '-'}
+                                                </td>
+                                                <td style={{ fontFamily: 'monospace' }}>
+                                                    <PasswordReveal password={cred.password} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile List View */}
+                            <div className="mobile-list-view">
+                                {asset.assigned_credentials.map(cred => (
+                                    <div key={cred.id} className="maintenance-card-mobile">
+                                        <div className="maintenance-card-header">
+                                            <div className="maintenance-type" style={{ wordBreak: 'break-word' }}>
+                                                <FiLock style={{ flexShrink: 0 }} /> {cred.platform_name}
+                                            </div>
+                                        </div>
+                                        <div className="maintenance-card-body">
+                                            <div className="maintenance-date">
+                                                <FiUser style={{ flexShrink: 0 }} />
+                                                <span style={{ wordBreak: 'break-word' }}>{cred.username}</span>
+                                            </div>
+                                            {cred.url && (
+                                                <div className="maintenance-date" style={{ alignItems: 'flex-start' }}>
+                                                    <FiArrowLeft style={{ transform: 'rotate(135deg)', marginTop: '4px', flexShrink: 0 }} />
+                                                    <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{ color: 'var(--primary-color)', wordBreak: 'break-all', lineHeight: '1.4' }}>
+                                                        {cred.url}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            <div className="maintenance-meta" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem' }}>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Password:</span>
+                                                <div style={{ fontFamily: 'monospace', width: '100%', padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', overflowX: 'auto' }}>
+                                                    <PasswordReveal password={cred.password} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* System Information Card */}
                 <div className="card">

@@ -253,6 +253,29 @@ router.get('/assets/:id', checkPermission('asset.items.view'), async (req, res) 
 
         asset.history = history;
 
+        // Get assigned child assets
+        const childAssets = await db.query(`
+            SELECT 
+                a.id, a.asset_tag, a.asset_name, a.status, 
+                c.category_name, l.location_name
+            FROM asset_items a
+            LEFT JOIN asset_categories c ON a.category_id = c.id
+            LEFT JOIN asset_locations l ON a.location_id = l.id
+            WHERE a.assigned_to_asset_id = ? AND (a.is_deleted = FALSE OR a.is_deleted IS NULL)
+        `, [req.params.id]);
+
+        asset.child_assets = childAssets;
+
+        // Get assigned credentials
+        const assignedCredentials = await db.query(`
+            SELECT c.*
+            FROM asset_credentials c
+            INNER JOIN asset_credential_assignments aca ON c.id = aca.credential_id
+            WHERE aca.asset_id = ? AND (c.is_deleted = FALSE OR c.is_deleted IS NULL)
+        `, [req.params.id]);
+
+        asset.assigned_credentials = assignedCredentials;
+
         res.json({ success: true, data: asset });
     } catch (error) {
         console.error('Get asset error:', error);

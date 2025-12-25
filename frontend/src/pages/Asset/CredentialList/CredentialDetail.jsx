@@ -281,7 +281,13 @@ const CredentialDetail = () => {
                             <div className="info-item">
                                 <label>Assigned Users</label>
                                 {credential.assigned_names ? (
-                                    <p>{credential.assigned_names}</p>
+                                    <div className="helper-badges">
+                                        {credential.assigned_names.split(', ').map((name, index) => (
+                                            <span key={index} className="assignment-badge">
+                                                <FiUser /> {name}
+                                            </span>
+                                        ))}
+                                    </div>
                                 ) : (
                                     <p className="text-muted">-</p>
                                 )}
@@ -289,7 +295,13 @@ const CredentialDetail = () => {
                             <div className="info-item">
                                 <label>Assigned Assets</label>
                                 {credential.assigned_asset_names ? (
-                                    <p>{credential.assigned_asset_names}</p>
+                                    <div className="helper-badges">
+                                        {credential.assigned_asset_names.split(', ').map((name, index) => (
+                                            <span key={index} className="assignment-badge">
+                                                <FiBox /> {name}
+                                            </span>
+                                        ))}
+                                    </div>
                                 ) : (
                                     <p className="text-muted">-</p>
                                 )}
