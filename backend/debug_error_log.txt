@@ -1,7 +1,0 @@
-[Category Error]: Do not know how to serialize a BigInt
-TypeError: Do not know how to serialize a BigInt
-    at JSON.stringify (<anonymous>)
-    at stringify (C:\Users\Rosyd\Documents\React-js\ReactAppV3\backend\node_modules\express\lib\response.js:1160:12)
-    at ServerResponse.json (C:\Users\Rosyd\Documents\React-js\ReactAppV3\backend\node_modules\express\lib\response.js:271:14)
-    at C:\Users\Rosyd\Documents\React-js\ReactAppV3\backend\routes\asset.js:558:25
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

@@ -25,7 +25,8 @@ import {
     FiPackage,
     FiChevronDown,
     FiLogOut,
-    FiMoreVertical
+    FiMoreVertical,
+    FiCopy
 } from 'react-icons/fi';
 
 const AssetList = () => {
@@ -38,6 +39,7 @@ const AssetList = () => {
     // Modal State
     const [showAssetModal, setShowAssetModal] = useState(false);
     const [selectedAssetId, setSelectedAssetId] = useState(null);
+    const [cloneAssetId, setCloneAssetId] = useState(null);
 
     const [statusFilter, setStatusFilter] = useState('');
     const [expandedItemId, setExpandedItemId] = useState(null);
@@ -234,6 +236,13 @@ const AssetList = () => {
 
     const handleEditClick = (id) => {
         setSelectedAssetId(id);
+        setCloneAssetId(null);
+        setShowAssetModal(true);
+    };
+
+    const handleCloneClick = (id) => {
+        setSelectedAssetId(null);
+        setCloneAssetId(id);
         setShowAssetModal(true);
     };
 
@@ -480,6 +489,17 @@ const AssetList = () => {
                                                                         {asset.status === 'maintenance' ? "Update Maintenance" : "Maintenance"}
                                                                     </button>
                                                                 )}
+                                                                {hasPermission('asset.items.create') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleCloneClick(asset.id);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiCopy /> Clone Asset
+                                                                    </button>
+                                                                )}
                                                                 <button
                                                                     className="dropdown-item"
                                                                     onClick={() => {
@@ -630,15 +650,18 @@ const AssetList = () => {
                 onClose={() => setShowAssetModal(false)}
                 onSuccess={handleModalSuccess}
                 assetId={selectedAssetId}
+                cloneAssetId={cloneAssetId}
             />
 
-            {showToast && (
-                <Toast
-                    message={toastMessage}
-                    type="success"
-                    onClose={() => setShowToast(false)}
-                />
-            )}
+            {
+                showToast && (
+                    <Toast
+                        message={toastMessage}
+                        type="success"
+                        onClose={() => setShowToast(false)}
+                    />
+                )
+            }
 
             <ConfirmationModal
                 isOpen={showDeleteModal}
@@ -688,7 +711,7 @@ const AssetList = () => {
                 maintenanceId={maintenanceRecord?.id}
                 initialData={maintenanceRecord}
             />
-        </div>
+        </div >
     );
 };
 

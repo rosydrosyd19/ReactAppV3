@@ -6,8 +6,9 @@ import Toast from '../../../components/Toast/Toast';
 import { QuickAddCategoryModal, QuickAddLocationModal, QuickAddSupplierModal } from './QuickAddModals';
 import './AssetModal.css';
 
-const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
+const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId = null }) => {
     const isEditMode = !!assetId;
+    const isCloneMode = !!cloneAssetId;
 
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -50,20 +51,23 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
         if (isOpen) {
             if (isEditMode) {
                 if (categories.length === 0) fetchDependencies();
-                fetchAsset();
+                fetchAsset(assetId);
+            } else if (isCloneMode) {
+                if (categories.length === 0) fetchDependencies();
+                fetchAsset(cloneAssetId, true);
             } else {
                 if (categories.length === 0) fetchDependencies();
                 resetForm();
             }
         }
-    }, [isOpen, assetId]);
+    }, [isOpen, assetId, cloneAssetId]);
 
     // Separate effect for autogenerating tag
     useEffect(() => {
-        if (isOpen && !isEditMode) {
+        if (isOpen && !isEditMode && !formData.asset_tag) {
             fetchNextAssetTag();
         }
-    }, [isOpen, isEditMode, formData.category_id, formData.location_id, formData.purchase_date]);
+    }, [isOpen, isEditMode, formData.category_id, formData.location_id, formData.purchase_date, formData.asset_tag]);
 
     // Helper to show toast
     const showToast = (message, type = 'success') => {
@@ -129,18 +133,18 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
         }
     };
 
-    const fetchAsset = async () => {
+    const fetchAsset = async (id, isClone = false) => {
         try {
             setLoading(true);
-            const response = await axios.get(`/asset/assets/${assetId}`);
+            const response = await axios.get(`/asset/assets/${id}`);
             if (response.data.success) {
                 const asset = response.data.data;
                 setFormData({
-                    asset_tag: asset.asset_tag,
+                    asset_tag: isClone ? '' : asset.asset_tag, // Clear tag if cloning
                     asset_name: asset.asset_name,
                     category_id: asset.category_id || '',
                     description: asset.description || '',
-                    serial_number: asset.serial_number || '',
+                    serial_number: isClone ? '' : (asset.serial_number || ''), // Clear serial if cloning
                     model: asset.model || '',
                     manufacturer: asset.manufacturer || '',
                     purchase_date: asset.purchase_date ? asset.purchase_date.split('T')[0] : '',
@@ -148,12 +152,26 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
                     supplier_id: asset.supplier_id || '',
                     warranty_expiry: asset.warranty_expiry ? asset.warranty_expiry.split('T')[0] : '',
                     location_id: asset.location_id || '',
-                    status: asset.status,
+                    status: isClone ? 'available' : asset.status, // Reset status to available if cloning
                     condition_status: asset.condition_status || 'good',
                     notes: asset.notes || ''
                 });
                 if (asset.image_url) {
                     setImagePreview(`${import.meta.env.VITE_API_URL}${asset.image_url}`);
+                    // Note: We can't easily clone the actual file object for re-upload without fetching it as blob
+                    // For now, we'll keep the preview but user might need to re-upload if they want to change it
+                    // Or if backend supports copying image from URL. 
+                    // To keep it simple, we might want to clear image on clone or let it persist visually 
+                    // but we need to handle the submission correctly.
+                    // If we want to copy the image, the backend create endpoint would need to handle 'image_url' input 
+                    // or we fetch blob here. 
+                    // Let's clear image for now to avoid confusion or specific backend requirement complexity 
+                    // unless requested otherwise.
+                    if (isClone) {
+                        setImagePreview(null);
+                        // Optional: If we want to keep the image, we'd need to handle it.
+                        // Let's leave it cleared for clean clone state as per "create new" paradigm
+                    }
                 }
             }
         } catch (error) {
@@ -253,7 +271,9 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null }) => {
             <div className="modal-overlay" onClick={onClose}>
                 <div className="modal asset-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="modal-header">
-                        <h2 className="modal-title">{isEditMode ? 'Edit Asset' : 'Add New Asset'}</h2>
+                        <h2 className="modal-title">
+                            {isEditMode ? 'Edit Asset' : isCloneMode ? 'Clone Asset' : 'Add New Asset'}
+                        </h2>
                         <button className="modal-close" onClick={onClose}>
                             <FiX />
                         </button>
