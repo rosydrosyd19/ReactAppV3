@@ -1,10 +1,11 @@
 ## New Feature 
+----------------------------
 tambahkan fitur view credential detail dengan referensi dari asset detail
 
 hilangkan kolom Assigned To pada credential list
 
 tambahakan credential apa saja yang sudah di assign ke user di halaman /profile, user detail (asset yang di assign ke user) dan asset detail yang di assign ke asset (asset yang di assign ke asset)
-
+----------------------------
 
 Menu baru List IP Address
 

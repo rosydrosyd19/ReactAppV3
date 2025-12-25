@@ -49,6 +49,33 @@ const AssetDetail = ({ readOnly = false }) => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
+    const renderDescriptionWithLinks = (text) => {
+        if (!text) return '-';
+
+        // Regular expression to find URLs
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+        const parts = text.split(urlRegex);
+
+        return parts.map((part, index) => {
+            if (part.match(urlRegex)) {
+                return (
+                    <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return part;
+        });
+    };
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showCheckOutModal, setShowCheckOutModal] = useState(false);
     const [showCheckInModal, setShowCheckInModal] = useState(false);
@@ -372,6 +399,10 @@ const AssetDetail = ({ readOnly = false }) => {
                             <div className="info-item">
                                 <label><FiPackage /> Asset Name</label>
                                 <p>{asset.asset_name}</p>
+                            </div>
+                            <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                                <label><FiInfo /> Description</label>
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{renderDescriptionWithLinks(asset.description)}</p>
                             </div>
                             <div className="info-item">
                                 <label><FiPackage /> Category</label>
