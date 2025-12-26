@@ -383,6 +383,7 @@ const AssetList = () => {
                                             />
                                         </th>
                                         <th>Asset Tag</th>
+                                        <th>Serial Number</th>
                                         <th>Name</th>
                                         <th>Category</th>
                                         <th>Location</th>
@@ -404,6 +405,7 @@ const AssetList = () => {
                                             <td>
                                                 <strong>{asset.asset_tag}</strong>
                                             </td>
+                                            <td>{asset.serial_number || '-'}</td>
                                             <td>{asset.asset_name}</td>
                                             <td>{asset.category_name || '-'}</td>
                                             <td>{asset.location_name || '-'}</td>
@@ -547,6 +549,10 @@ const AssetList = () => {
                                     {expandedItemId === asset.id && (
                                         <div className="mobile-list-details">
                                             <div className="detail-grid">
+                                                <div className="detail-item">
+                                                    <span className="label">Serial Number</span>
+                                                    <span className="value">{asset.serial_number || '-'}</span>
+                                                </div>
                                                 <div className="detail-item">
                                                     <span className="label">Status</span>
                                                     <span className="value" style={{ textTransform: 'capitalize' }}>{asset.status}</span>
@@ -695,6 +701,7 @@ const AssetList = () => {
                 assetId={qrAsset?.id}
                 assetName={qrAsset?.asset_name}
                 assetTag={qrAsset?.asset_tag}
+                serialNumber={qrAsset?.serial_number}
             />
 
             <BulkQRModal

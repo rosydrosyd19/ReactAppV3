@@ -3,10 +3,21 @@ import QRCode from 'react-qr-code';
 import { FiX, FiDownload, FiPrinter } from 'react-icons/fi';
 import './AssetModal.css'; // Reusing AssetModal styles for consistency
 
-const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag }) => {
+const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag, serialNumber }) => {
     if (!isOpen) return null;
 
     const qrValue = `${window.location.origin}/asset/scan/${assetId}`;
+
+    // Logic for serial number display
+    const getSerialDisplay = (sn) => {
+        if (!sn) return '-';
+        if (sn.length > 7) {
+            return '...' + sn.slice(-7);
+        }
+        return sn;
+    };
+
+    const serialDisplay = getSerialDisplay(serialNumber);
 
     const handlePrint = () => {
         const printWindow = window.open('', '', 'height=600,width=600');
@@ -37,7 +48,7 @@ const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag }) => {
                 </head>
                 <body>
                     <div class="qr-container">
-                        <h2>${assetName}</h2>
+                        <h2>${serialDisplay}</h2>
                         <div id="qr-code"></div>
                         <p class="tag">${assetTag}</p>
                     </div>
@@ -142,7 +153,7 @@ const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag }) => {
                     />
                 </div>
 
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: 'var(--text-primary)' }}>{assetName}</h3>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: 'var(--text-primary)' }}>{serialDisplay}</h3>
                 <span style={{
                     fontSize: '0.85rem',
                     color: 'var(--text-secondary)',

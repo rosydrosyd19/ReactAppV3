@@ -193,6 +193,18 @@ const AssetDetail = ({ readOnly = false }) => {
 
     const handlePrintQR = () => {
         const printWindow = window.open('', '', 'width=600,height=600');
+
+        // Logic for serial number display
+        const getSerialDisplay = (sn) => {
+            if (!sn) return '-';
+            if (sn.length > 7) {
+                return '...' + sn.slice(-7);
+            }
+            return sn;
+        };
+
+        const serialDisplay = getSerialDisplay(asset.serial_number);
+
         printWindow.document.write(`
             <html>
                 <head>
@@ -220,7 +232,7 @@ const AssetDetail = ({ readOnly = false }) => {
                 </head>
                 <body>
                     <div class="qr-container">
-                        <h2>${asset.asset_name}</h2>
+                        <h2>${serialDisplay}</h2>
                         <div id="qr-code"></div>
                         <p class="tag">${asset.asset_tag}</p>
                     </div>

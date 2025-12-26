@@ -63,6 +63,13 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
     const [settings, setSettings] = useState(DEFAULT_PRESETS[0]);
     const [presetName, setPresetName] = useState('');
 
+    const getSerialDisplay = (asset) => {
+        const sn = asset.serial_number;
+        if (!sn) return '-';
+        if (sn.length > 7) return '...' + sn.slice(-7);
+        return sn;
+    };
+
     useEffect(() => {
         const saved = localStorage.getItem(PRESETS_KEY);
         if (saved) {
@@ -331,7 +338,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                         <div class="qr-grid">
                             ${assets.map(asset => `
                                 <div class="qr-item">
-                                    <h3>${asset.asset_name.slice(0, 7)}</h3>
+                                    <h3>${getSerialDisplay(asset)}</h3>
                                     <div class="qr-wrapper" id="qr-wrapper-${asset.id}">
                                         <!-- SVG will be injected here -->
                                     </div>
@@ -656,7 +663,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                             lineHeight: 1.1,
                                             color: 'black'
                                         }}>
-                                            {asset.asset_name.slice(0, 7)}
+                                            {getSerialDisplay(asset)}
                                         </h3>
                                     )}
                                     <div id={`qr-code-bulk-${asset.id}`} style={{ width: `${settings.qrSize}%`, height: `${settings.qrSize}%`, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
