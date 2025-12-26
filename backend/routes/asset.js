@@ -99,10 +99,12 @@ router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
         u.full_name as assigned_to_name,
         creator.username as created_by_username,
         parent_asset.asset_name as assigned_to_asset_name,
-        parent_asset.asset_tag as assigned_to_asset_tag
+        parent_asset.asset_tag as assigned_to_asset_tag,
+        al.location_name as assigned_location_name
       FROM asset_items a
       LEFT JOIN asset_categories c ON a.category_id = c.id
       LEFT JOIN asset_locations l ON a.location_id = l.id
+      LEFT JOIN asset_locations al ON a.assigned_location_id = al.id
       LEFT JOIN asset_suppliers s ON a.supplier_id = s.id
       LEFT JOIN sysadmin_users u ON a.assigned_to = u.id
       LEFT JOIN sysadmin_users creator ON a.created_by = creator.id
@@ -416,7 +418,7 @@ router.post('/assets/:id/checkin', checkPermission('asset.items.checkin'), async
         }
 
         // Update asset
-        let updateQuery = "UPDATE asset_items SET status = 'available', assigned_to = NULL, assigned_to_asset_id = NULL";
+        let updateQuery = "UPDATE asset_items SET status = 'available', assigned_to = NULL, assigned_to_asset_id = NULL, assigned_location_id = NULL";
         const updateParams = [];
 
         if (location_id) {
@@ -514,13 +516,14 @@ router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), asy
         const updateParams = [];
 
         if (user_id) {
-            updateQuery += ", assigned_to = ?, location_id = NULL, assigned_to_asset_id = NULL";
+            updateQuery += ", assigned_to = ?, assigned_to_asset_id = NULL, assigned_location_id = NULL";
             updateParams.push(user_id);
         } else if (location_id) {
-            updateQuery += ", location_id = ?, assigned_to = NULL, assigned_to_asset_id = NULL";
+            // Checkout to location: Set assigned_location_id, clear others. HOME location (location_id) stays same.
+            updateQuery += ", assigned_location_id = ?, assigned_to = NULL, assigned_to_asset_id = NULL";
             updateParams.push(location_id);
         } else if (asset_id) {
-            updateQuery += ", assigned_to_asset_id = ?, assigned_to = NULL, location_id = NULL";
+            updateQuery += ", assigned_to_asset_id = ?, assigned_to = NULL, assigned_location_id = NULL";
             updateParams.push(asset_id);
         }
 

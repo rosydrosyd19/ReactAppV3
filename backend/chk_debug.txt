@@ -1,0 +1,14 @@
+{"notes":"","due_date":"","location_id":2}
+Asset Status: available
+{"notes":"","due_date":"","location_id":2}
+Asset Status: available
+{"notes":"","due_date":"","location_id":17}
+Asset Status: available
+{"notes":"","due_date":"","location_id":1}
+Asset Status: available
+{"notes":"","due_date":"","location_id":14}
+Asset Status: available
+{"notes":"","due_date":"","user_id":34}
+Asset Status: available
+{"notes":"","due_date":"","asset_id":18}
+Asset Status: available
