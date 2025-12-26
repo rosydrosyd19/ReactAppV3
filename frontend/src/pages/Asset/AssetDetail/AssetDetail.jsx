@@ -286,6 +286,8 @@ const AssetDetail = ({ readOnly = false }) => {
 
     const childAssets = asset?.child_assets || [];
 
+    const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/api$/, '');
+
     return (
         <div className="user-detail asset-detail-override">
             <div className="page-header">
@@ -362,7 +364,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                 <label className="media-label">Asset Image</label>
                                 <div className="image-container">
                                     {asset.image_url ? (
-                                        <img src={asset.image_url} alt={asset.asset_name} className="asset-image" />
+                                        <img src={`${BASE_URL}${asset.image_url}`} alt={asset.asset_name} className="asset-image" />
                                     ) : (
                                         <div className="placeholder-image">
                                             <FiPackage />

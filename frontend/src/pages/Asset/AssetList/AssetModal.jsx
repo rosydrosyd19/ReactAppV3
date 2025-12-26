@@ -157,7 +157,8 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                     notes: asset.notes || ''
                 });
                 if (asset.image_url) {
-                    setImagePreview(`${import.meta.env.VITE_API_URL}${asset.image_url}`);
+                    const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/api$/, '');
+                    setImagePreview(`${BASE_URL}${asset.image_url}`);
                     // Note: We can't easily clone the actual file object for re-upload without fetching it as blob
                     // For now, we'll keep the preview but user might need to re-upload if they want to change it
                     // Or if backend supports copying image from URL. 

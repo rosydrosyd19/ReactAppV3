@@ -6,9 +6,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 // Create axios instance
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: API_BASE_URL,
+    // headers: {
+    //     'Content-Type': 'application/json', // Removed to allow axios to set content-type automatically (needed for FormData)
+    // },
 });
 
 // Request interceptor to add token
