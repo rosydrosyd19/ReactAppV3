@@ -64,10 +64,10 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
 
     // Separate effect for autogenerating tag
     useEffect(() => {
-        if (isOpen && !isEditMode && !formData.asset_tag) {
+        if (isOpen && !isEditMode) {
             fetchNextAssetTag();
         }
-    }, [isOpen, isEditMode, formData.category_id, formData.location_id, formData.purchase_date, formData.asset_tag]);
+    }, [isOpen, isEditMode, formData.category_id, formData.location_id, formData.purchase_date]);
 
     // Helper to show toast
     const showToast = (message, type = 'success') => {
