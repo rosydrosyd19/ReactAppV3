@@ -540,6 +540,9 @@ const AssetList = () => {
                                                 <span className="category-badge-small">{asset.category_name || 'No Category'}</span>
                                             </div>
                                             <div className="asset-secondary-text">{asset.asset_name}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                                                SN: {asset.serial_number || '-'}
+                                            </div>
                                         </div>
                                         <div className="mobile-expand-icon">
                                             <FiChevronDown className={expandedItemId === asset.id ? 'rotated' : ''} />
