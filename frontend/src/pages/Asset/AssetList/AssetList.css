@@ -496,3 +496,14 @@
 .text-danger {
     color: var(--danger-color);
 }
+
+.duplicate-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+    margin-left: 6px;
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}

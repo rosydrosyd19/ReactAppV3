@@ -26,8 +26,10 @@ import {
     FiChevronDown,
     FiLogOut,
     FiMoreVertical,
-    FiCopy
+    FiCopy,
+    FiAlertCircle
 } from 'react-icons/fi';
+import { useMemo } from 'react';
 
 const AssetList = () => {
     const navigate = useNavigate();
@@ -219,8 +221,34 @@ const AssetList = () => {
     const filteredAssets = assets.filter(asset =>
         asset.asset_name.toLowerCase().includes(search.toLowerCase()) ||
         asset.asset_tag.toLowerCase().includes(search.toLowerCase()) ||
+        (asset.serial_number && asset.serial_number.toLowerCase().includes(search.toLowerCase())) ||
         (asset.category_name && asset.category_name.toLowerCase().includes(search.toLowerCase()))
     );
+
+    // Identify duplicate serial numbers
+    const duplicateSerialNumbers = useMemo(() => {
+        const serialCounts = {};
+        assets.forEach(asset => {
+            if (asset.serial_number) {
+                const sn = asset.serial_number.trim();
+                if (sn) {
+                    serialCounts[sn] = (serialCounts[sn] || 0) + 1;
+                }
+            }
+        });
+
+        const duplicates = new Set();
+        Object.entries(serialCounts).forEach(([sn, count]) => {
+            if (count > 1) {
+                duplicates.add(sn);
+            }
+        });
+        return duplicates;
+    }, [assets]);
+
+    const isDuplicateSerial = (serialNumber) => {
+        return serialNumber && duplicateSerialNumbers.has(serialNumber.trim());
+    };
 
     // Pagination Logic
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -405,7 +433,15 @@ const AssetList = () => {
                                             <td>
                                                 <strong>{asset.asset_tag}</strong>
                                             </td>
-                                            <td>{asset.serial_number || '-'}</td>
+                                            <td>
+                                                {asset.serial_number || '-'}
+                                                {isDuplicateSerial(asset.serial_number) && (
+                                                    <span
+                                                        className="duplicate-dot"
+                                                        title="Duplicate Serial Number"
+                                                    />
+                                                )}
+                                            </td>
                                             <td>{asset.asset_name}</td>
                                             <td>{asset.category_name || '-'}</td>
                                             <td>{asset.location_name || '-'}</td>
@@ -550,6 +586,13 @@ const AssetList = () => {
                                             <div className="asset-secondary-text">{asset.asset_name}</div>
                                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                                                 SN: {asset.serial_number || '-'}
+                                                {isDuplicateSerial(asset.serial_number) && (
+                                                    <span
+                                                        className="duplicate-dot"
+                                                        title="Duplicate Serial Number"
+                                                        style={{ marginLeft: '4px' }}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                         <div className="mobile-expand-icon">
@@ -562,7 +605,15 @@ const AssetList = () => {
                                             <div className="detail-grid">
                                                 <div className="detail-item">
                                                     <span className="label">Serial Number</span>
-                                                    <span className="value">{asset.serial_number || '-'}</span>
+                                                    <span className="value">
+                                                        {asset.serial_number || '-'}
+                                                        {isDuplicateSerial(asset.serial_number) && (
+                                                            <span
+                                                                className="duplicate-dot"
+                                                                title="Duplicate Serial Number"
+                                                            />
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 <div className="detail-item">
                                                     <span className="label">Status</span>
