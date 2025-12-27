@@ -5,7 +5,7 @@ import axios from '../../../utils/axios';
 const BaseQuickModal = ({ isOpen, onClose, title, onSubmit, children, loading }) => {
     if (!isOpen) return null;
     return (
-        <div className="modal-overlay" style={{ zIndex: 2000 }} onClick={onClose}>
+        <div className="modal-overlay" style={{ zIndex: 3000 }} onClick={onClose}>
             <div className="modal" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3 className="modal-title">{title}</h3>
