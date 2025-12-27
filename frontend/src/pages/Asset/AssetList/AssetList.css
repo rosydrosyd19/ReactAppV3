@@ -434,6 +434,11 @@
         background-color: var(--info-color);
         color: white;
     }
+
+    .action-btn.clone {
+        background-color: #8b5cf6;
+        color: white;
+    }
 }
 
 /* Action Dropdown Menu */

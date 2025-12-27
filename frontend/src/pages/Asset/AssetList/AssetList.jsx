@@ -413,9 +413,9 @@ const AssetList = () => {
                                         <th>Asset Tag</th>
                                         <th>Serial Number</th>
                                         <th>Name</th>
-                                        <th>Category</th>
                                         <th>Location</th>
                                         <th>Assigned To</th>
+                                        <th>Condition</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -443,7 +443,6 @@ const AssetList = () => {
                                                 )}
                                             </td>
                                             <td>{asset.asset_name}</td>
-                                            <td>{asset.category_name || '-'}</td>
                                             <td>{asset.location_name || '-'}</td>
                                             <td>
                                                 {asset.assigned_to_name
@@ -453,6 +452,11 @@ const AssetList = () => {
                                                         : asset.assigned_location_name
                                                             ? asset.assigned_location_name
                                                             : '-'}
+                                            </td>
+                                            <td>
+                                                <span style={{ textTransform: 'capitalize' }}>
+                                                    {asset.condition_status || '-'}
+                                                </span>
                                             </td>
                                             <td>
                                                 <span className={getStatusBadge(asset.status)}>
@@ -603,21 +607,14 @@ const AssetList = () => {
                                     {expandedItemId === asset.id && (
                                         <div className="mobile-list-details">
                                             <div className="detail-grid">
-                                                <div className="detail-item">
-                                                    <span className="label">Serial Number</span>
-                                                    <span className="value">
-                                                        {asset.serial_number || '-'}
-                                                        {isDuplicateSerial(asset.serial_number) && (
-                                                            <span
-                                                                className="duplicate-dot"
-                                                                title="Duplicate Serial Number"
-                                                            />
-                                                        )}
-                                                    </span>
-                                                </div>
+
                                                 <div className="detail-item">
                                                     <span className="label">Status</span>
                                                     <span className="value" style={{ textTransform: 'capitalize' }}>{asset.status}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Condition</span>
+                                                    <span className="value" style={{ textTransform: 'capitalize' }}>{asset.condition_status || '-'}</span>
                                                 </div>
                                                 <div className="detail-item">
                                                     <span className="label">Type</span>
@@ -639,6 +636,15 @@ const AssetList = () => {
                                             </div>
 
                                             <div className="mobile-actions">
+                                                {hasPermission('asset.items.create') && (
+                                                    <button
+                                                        className="action-btn clone"
+                                                        onClick={() => handleCloneClick(asset.id)}
+                                                        title="Clone Asset"
+                                                    >
+                                                        <FiCopy /> <span>Clone</span>
+                                                    </button>
+                                                )}
                                                 {asset.status === 'available' && hasPermission('asset.items.checkout') && (
                                                     <button
                                                         className="action-btn primary"
