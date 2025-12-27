@@ -222,20 +222,23 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
 
     // Quick Add Handlers
     const handleQuickCategorySuccess = (newCategory) => {
-        setCategories(prev => [...prev, { id: newCategory.id, category_name: newCategory.name }]);
-        handleSelectChange('category_id', newCategory.id);
+        const id = Number(newCategory.id);
+        setCategories(prev => [...prev, { id: id, category_name: newCategory.name }]);
+        handleSelectChange('category_id', id);
         showToast('Category added successfully!', 'success');
     };
 
     const handleQuickLocationSuccess = (newLocation) => {
-        setLocations(prev => [...prev, { id: newLocation.id, location_name: newLocation.name }]);
-        handleSelectChange('location_id', newLocation.id);
+        const id = Number(newLocation.id);
+        setLocations(prev => [...prev, { id: id, location_name: newLocation.name }]);
+        handleSelectChange('location_id', id);
         showToast('Location added successfully!', 'success');
     };
 
     const handleQuickSupplierSuccess = (newSupplier) => {
-        setSuppliers(prev => [...prev, { id: newSupplier.id, supplier_name: newSupplier.name }]);
-        handleSelectChange('supplier_id', newSupplier.id);
+        const id = Number(newSupplier.id);
+        setSuppliers(prev => [...prev, { id: id, supplier_name: newSupplier.name }]);
+        handleSelectChange('supplier_id', id);
         showToast('Supplier added successfully!', 'success');
     };
 
