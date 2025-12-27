@@ -259,6 +259,7 @@ const AssetList = () => {
 
     const handleCreateClick = () => {
         setSelectedAssetId(null);
+        setCloneAssetId(null);
         setShowAssetModal(true);
     };
 

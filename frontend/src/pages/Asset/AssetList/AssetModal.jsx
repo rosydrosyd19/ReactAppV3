@@ -65,7 +65,10 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
     // Separate effect for autogenerating tag
     useEffect(() => {
         if (isOpen && !isEditMode) {
-            fetchNextAssetTag();
+            // Only fetch if we have necessary data
+            if (formData.category_id && formData.location_id) {
+                fetchNextAssetTag(formData.category_id, formData.location_id, formData.purchase_date);
+            }
         }
     }, [isOpen, isEditMode, formData.category_id, formData.location_id, formData.purchase_date]);
 
@@ -74,12 +77,14 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
         setToast({ message, type });
     };
 
-    const fetchNextAssetTag = async () => {
+    const fetchNextAssetTag = async (categoryId, locationId, date) => {
+        if (!categoryId || !locationId) return;
+
         try {
             const params = {
-                category_id: formData.category_id,
-                location_id: formData.location_id,
-                date: formData.purchase_date
+                category_id: categoryId,
+                location_id: locationId,
+                date: date
             };
             const response = await axios.get('/asset/assets/next-tag', { params });
             if (response.data.success) {
@@ -295,15 +300,27 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
 
                                     <div className="form-group">
                                         <label className="form-label">Asset Tag </label>
-                                        <input
-                                            type="text"
-                                            name="asset_tag"
-                                            value={formData.asset_tag}
-                                            onChange={handleChange}
-                                            className="form-input bg-gray-50 text-gray-500 cursor-not-allowed"
-                                            disabled
-                                            placeholder="Automatically filled"
-                                        />
+                                        <div className="input-with-button" style={{ display: 'flex', gap: '8px' }}>
+                                            <input
+                                                type="text"
+                                                name="asset_tag"
+                                                value={formData.asset_tag}
+                                                onChange={handleChange}
+                                                className="form-input bg-gray-50 text-gray-500 cursor-not-allowed"
+                                                disabled
+                                                placeholder="Automatically filled"
+                                                style={{ flex: 1 }}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline btn-sm"
+                                                onClick={() => fetchNextAssetTag(formData.category_id, formData.location_id, formData.purchase_date)}
+                                                title="Generate/Refresh Tag"
+                                                disabled={!formData.category_id || !formData.location_id}
+                                            >
+                                                Refresh
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="form-group">
