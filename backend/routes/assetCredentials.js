@@ -139,16 +139,16 @@ router.get('/:id', authenticateToken, checkPermission('asset.credentials.view'),
 // Create credential
 router.post('/', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
     try {
-        const { platform_name, username, password, url, category, description } = req.body;
+        const { platform_name, username, password, url, category, description, is_public } = req.body;
 
         if (!platform_name) {
             return res.status(400).json({ success: false, message: 'Platform name is required' });
         }
 
         const result = await db.query(`
-            INSERT INTO asset_credentials (platform_name, username, password, url, category, description, created_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [platform_name, username, password, url, category || 'other', description, req.user.id]);
+            INSERT INTO asset_credentials (platform_name, username, password, url, category, description, is_public, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [platform_name, username, password, url, category || 'other', description, is_public || false, req.user.id]);
 
         res.status(201).json({
             success: true,
@@ -165,7 +165,7 @@ router.post('/', authenticateToken, checkPermission('asset.credentials.manage'),
 // Update credential
 router.put('/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
     try {
-        const { platform_name, username, password, url, category, description } = req.body;
+        const { platform_name, username, password, url, category, description, is_public } = req.body;
 
         if (!platform_name) {
             return res.status(400).json({ success: false, message: 'Platform name is required' });
@@ -173,9 +173,9 @@ router.put('/:id', authenticateToken, checkPermission('asset.credentials.manage'
 
         await db.query(`
             UPDATE asset_credentials 
-            SET platform_name = ?, username = ?, password = ?, url = ?, category = ?, description = ?
+            SET platform_name = ?, username = ?, password = ?, url = ?, category = ?, description = ?, is_public = ?
             WHERE id = ?
-        `, [platform_name, username, password, url, category, description, req.params.id]);
+        `, [platform_name, username, password, url, category, description, is_public || false, req.params.id]);
 
         res.json({ success: true, message: 'Credential updated successfully' });
     } catch (error) {

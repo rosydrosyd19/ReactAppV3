@@ -35,7 +35,7 @@ const MaintenanceModal = ({ isOpen, onClose, onSuccess, assetId, maintenanceId =
                     maintenance_type: initialData.maintenance_type || 'preventive',
                     maintenance_date: initialData.maintenance_date ? initialData.maintenance_date.split('T')[0] : '',
                     performed_by: initialData.performed_by || '',
-                    cost: initialData.cost ? formatNumber(initialData.cost) : '',
+                    cost: initialData.cost ? formatNumber(Math.floor(Number(initialData.cost))) : '',
                     description: initialData.description || '',
                     next_maintenance_date: initialData.next_maintenance_date ? initialData.next_maintenance_date.split('T')[0] : '',
                     status: initialData.status || 'scheduled'

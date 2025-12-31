@@ -206,6 +206,61 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
         if (selectedPresetId !== 'custom') setSelectedPresetId('custom');
     };
 
+    // Pagination Logic
+    const calculateItemsPerPage = () => {
+        // Convert everything to mm for calculation
+        const u = settings.unit === 'in' ? 25.4 : 1;
+
+        const pageHeight = settings.height * u;
+        const marginTop = settings.marginTop * u;
+        const marginBottom = settings.marginBottom * u;
+        const availHeight = pageHeight - marginTop - marginBottom;
+
+        const pageWidth = settings.width * u;
+        const marginLeft = settings.marginLeft * u;
+        const marginRight = settings.marginRight * u;
+        const availWidth = pageWidth - marginLeft - marginRight;
+
+        const gapX = settings.gapX * u;
+        const gapY = settings.gapY * u;
+
+        // Calculate item width/height
+        let itemWidth, itemHeight;
+
+        if (settings.labelWidth && settings.labelWidth > 0) {
+            itemWidth = settings.labelWidth * u;
+        } else {
+            // Auto width
+            const totalGapX = (settings.columns - 1) * gapX;
+            itemWidth = (availWidth - totalGapX) / settings.columns;
+        }
+
+        if (settings.labelHeight && settings.labelHeight > 0) {
+            itemHeight = settings.labelHeight * u;
+        } else {
+            // Square aspect ratio
+            itemHeight = itemWidth;
+        }
+
+        // Calculate rows per page
+        // Equation: rows * itemHeight + (rows - 1) * gapY <= availHeight
+        // rows * (itemHeight + gapY) - gapY <= availHeight
+        // rows * (itemHeight + gapY) <= availHeight + gapY
+        const rowHeight = itemHeight + gapY;
+        const maxRows = Math.floor((availHeight + gapY) / rowHeight);
+
+        // Ensure at least 1 row
+        const safeRows = Math.max(1, maxRows);
+
+        return safeRows * settings.columns;
+    };
+
+    const itemsPerPage = calculateItemsPerPage();
+    const totalPages = Math.ceil(assets.length / itemsPerPage);
+    const pages = Array.from({ length: totalPages }, (_, i) => {
+        return assets.slice(i * itemsPerPage, (i + 1) * itemsPerPage);
+    });
+
     const handlePrint = () => {
         const printWindow = window.open('', '', 'height=800,width=1000');
         const u = settings.unit === 'in' ? 'in' : 'mm';
@@ -220,7 +275,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
             ? `repeat(${settings.columns}, ${settings.labelWidth}${u})`
             : `repeat(${settings.columns}, 1fr)`;
 
-        // Calculate absolute font size for print safety (avoid cqi instability in print)
+        // Calculate absolute font size for print safety
         let finalLabelWidthMm = 0;
         if (isCustomWidth) {
             finalLabelWidthMm = settings.unit === 'in' ? settings.labelWidth * 25.4 : settings.labelWidth;
@@ -235,10 +290,6 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
             finalLabelWidthMm = (avail - totalGap) / settings.columns;
         }
 
-        // settings.textSize is approx % of width (originally cqi). 
-        // Let's map 1 unit textSize -> 1% of width explicitly? 
-        // Earlier css used: font-size: ${settings.textSize}cqi; -> which is % of container inline size.
-        // So yes, textSize 8 = 8% of width.
         const titleSizeMm = finalLabelWidthMm * (settings.textSize / 100);
         const tagSizeMm = finalLabelWidthMm * (Math.max(2, settings.textSize - 2) / 100);
 
@@ -256,19 +307,25 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
             }
             .page-container {
                 width: ${settings.width}${u};
-                min-height: ${settings.height}${u};
+                height: ${settings.height}${u};
                 box-sizing: border-box;
                 padding-top: ${settings.marginTop}${u};
                 padding-right: ${settings.marginRight}${u};
                 padding-bottom: ${settings.marginBottom}${u};
                 padding-left: ${settings.marginLeft}${u};
+                page-break-after: always;
+                position: relative;
+                overflow: hidden;
+            }
+            .page-container:last-child {
+                page-break-after: avoid;
             }
             .qr-grid {
                 display: grid;
                 grid-template-columns: ${gridColStyle};
                 column-gap: ${settings.gapX}${u};
                 row-gap: ${settings.gapY}${u};
-                /* If custom width, justify content could be center or start? Default start is safer for stickers */
+                align-content: start;
             }
             .qr-item {
                 border: ${settings.showBorder ? '1px solid #ccc' : 'none'};
@@ -281,16 +338,15 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                page-break-inside: avoid;
+                gap: 0;
                 overflow: hidden;
                 color: black;
                 position: relative;
             }
-            /* Use absolute units for print text to ensure WYSIWYG */
             .qr-item h3 {
-                margin: 0 0 1px;
+                margin: 0;
                 font-size: ${titleSizeMm}mm;
-                width: 95%;
+                width: 98%;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -299,10 +355,10 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                 color: black;
             }
             .qr-item p {
-                margin: 1px 0 0;
+                margin: 0;
                 font-size: ${tagSizeMm}mm;
                 font-weight: bold;
-                width: 95%;
+                width: 98%;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -311,15 +367,20 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                 color: black;
             }
             .qr-wrapper {
+                flex: 0 0 auto;
                 width: ${settings.qrSize}%;
-                height: ${settings.qrSize}%;
+                aspect-ratio: 1/1;
                 display: flex;
                 justify-content: center;
                 align-items: center;
             }
             svg {
-                width: 100%;
-                height: 100%;
+                /* SVG sizing controlled by clone/inject logic time */
+                width: ${settings.qrSize}%;
+                height: ${settings.qrSize}%;
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
             }
             @media print {
                 .qr-item { border: ${settings.showBorder ? '1px solid #000' : 'none'}; }
@@ -334,19 +395,21 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                     <style>${printCss}</style>
                 </head>
                 <body>
-                    <div class="page-container">
-                        <div class="qr-grid">
-                            ${assets.map(asset => `
-                                <div class="qr-item">
-                                    <h3>${getSerialDisplay(asset)}</h3>
-                                    <div class="qr-wrapper" id="qr-wrapper-${asset.id}">
-                                        <!-- SVG will be injected here -->
+                    ${pages.map((pageAssets, i) => `
+                        <div class="page-container">
+                            <div class="qr-grid">
+                                ${pageAssets.map(asset => `
+                                    <div class="qr-item">
+                                        <h3>${getSerialDisplay(asset)}</h3>
+                                        <div class="qr-wrapper" id="qr-wrapper-${asset.id}-print-${i}">
+                                            <!-- SVG -->
+                                        </div>
+                                        <p>${asset.asset_tag}</p>
                                     </div>
-                                    <p>${asset.asset_tag}</p>
-                                </div>
-                            `).join('')}
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
+                    `).join('')}
                 </body>
             </html>
         `;
@@ -354,31 +417,40 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
         printWindow.document.write(htmlContent);
         printWindow.document.close();
 
-        // Use a slightly longer timeout to ensure write is done
         setTimeout(() => {
-            const previewSvgs = document.querySelectorAll('.modal-preview-area svg');
-            // We can match by index if the sort order is preserved, 
-            // OR strictly by finding the container in preview that matches value.
-            // But strictly, the assets map order is preserved in both renders.
+            // Need to copy SVGs effectively
+            // Since we have pagination now, the IDs need to be matched correctly
+            // Best way: re-generate SVGs or copy from source by matching asset IDs logic
 
-            const printWrappers = Array.from(printWindow.document.querySelectorAll('.qr-wrapper'));
+            // This loop is a bit tricky with multipage. Let's do it by data matching
+            // We can iterate over all assets
+            assets.forEach(asset => {
+                // Find source
+                const sourceContainer = document.getElementById(`qr-code-bulk-${asset.id}`);
+                if (!sourceContainer) return;
+                const svg = sourceContainer.querySelector('svg');
+                if (!svg) return;
 
-            if (previewSvgs.length > 0 && printWrappers.length === previewSvgs.length) {
-                previewSvgs.forEach((svg, i) => {
+                // Find all targets for this asset (technically 1 in print unless we printed same asset multiple times?)
+                // Actually the asset list assumes unique assets or at least unique IDs.
+                // We construct ID in print loop above: qr-wrapper-${asset.id}-print-${pageIndex}
+                // But we don't know easily which page it is on here without recalc.
+                // Simpler: use querySelectorAll with partial logical ID
+
+                const targets = printWindow.document.querySelectorAll(`[id^="qr-wrapper-${asset.id}-print-"]`);
+                targets.forEach(target => {
                     const clone = svg.cloneNode(true);
-                    // Ensure clone fits
-                    clone.style.width = "100%";
-                    clone.style.height = "100%";
-                    if (printWrappers[i]) {
-                        printWrappers[i].appendChild(clone);
-                    }
+                    // Remove inline overrides so CSS class handles sizing
+                    clone.style.width = "";
+                    clone.style.height = "";
+                    target.appendChild(clone);
                 });
-            }
+            });
 
             printWindow.focus();
             printWindow.print();
             printWindow.close();
-        }, 500);
+        }, 1000); // 1s wait suitable for large lists
     };
 
     if (!isOpen) return null;
@@ -390,15 +462,22 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
     const displayWidth = isCustomWidth ? settings.labelWidth : calcWidth;
 
     // Preview styles
-    const previewGridStyle = {
+    const pageStyle = {
         width: `${settings.width}${uLabel}`,
-        minHeight: `${settings.height}${uLabel}`,
+        height: `${settings.height}${uLabel}`,
         background: 'white',
         paddingTop: `${settings.marginTop}${uLabel}`,
         paddingRight: `${settings.marginRight}${uLabel}`,
         paddingBottom: `${settings.marginBottom}${uLabel}`,
         paddingLeft: `${settings.marginLeft}${uLabel}`,
-        boxShadow: '0 0 20px rgba(0,0,0,0.5)',
+        boxShadow: '0 0 20px rgba(0,0,0,0.2)',
+        marginBottom: '40px',
+        position: 'relative',
+        overflow: 'hidden',
+        flexShrink: 0 // Prevent page compression
+    };
+
+    const gridStyle = {
         display: 'grid',
         gridTemplateColumns: isCustomWidth
             ? `repeat(${settings.columns}, ${settings.labelWidth}${uLabel})`
@@ -406,7 +485,8 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
         columnGap: `${settings.gapX}${uLabel}`,
         rowGap: `${settings.gapY}${uLabel}`,
         alignContent: 'start',
-        color: 'black'
+        color: 'black',
+        height: '100%'
     };
 
     return (
@@ -539,12 +619,12 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                         </h3>
 
                         <div className="mb-2">
-                            <label className="text-xs">QR Code Scale (%)</label>
+                            <label className="text-xs">QR Code Scale (Safe Zone)</label>
                             <input type="range" min="30" max="100" className="w-full" style={{ width: '100%' }} value={settings.qrSize} onChange={e => updateSetting('qrSize', Number(e.target.value))} />
                             <div className="text-right text-xs">{settings.qrSize}%</div>
                         </div>
                         <div className="mb-2">
-                            <label className="text-xs block mb-1">Text Scale (Relative to Box)</label>
+                            <label className="text-xs block mb-1">Text Scale (Relative)</label>
                             <input type="range" min="2" max="25" step="0.5" className="w-full" style={{ width: '100%' }} value={settings.textSize} onChange={e => updateSetting('textSize', Number(e.target.value))} />
                             <div className="text-right text-xs">{settings.textSize} units</div>
                         </div>
@@ -612,87 +692,113 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                 {/* Main Preview Area */}
                 <div className="flex-1 flex flex-col" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div className="p-4 border-b flex justify-between items-center" style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', background: 'var(--bg-secondary)' }}>
-                        <span className="text-sm text-gray-500">Preview: {assets.length} assets selected</span>
+                        <span className="text-sm text-gray-500">
+                            Preview: {assets.length} assets | {itemsPerPage} items/page | {totalPages} pages
+                        </span>
                         <div className="flex gap-2" style={{ display: 'flex', gap: '10px' }}>
                             <button onClick={onClose} className="btn btn-outline">Cancel</button>
                             <button onClick={handlePrint} className="btn btn-primary"><FiPrinter /> Print</button>
                         </div>
                     </div>
 
-                    <div className="modal-preview-area custom-scrollbar p-8 bg-gray-100 flex-1 overflow-auto flex justify-center"
+                    <div className="modal-preview-area custom-scrollbar p-8 bg-gray-100 flex-1 overflow-auto flex flex-col items-center"
                         style={{
                             flex: 1,
                             overflow: 'auto',
                             padding: '40px',
                             background: '#525659',
                             display: 'flex',
-                            alignItems: 'flex-start',
-                            justifyContent: 'center'
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '40px'
                         }}>
 
-                        {/* Paper Representation */}
-                        <div
-                            className="bg-white shadow-lg transition-all duration-300"
-                            style={previewGridStyle}
-                        >
-                            {assets.map(asset => (
-                                <div key={asset.id} className="preview-item" style={{
-                                    border: settings.showBorder ? '1px solid #ddd' : 'none',
-                                    borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
-                                    padding: '5px',
-                                    aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
-                                    height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
-                                    width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto', // Use exact width if set
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    overflow: 'hidden',
-                                    color: 'black',
-                                    containerType: 'size'
-                                }}>
-                                    {settings.showName && (
-                                        <h3 style={{
-                                            margin: '0 0 1px',
-                                            fontSize: `${settings.textSize}cqi`,
-                                            width: '95%',
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            textAlign: 'center',
-                                            lineHeight: 1.1,
-                                            color: 'black'
-                                        }}>
-                                            {getSerialDisplay(asset)}
-                                        </h3>
-                                    )}
-                                    <div id={`qr-code-bulk-${asset.id}`} style={{ width: `${settings.qrSize}%`, height: `${settings.qrSize}%`, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                        <QRCode
-                                            size={256}
-                                            style={{ height: "100%", width: "100%" }}
-                                            value={`${window.location.origin}/asset/scan/${asset.id}`}
-                                            viewBox={`0 0 256 256`}
-                                        />
-                                    </div>
-                                    {settings.showTag && (
-                                        <p style={{
-                                            margin: '1px 0 0',
-                                            fontSize: `${Math.max(2, settings.textSize - 2)}cqi`,
-                                            fontWeight: 'bold',
-                                            width: '95%',
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            textAlign: 'center',
-                                            lineHeight: 1.1,
-                                            color: 'black'
-                                        }}>
-                                            {asset.asset_tag}
-                                        </p>
-                                    )}
+                        {/* Render Pages */}
+                        {pages.map((pageAssets, index) => (
+                            <div key={index} className="page-sheet bg-white shadow-lg transition-all duration-300" style={pageStyle}>
+                                <div className="page-label absolute top-0 right-0 bg-gray-200 text-xs px-2" style={{ position: 'absolute', top: 0, right: '-40px', background: '#ccc', color: '#000', padding: '4px 8px', fontWeight: 'bold' }}>
+                                    Pg {index + 1}
                                 </div>
-                            ))}
-                        </div>
+                                <div style={gridStyle}>
+                                    {pageAssets.map(asset => (
+                                        <div key={asset.id} className="preview-item" style={{
+                                            border: settings.showBorder ? '1px solid #ddd' : 'none',
+                                            borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
+                                            padding: '2px',
+                                            aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
+                                            height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
+                                            width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0px',
+                                            overflow: 'hidden',
+                                            color: 'black',
+                                            containerType: 'size'
+                                        }}>
+                                            {settings.showName && (
+                                                <h3 style={{
+                                                    margin: '0',
+                                                    fontSize: `${settings.textSize}cqi`,
+                                                    width: '98%',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    textAlign: 'center',
+                                                    color: 'black',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {getSerialDisplay(asset)}
+                                                </h3>
+                                            )}
+
+                                            {/* Flexible QR Wrapper 
+                                                size controlled by width % and aspect ratio
+                                                This ensures the box collapses tightly around the QR
+                                            */}
+                                            <div id={`qr-code-bulk-${asset.id}`} style={{
+                                                flex: '0 0 auto',
+                                                width: `${settings.qrSize}%`,
+                                                aspectRatio: '1/1',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}>
+                                                <QRCode
+                                                    size={256}
+                                                    style={{
+                                                        height: "100%",
+                                                        width: "100%",
+                                                        maxWidth: '100%',
+                                                        maxHeight: '100%'
+                                                    }}
+                                                    value={`${window.location.origin}/asset/scan/${asset.id}`}
+                                                    viewBox={`0 0 256 256`}
+                                                />
+                                            </div>
+
+                                            {settings.showTag && (
+                                                <p style={{
+                                                    margin: '0',
+                                                    fontSize: `${Math.max(2, settings.textSize - 2)}cqi`,
+                                                    fontWeight: 'bold',
+                                                    width: '98%',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    textAlign: 'center',
+                                                    color: 'black',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {asset.asset_tag}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

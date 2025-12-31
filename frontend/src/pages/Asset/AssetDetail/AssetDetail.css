@@ -399,6 +399,16 @@
     gap: 0.4rem;
 }
 
+/* Default state (Desktop) */
+.desktop-table-view {
+    display: block;
+}
+
+.mobile-list-view {
+    display: none;
+}
+
+/* Mobile Adjustments */
 @media (max-width: 768px) {
     .maintenance-desktop-table {
         display: none;
@@ -409,31 +419,18 @@
     }
 
     /* Ensure padding is consistent */
-    /* Ensure padding is consistent */
     .user-detail.asset-detail-override .card-body {
         padding: 1rem;
     }
 
-    /* Generic Desktop/Mobile toggle for tables */
+    /* Desktop/Mobile toggle for tables */
     .desktop-table-view {
-        display: none;
-        /* Hidden on mobile */
+        display: none !important;
     }
 
     .mobile-list-view {
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         gap: 1rem;
-    }
-}
-
-/* Default state (Desktop) - Wrapped to prevent overriding mobile styles */
-@media (min-width: 769px) {
-    .mobile-list-view {
-        display: none;
-    }
-
-    .desktop-table-view {
-        display: block;
     }
 }

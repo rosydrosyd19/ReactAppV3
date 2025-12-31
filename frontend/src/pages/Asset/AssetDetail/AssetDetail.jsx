@@ -813,14 +813,22 @@ const AssetDetail = ({ readOnly = false }) => {
                                                 <td>{cred.platform_name}</td>
                                                 <td>{cred.username}</td>
                                                 <td>
-                                                    {cred.url ? (
+                                                    {cred.is_public && cred.url ? (
                                                         <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>
                                                             {cred.url}
                                                         </a>
-                                                    ) : '-'}
+                                                    ) : (
+                                                        cred.is_public ? '-' : <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>Private</span>
+                                                    )}
                                                 </td>
-                                                <td style={{ fontFamily: 'monospace' }}>
-                                                    <PasswordReveal password={cred.password} />
+                                                <td>
+                                                    {cred.is_public ? (
+                                                        <div style={{ fontFamily: 'monospace' }}>
+                                                            <PasswordReveal password={cred.password} />
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>Private</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -842,7 +850,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                                 <FiUser style={{ flexShrink: 0 }} />
                                                 <span style={{ wordBreak: 'break-word' }}>{cred.username}</span>
                                             </div>
-                                            {cred.url && (
+                                            {cred.is_public && cred.url && (
                                                 <div className="maintenance-date" style={{ alignItems: 'flex-start' }}>
                                                     <FiArrowLeft style={{ transform: 'rotate(135deg)', marginTop: '4px', flexShrink: 0 }} />
                                                     <a href={cred.url.startsWith('http') ? cred.url : `https://${cred.url}`}
@@ -855,8 +863,14 @@ const AssetDetail = ({ readOnly = false }) => {
                                             )}
                                             <div className="maintenance-meta" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem' }}>
                                                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Password:</span>
-                                                <div style={{ fontFamily: 'monospace', width: '100%', padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', overflowX: 'auto' }}>
-                                                    <PasswordReveal password={cred.password} />
+                                                <div style={{ width: '100%', padding: '0.5rem', background: 'var(--bg-primary)', borderRadius: '4px', overflowX: 'auto' }}>
+                                                    {cred.is_public ? (
+                                                        <div style={{ fontFamily: 'monospace' }}>
+                                                            <PasswordReveal password={cred.password} />
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>Private</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

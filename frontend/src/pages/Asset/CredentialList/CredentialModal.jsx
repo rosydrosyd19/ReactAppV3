@@ -9,7 +9,8 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId }) => {
         password: '',
         url: '',
         category: 'other',
-        description: ''
+        description: '',
+        is_public: false
     });
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +27,8 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId }) => {
                 password: '',
                 url: '',
                 category: 'other',
-                description: ''
+                description: '',
+                is_public: false
             });
             setError('');
         }
@@ -48,10 +50,10 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId }) => {
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
@@ -174,6 +176,18 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId }) => {
                                 className="form-textarea"
                                 rows="3"
                             ></textarea>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    name="is_public"
+                                    checked={formData.is_public}
+                                    onChange={handleChange}
+                                />
+                                <span>Mask as Public? (Visible to anyone with asset access)</span>
+                            </label>
                         </div>
                     </div>
 
