@@ -122,3 +122,37 @@ export const QuickAddSupplierModal = ({ isOpen, onClose, onSuccess, showToast })
         </BaseQuickModal>
     );
 };
+
+export const QuickAddCredentialCategoryModal = ({ isOpen, onClose, onSuccess, showToast }) => {
+    const [name, setName] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const res = await axios.post('/asset/credentials/categories', { category_name: name });
+            if (res.data.success) {
+                // Return id and name. Note: standard QuickAddCategoryModal returns {id, name}
+                // We follow same pattern
+                onSuccess({ id: res.data.data.id, name });
+                setName('');
+                onClose();
+            }
+        } catch (error) {
+            console.error(error);
+            showToast(error.response?.data?.message || 'Failed to create category', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <BaseQuickModal isOpen={isOpen} onClose={onClose} title="Add Credential Category" onSubmit={handleSubmit} loading={loading}>
+            <div className="form-group">
+                <label className="form-label">Category Name</label>
+                <input required type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Server Access, SaaS" />
+            </div>
+        </BaseQuickModal>
+    );
+};

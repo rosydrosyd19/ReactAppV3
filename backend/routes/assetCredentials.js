@@ -3,6 +3,47 @@ const router = express.Router();
 const db = require('../config/database');
 const { verifyToken: authenticateToken, checkPermission } = require('../middleware/auth');
 
+// ==================== CREDENTIAL CATEGORIES ====================
+
+// Get all credential categories
+router.get('/categories', authenticateToken, async (req, res) => {
+    try {
+        const categories = await db.query(`
+            SELECT * FROM credential_categories 
+            WHERE is_deleted = FALSE OR is_deleted IS NULL 
+            ORDER BY category_name
+        `);
+        res.json({ success: true, data: categories });
+    } catch (error) {
+        console.error('Get credential categories error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching categories' });
+    }
+});
+
+// Create credential category
+router.post('/categories', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+    try {
+        const { category_name } = req.body;
+
+        const existing = await db.query('SELECT id FROM credential_categories WHERE category_name = ?', [category_name]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Category name already exists' });
+        }
+
+        const result = await db.query(
+            'INSERT INTO credential_categories (category_name, created_by) VALUES (?, ?)',
+            [category_name, req.user.id]
+        );
+
+        res.status(201).json({ success: true, data: { id: result.insertId.toString(), name: category_name } });
+    } catch (error) {
+        console.error('Create credential category error:', error);
+        res.status(500).json({ success: false, message: 'Error creating category' });
+    }
+});
+
+// ==================== CREDENTIALS ====================
+
 // Get all credentials
 router.get('/my-assignments', authenticateToken, async (req, res) => {
     try {

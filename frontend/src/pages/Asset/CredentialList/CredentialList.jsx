@@ -40,6 +40,7 @@ const CredentialList = () => {
     // Modal State
     const [showModal, setShowModal] = useState(false);
     const [selectedCredentialId, setSelectedCredentialId] = useState(null);
+    const [cloneCredentialId, setCloneCredentialId] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [credentialToDelete, setCredentialToDelete] = useState(null);
 
@@ -107,6 +108,13 @@ const CredentialList = () => {
 
     const handleCreateClick = () => {
         setSelectedCredentialId(null);
+        setCloneCredentialId(null);
+        setShowModal(true);
+    };
+
+    const handleCloneClick = (id) => {
+        setSelectedCredentialId(null);
+        setCloneCredentialId(id);
         setShowModal(true);
     };
 
@@ -480,6 +488,15 @@ const CredentialList = () => {
                                                                         >
                                                                             <FiLogOut className="text-primary" /> Check Out
                                                                         </button>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                handleCloneClick(item.id);
+                                                                                setActiveDropdownId(null);
+                                                                            }}
+                                                                        >
+                                                                            <FiCopy /> Clone
+                                                                        </button>
                                                                         {item.status !== 'available' && (
                                                                             <button
                                                                                 className="dropdown-item"
@@ -614,6 +631,16 @@ const CredentialList = () => {
                                                             >
                                                                 <FiLogOut /> <span>Check Out</span>
                                                             </button>
+                                                            <button
+                                                                className="action-btn clone"
+                                                                style={{ backgroundColor: '#8b5cf6', color: 'white' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleCloneClick(item.id);
+                                                                }}
+                                                            >
+                                                                <FiCopy /> <span>Clone</span>
+                                                            </button>
                                                             {item.status !== 'available' && (
                                                                 <button
                                                                     className="action-btn checkin"
@@ -683,6 +710,7 @@ const CredentialList = () => {
                 onClose={() => setShowModal(false)}
                 onSuccess={handleModalSuccess}
                 credentialId={selectedCredentialId}
+                cloneId={cloneCredentialId}
             />
 
             {

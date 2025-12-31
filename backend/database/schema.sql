@@ -315,25 +315,10 @@ CREATE TABLE IF NOT EXISTS asset_license_assignments (
   FOREIGN KEY (assigned_by) REFERENCES sysadmin_users(id) ON DELETE SET NULL,
   INDEX idx_license_id (license_id),
   INDEX idx_asset_id (asset_id),
+  INDEX idx_credential_id (credential_id),
+  INDEX idx_asset_id (asset_id),
   INDEX idx_user_id (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Credentials / Digital Assets
-CREATE TABLE IF NOT EXISTS asset_credentials (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  platform_name VARCHAR(100) NOT NULL,
-  username VARCHAR(100),
-  password VARCHAR(255),
-  url VARCHAR(255),
-  category ENUM('social_media', 'storage', 'email', 'other') DEFAULT 'other',
-  description TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  created_by INT,
-  FOREIGN KEY (created_by) REFERENCES sysadmin_users(id) ON DELETE SET NULL,
-  INDEX idx_platform_name (platform_name),
-  INDEX idx_category (category)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB;
 
 -- ================================================
 -- INITIAL DATA SEEDING
