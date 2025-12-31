@@ -315,8 +315,6 @@ CREATE TABLE IF NOT EXISTS asset_license_assignments (
   FOREIGN KEY (assigned_by) REFERENCES sysadmin_users(id) ON DELETE SET NULL,
   INDEX idx_license_id (license_id),
   INDEX idx_asset_id (asset_id),
-  INDEX idx_credential_id (credential_id),
-  INDEX idx_asset_id (asset_id),
   INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB;
 
