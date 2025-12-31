@@ -68,8 +68,26 @@ router.get('/public/:id', async (req, res) => {
           ORDER BY maintenance_date DESC
         `, [req.params.id]);
 
+        // Fetch assigned credentials for public view
+        const credentials = await db.query(`
+            SELECT c.id, c.platform_name, c.username, c.url, c.is_public, c.password 
+            FROM asset_credentials c
+            JOIN asset_credential_assignments ac ON c.id = ac.credential_id
+            WHERE ac.asset_id = ? AND (c.is_deleted = FALSE OR c.is_deleted IS NULL)
+        `, [req.params.id]);
+
+        // Security: Filter out passwords for private credentials in public view
+        const safeCredentials = credentials.map(cred => {
+            if (!cred.is_public) {
+                const { password, ...rest } = cred;
+                return rest;
+            }
+            return cred;
+        });
+
         asset.history = history;
         asset.maintenance_records = maintenance;
+        asset.assigned_credentials = safeCredentials;
 
         res.json({ success: true, data: asset });
     } catch (error) {

@@ -826,8 +826,8 @@ const AssetDetail = ({ readOnly = false }) => {
                     </div>
                 )}
 
-                {/* Assigned Credentials Card - Hide in readOnly mode (Scan) */}
-                {!readOnly && asset.assigned_credentials && asset.assigned_credentials.length > 0 && (
+                {/* Assigned Credentials Card - Show in both modes (filtered by backend for public) */}
+                {asset.assigned_credentials && asset.assigned_credentials.length > 0 && (
                     <div className="card">
                         <div className="card-header">
                             <h2><FiLock /> Assigned Credentials</h2>
