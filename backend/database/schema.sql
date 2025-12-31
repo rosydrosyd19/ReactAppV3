@@ -318,6 +318,52 @@ CREATE TABLE IF NOT EXISTS asset_license_assignments (
   INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB;
 
+-- Credentials / Digital Assets
+CREATE TABLE IF NOT EXISTS asset_credentials (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  platform_name VARCHAR(100) NOT NULL,
+  username VARCHAR(100),
+  password VARCHAR(255),
+  url VARCHAR(255),
+  category VARCHAR(100), -- Legacy string field
+  description TEXT,
+  is_public BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_by INT,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (created_by) REFERENCES sysadmin_users(id) ON DELETE SET NULL,
+  INDEX idx_platform_name (platform_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Credential Categories
+CREATE TABLE IF NOT EXISTS asset_credential_categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (created_by) REFERENCES sysadmin_users(id)
+) ENGINE=InnoDB;
+
+-- Credential Assignments
+CREATE TABLE IF NOT EXISTS asset_credential_assignments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  credential_id INT NOT NULL,
+  asset_id INT,
+  user_id INT,
+  assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  assigned_by INT,
+  notes TEXT,
+  FOREIGN KEY (credential_id) REFERENCES asset_credentials(id) ON DELETE CASCADE,
+  FOREIGN KEY (asset_id) REFERENCES asset_items(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES sysadmin_users(id) ON DELETE CASCADE,
+  FOREIGN KEY (assigned_by) REFERENCES sysadmin_users(id) ON DELETE SET NULL,
+  INDEX idx_credential_id (credential_id),
+  INDEX idx_asset_id (asset_id),
+  INDEX idx_user_id (user_id)
+) ENGINE=InnoDB;
+
 -- ================================================
 -- INITIAL DATA SEEDING
 -- ================================================

@@ -15,9 +15,9 @@ async function runMigration() {
 
         console.log('Connected to database. Running migration for credential_categories...');
 
-        // Create credential_categories table
+        // Create asset_credential_categories table
         await conn.query(`
-            CREATE TABLE IF NOT EXISTS credential_categories (
+            CREATE TABLE IF NOT EXISTS asset_credential_categories (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 category_name VARCHAR(255) NOT NULL UNIQUE,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

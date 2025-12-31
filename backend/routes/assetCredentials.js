@@ -9,7 +9,7 @@ const { verifyToken: authenticateToken, checkPermission } = require('../middlewa
 router.get('/categories', authenticateToken, async (req, res) => {
     try {
         const categories = await db.query(`
-            SELECT * FROM credential_categories 
+            SELECT * FROM asset_credential_categories 
             WHERE is_deleted = FALSE OR is_deleted IS NULL 
             ORDER BY category_name
         `);
@@ -25,13 +25,13 @@ router.post('/categories', authenticateToken, checkPermission('asset.credentials
     try {
         const { category_name } = req.body;
 
-        const existing = await db.query('SELECT id FROM credential_categories WHERE category_name = ?', [category_name]);
+        const existing = await db.query('SELECT id FROM asset_credential_categories WHERE category_name = ?', [category_name]);
         if (existing.length > 0) {
             return res.status(400).json({ success: false, message: 'Category name already exists' });
         }
 
         const result = await db.query(
-            'INSERT INTO credential_categories (category_name, created_by) VALUES (?, ?)',
+            'INSERT INTO asset_credential_categories (category_name, created_by) VALUES (?, ?)',
             [category_name, req.user.id]
         );
 
