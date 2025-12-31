@@ -1,6 +1,7 @@
 import './AssetDetail.css';
 import '../../SysAdmin/UserDetail.css';
 import { useState, useEffect } from 'react';
+import { intervalToDuration } from 'date-fns';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -300,6 +301,36 @@ const AssetDetail = ({ readOnly = false }) => {
 
     const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/api$/, '');
 
+    const getWarrantyStatusDisplay = () => {
+        if (!asset.warranty_expiry) return '-';
+
+        const now = new Date();
+        const expiry = new Date(asset.warranty_expiry);
+        now.setHours(0, 0, 0, 0);
+        expiry.setHours(0, 0, 0, 0);
+
+        if (expiry < now) {
+            return <span style={{ color: 'var(--danger-color)', fontWeight: 'bold' }}>Expired</span>;
+        }
+
+        const duration = intervalToDuration({ start: now, end: expiry });
+        const { years, months, days } = duration;
+
+        let parts = [];
+        if (years > 0) parts.push(`${years} Year`);
+        if (months > 0) parts.push(`${months} Month`);
+        if (days > 0) parts.push(`${days} Day`);
+
+        const durationText = parts.length > 0 ? parts.join(' ') : 'Today';
+
+        return (
+            <span>
+                <span style={{ color: 'var(--success-color)', fontWeight: 'bold' }}>Active</span>
+                <span style={{ marginLeft: '4px', color: 'var(--text-secondary)' }}>({durationText})</span>
+            </span>
+        );
+    };
+
     return (
         <div className="user-detail asset-detail-override">
             <div className="page-header">
@@ -444,7 +475,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                 <p>{asset.category_name || '-'}</p>
                             </div>
                             <div className="info-item">
-                                <label><FiPackage /> Model</label>
+                                <label><FiPackage /> Model / Type</label>
                                 <p>{asset.model || '-'}</p>
                             </div>
                             <div className="info-item">
@@ -688,6 +719,12 @@ const AssetDetail = ({ readOnly = false }) => {
                             <div className="info-item">
                                 <label><FiCalendar /> Warranty Expiry</label>
                                 <p>{asset.warranty_expiry ? new Date(asset.warranty_expiry).toLocaleDateString() : '-'}</p>
+                            </div>
+                            <div className="info-item">
+                                <label><FiCheckCircle /> Warranty Status</label>
+                                <p>
+                                    {getWarrantyStatusDisplay()}
+                                </p>
                             </div>
                         </div>
                     </div>

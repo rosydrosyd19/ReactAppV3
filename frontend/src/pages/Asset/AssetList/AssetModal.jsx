@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FiX, FiSave, FiUpload, FiXCircle, FiPlus } from 'react-icons/fi';
+import { FiX, FiSave, FiUpload, FiXCircle, FiPlus, FiCamera } from 'react-icons/fi';
 import axios from '../../../utils/axios';
 import SearchableSelect from '../../../components/Form/SearchableSelect';
 import Toast from '../../../components/Toast/Toast';
 import { QuickAddCategoryModal, QuickAddLocationModal, QuickAddSupplierModal } from './QuickAddModals';
+import CameraModal from '../../../components/Camera/CameraModal';
 import './AssetModal.css';
 
 const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId = null }) => {
@@ -20,6 +21,7 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
     const [showQuickCategory, setShowQuickCategory] = useState(false);
     const [showQuickLocation, setShowQuickLocation] = useState(false);
     const [showQuickSupplier, setShowQuickSupplier] = useState(false);
+    const [showCamera, setShowCamera] = useState(false);
 
     // Toast State
     const [toast, setToast] = useState({ message: '', type: '' });
@@ -218,6 +220,17 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
     const removeImage = () => {
         setSelectedImage(null);
         setImagePreview(null);
+    };
+
+    const handleCameraCapture = (file) => {
+        if (file) {
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     // Quick Add Handlers
@@ -424,7 +437,7 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
 
                                     <div className="form-row">
                                         <div className="form-group half">
-                                            <label className="form-label">Model</label>
+                                            <label className="form-label">Model / Type</label>
                                             <input
                                                 type="text"
                                                 name="model"
@@ -504,6 +517,17 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                             />
                                         </div>
                                     </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Warranty Expiry</label>
+                                        <input
+                                            type="date"
+                                            name="warranty_expiry"
+                                            value={formData.warranty_expiry}
+                                            onChange={handleChange}
+                                            className="form-input"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Full Width Sections */}
@@ -522,17 +546,30 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                     <div className="form-group">
                                         <label className="form-label">Image</label>
                                         {!imagePreview ? (
-                                            <div className="image-upload-area-small" onClick={() => document.getElementById('modal-image-upload').click()}>
-                                                <input
-                                                    id="modal-image-upload"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleImageChange}
-                                                    style={{ display: 'none' }}
-                                                />
-                                                <div className="upload-placeholder-content">
-                                                    <FiUpload className="upload-icon" />
-                                                    <span>Upload</span>
+                                            <div className="image-upload-area-small" style={{ flexDirection: 'row', gap: '1rem', padding: '1rem' }}>
+                                                <div
+                                                    className="upload-placeholder-content"
+                                                    onClick={() => document.getElementById('modal-image-upload').click()}
+                                                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '1rem', border: '1px dashed var(--border-color)', borderRadius: '8px', flex: 1 }}
+                                                >
+                                                    <input
+                                                        id="modal-image-upload"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleImageChange}
+                                                        style={{ display: 'none' }}
+                                                    />
+                                                    <FiUpload className="upload-icon" style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }} />
+                                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Upload Image</span>
+                                                </div>
+
+                                                <div
+                                                    className="upload-placeholder-content"
+                                                    onClick={() => setShowCamera(true)}
+                                                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '1rem', border: '1px dashed var(--border-color)', borderRadius: '8px', flex: 1 }}
+                                                >
+                                                    <FiCamera className="upload-icon" style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }} />
+                                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Use Camera</span>
                                                 </div>
                                             </div>
                                         ) : (
@@ -601,6 +638,12 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                 onClose={() => setShowQuickSupplier(false)}
                 onSuccess={handleQuickSupplierSuccess}
                 showToast={showToast}
+            />
+
+            <CameraModal
+                isOpen={showCamera}
+                onClose={() => setShowCamera(false)}
+                onCapture={handleCameraCapture}
             />
         </>
     );
