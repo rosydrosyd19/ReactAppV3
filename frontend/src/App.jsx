@@ -18,6 +18,7 @@ import LocationList from './pages/Asset/LocationList/LocationList'; // New
 import LocationDetail from './pages/Asset/LocationList/LocationDetail'; // New
 import CredentialList from './pages/Asset/CredentialList/CredentialList'; // New
 import CredentialDetail from './pages/Asset/CredentialList/CredentialDetail'; // New
+import CredentialCategoryList from './pages/Asset/CredentialList/CredentialCategoryList'; // New
 import ModuleSelection from './pages/Modules/ModuleSelection';
 import Profile from './pages/Profile/Profile'; // New
 
@@ -111,6 +112,7 @@ function App() {
               <Route path="maintenance" element={<div className="card"><h2>Maintenance</h2><p>Coming soon...</p></div>} />
               <Route path="credentials" element={<CredentialList />} />
               <Route path="credentials/:id" element={<CredentialDetail />} />
+              <Route path="credential-categories" element={<CredentialCategoryList />} />
             </Route>
           </Route>
 

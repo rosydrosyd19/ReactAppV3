@@ -101,6 +101,13 @@ export const useMenu = () => {
                     group: 'Master',
                 },
                 {
+                    title: 'Credential Categories',
+                    path: '/asset/credential-categories',
+                    icon: <FiShield />,
+                    show: hasPermission('asset.credentials.manage'),
+                    group: 'Master',
+                },
+                {
                     title: 'Maintenance',
                     path: '/asset/maintenance',
                     icon: <FiTool />,

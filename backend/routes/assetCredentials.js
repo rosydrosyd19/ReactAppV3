@@ -42,6 +42,51 @@ router.post('/categories', authenticateToken, checkPermission('asset.credentials
     }
 });
 
+// Update credential category
+router.put('/categories/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+    try {
+        const { category_name } = req.body;
+        const { id } = req.params;
+
+        // Check if name exists for other ID
+        const existing = await db.query('SELECT id FROM asset_credential_categories WHERE category_name = ? AND id != ?', [category_name, id]);
+        if (existing.length > 0) {
+            return res.status(400).json({ success: false, message: 'Category name already exists' });
+        }
+
+        await db.query(
+            'UPDATE asset_credential_categories SET category_name = ? WHERE id = ?',
+            [category_name, id]
+        );
+
+        res.json({ success: true, message: 'Category updated successfully' });
+    } catch (error) {
+        console.error('Update credential category error:', error);
+        res.status(500).json({ success: false, message: 'Error updating category' });
+    }
+});
+
+// Delete credential category
+router.delete('/categories/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if used by credentials (need to decide logic: restrict or soft delete?)
+        // Assuming soft delete for category, but verifying usage first is good practice.
+        // For now, simple soft delete.
+
+        await db.query(
+            'UPDATE asset_credential_categories SET is_deleted = TRUE WHERE id = ?',
+            [id]
+        );
+
+        res.json({ success: true, message: 'Category deleted successfully' });
+    } catch (error) {
+        console.error('Delete credential category error:', error);
+        res.status(500).json({ success: false, message: 'Error deleting category' });
+    }
+});
+
 // ==================== CREDENTIALS ====================
 
 // Get all credentials

@@ -13,7 +13,7 @@ const MobileBottomNav = () => {
     // Flatten menu items for bottom nav (including children)
     // Flatten menu items for bottom nav (including children)
     const flattenedItems = [];
-    const hiddenPaths = ['/asset/categories', '/asset/locations', '/asset/suppliers'];
+    const hiddenPaths = ['/asset/categories', '/asset/locations', '/asset/suppliers', '/asset/credential-categories'];
 
     menuItems.forEach(item => {
         if (!item.show) return;
