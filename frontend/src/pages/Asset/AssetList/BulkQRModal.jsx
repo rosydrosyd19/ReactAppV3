@@ -58,6 +58,7 @@ const DEFAULT_PRESETS = [
 const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
     const [presets, setPresets] = useState(DEFAULT_PRESETS);
     const [selectedPresetId, setSelectedPresetId] = useState('a4');
+    const [startOffset, setStartOffset] = useState(0); // New: Start Position Offset
 
     // Current Settings
     const [settings, setSettings] = useState(DEFAULT_PRESETS[0]);
@@ -256,9 +257,16 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
     };
 
     const itemsPerPage = calculateItemsPerPage();
-    const totalPages = Math.ceil(assets.length / itemsPerPage);
+
+    // Create display list with offset padding
+    const displayAssets = [
+        ...Array(startOffset).fill(null),
+        ...assets
+    ];
+
+    const totalPages = Math.ceil(displayAssets.length / itemsPerPage);
     const pages = Array.from({ length: totalPages }, (_, i) => {
-        return assets.slice(i * itemsPerPage, (i + 1) * itemsPerPage);
+        return displayAssets.slice(i * itemsPerPage, (i + 1) * itemsPerPage);
     });
 
     const handlePrint = () => {
@@ -398,7 +406,12 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                     ${pages.map((pageAssets, i) => `
                         <div class="page-container">
                             <div class="qr-grid">
-                                ${pageAssets.map(asset => `
+                                ${pageAssets.map((asset, idx) => {
+            if (!asset) {
+                // Render empty placeholder
+                return `<div class="qr-item" style="border: none;"></div>`;
+            }
+            return `
                                     <div class="qr-item">
                                         <h3>${getSerialDisplay(asset)}</h3>
                                         <div class="qr-wrapper" id="qr-wrapper-${asset.id}-print-${i}">
@@ -406,7 +419,8 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                         </div>
                                         <p>${asset.asset_tag}</p>
                                     </div>
-                                `).join('')}
+                                    `;
+        }).join('')}
                             </div>
                         </div>
                     `).join('')}
@@ -592,6 +606,25 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                         </div>
                     </div>
 
+
+
+                    {/* Start Position / Skip Labels */}
+                    <div className="mb-4" style={{ marginBottom: '16px' }}>
+                        <h3 className="font-semibold mb-2" style={{ fontSize: '14px', marginBottom: '8px' }}>Start Position</h3>
+                        <div className="mb-2">
+                            <label className="text-xs">Skip Labels (Start at...)</label>
+                            <input
+                                type="number"
+                                min="0"
+                                max={itemsPerPage - 1}
+                                className="form-input w-full"
+                                value={startOffset}
+                                onChange={e => setStartOffset(Math.max(0, parseInt(e.target.value) || 0))}
+                            />
+                            <div className="text-right text-xs">Start at position: {startOffset + 1}</div>
+                        </div>
+                    </div>
+
                     {/* Grid Layout */}
                     <div className="mb-4" style={{ marginBottom: '16px' }}>
                         <h3 className="font-semibold mb-2" style={{ fontSize: '14px', marginBottom: '8px' }}>Grid Layout</h3>
@@ -720,89 +753,101 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                     Pg {index + 1}
                                 </div>
                                 <div style={gridStyle}>
-                                    {pageAssets.map(asset => (
-                                        <div key={asset.id} className="preview-item" style={{
-                                            border: settings.showBorder ? '1px solid #ddd' : 'none',
-                                            borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
-                                            padding: '2px',
-                                            aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
-                                            height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
-                                            width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '0px',
-                                            overflow: 'hidden',
-                                            color: 'black',
-                                            containerType: 'size'
-                                        }}>
-                                            {settings.showName && (
-                                                <h3 style={{
-                                                    margin: '0',
-                                                    fontSize: `${settings.textSize}cqi`,
-                                                    width: '98%',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    textAlign: 'center',
-                                                    color: 'black',
-                                                    flexShrink: 0
-                                                }}>
-                                                    {getSerialDisplay(asset)}
-                                                </h3>
-                                            )}
+                                    {pageAssets.map((asset, idx) => {
+                                        if (!asset) {
+                                            return (
+                                                <div key={`empty-${idx}`} className="preview-item" style={{
+                                                    border: 'none', // Invisible
+                                                    aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
+                                                    height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
+                                                    width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
+                                                }}></div>
+                                            );
+                                        }
+                                        return (
+                                            <div key={asset.id} className="preview-item" style={{
+                                                border: settings.showBorder ? '1px solid #ddd' : 'none',
+                                                borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
+                                                padding: '2px',
+                                                aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
+                                                height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
+                                                width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0px',
+                                                overflow: 'hidden',
+                                                color: 'black',
+                                                containerType: 'size'
+                                            }}>
+                                                {settings.showName && (
+                                                    <h3 style={{
+                                                        margin: '0',
+                                                        fontSize: `${settings.textSize}cqi`,
+                                                        width: '98%',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        textAlign: 'center',
+                                                        color: 'black',
+                                                        flexShrink: 0
+                                                    }}>
+                                                        {getSerialDisplay(asset)}
+                                                    </h3>
+                                                )}
 
-                                            {/* Flexible QR Wrapper 
+                                                {/* Flexible QR Wrapper 
                                                 size controlled by width % and aspect ratio
                                                 This ensures the box collapses tightly around the QR
                                             */}
-                                            <div id={`qr-code-bulk-${asset.id}`} style={{
-                                                flex: '0 0 auto',
-                                                width: `${settings.qrSize}%`,
-                                                aspectRatio: '1/1',
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
-                                            }}>
-                                                <QRCode
-                                                    size={256}
-                                                    style={{
-                                                        height: "100%",
-                                                        width: "100%",
-                                                        maxWidth: '100%',
-                                                        maxHeight: '100%'
-                                                    }}
-                                                    value={`${window.location.origin}/asset/scan/${asset.id}`}
-                                                    viewBox={`0 0 256 256`}
-                                                />
-                                            </div>
-
-                                            {settings.showTag && (
-                                                <p style={{
-                                                    margin: '0',
-                                                    fontSize: `${Math.max(2, settings.textSize - 2)}cqi`,
-                                                    fontWeight: 'bold',
-                                                    width: '98%',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    textAlign: 'center',
-                                                    color: 'black',
-                                                    flexShrink: 0
+                                                <div id={`qr-code-bulk-${asset.id}`} style={{
+                                                    flex: '0 0 auto',
+                                                    width: `${settings.qrSize}%`,
+                                                    aspectRatio: '1/1',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center'
                                                 }}>
-                                                    {asset.asset_tag}
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))}
+                                                    <QRCode
+                                                        size={256}
+                                                        style={{
+                                                            height: "100%",
+                                                            width: "100%",
+                                                            maxWidth: '100%',
+                                                            maxHeight: '100%'
+                                                        }}
+                                                        value={`${window.location.origin}/asset/scan/${asset.id}`}
+                                                        viewBox={`0 0 256 256`}
+                                                    />
+                                                </div>
+
+                                                {settings.showTag && (
+                                                    <p style={{
+                                                        margin: '0',
+                                                        fontSize: `${Math.max(2, settings.textSize - 2)}cqi`,
+                                                        fontWeight: 'bold',
+                                                        width: '98%',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        textAlign: 'center',
+                                                        color: 'black',
+                                                        flexShrink: 0
+                                                    }}>
+                                                        {asset.asset_tag}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

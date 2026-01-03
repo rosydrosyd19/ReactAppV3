@@ -809,10 +809,24 @@ router.delete('/locations/:id', checkPermission('asset.locations.manage'), async
 
 router.get('/suppliers', checkPermission('asset.items.view'), async (req, res) => {
     try {
-        const suppliers = await db.query('SELECT * FROM asset_suppliers WHERE is_deleted = 0 ORDER BY supplier_name');
-        res.json({ success: true, data: suppliers });
+        const suppliers = await db.query(`
+            SELECT s.*, COUNT(a.id) as asset_count
+            FROM asset_suppliers s
+            LEFT JOIN asset_items a ON s.id = a.supplier_id AND (a.is_deleted = 0 OR a.is_deleted IS NULL)
+            WHERE (s.is_deleted = 0 OR s.is_deleted IS NULL)
+            GROUP BY s.id
+            ORDER BY s.supplier_name
+        `);
+
+        const suppliersWithCount = suppliers.map(sup => ({
+            ...sup,
+            asset_count: Number(sup.asset_count)
+        }));
+
+        res.json({ success: true, data: suppliersWithCount });
     } catch (error) {
         console.error('Get suppliers error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching suppliers' });
     }
 });
 

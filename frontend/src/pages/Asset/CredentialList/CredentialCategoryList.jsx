@@ -123,6 +123,7 @@ const CredentialCategoryList = () => {
                             <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Count</th>
                                     <th>Created At</th>
                                     <th style={{ width: '150px' }}>Actions</th>
                                 </tr>
@@ -139,6 +140,7 @@ const CredentialCategoryList = () => {
                                                     <span style={{ fontWeight: 500 }}>{category.category_name}</span>
                                                 </div>
                                             </td>
+                                            <td><span className="badge badge-info">{category.credential_count || 0}</span></td>
                                             <td>{new Date(category.created_at).toLocaleDateString()}</td>
                                             <td>
                                                 <div className="action-buttons">
@@ -186,6 +188,9 @@ const CredentialCategoryList = () => {
                                 <div className="mobile-asset-info">
                                     <div className="asset-primary-text">
                                         <span className="asset-tag" style={{ fontSize: '16px' }}>{category.category_name}</span>
+                                    </div>
+                                    <div className="asset-secondary-text">
+                                        Count: <span className="badge badge-info" style={{ fontSize: '12px' }}>{category.credential_count || 0}</span>
                                     </div>
                                     <div className="asset-secondary-text">
                                         Created: {new Date(category.created_at).toLocaleDateString()}

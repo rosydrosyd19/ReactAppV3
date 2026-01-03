@@ -9,11 +9,21 @@ const { verifyToken: authenticateToken, checkPermission } = require('../middlewa
 router.get('/categories', authenticateToken, async (req, res) => {
     try {
         const categories = await db.query(`
-            SELECT * FROM asset_credential_categories 
-            WHERE is_deleted = FALSE OR is_deleted IS NULL 
-            ORDER BY category_name
+            SELECT acc.*, COUNT(ac.id) as credential_count
+            FROM asset_credential_categories acc
+            LEFT JOIN asset_credentials ac ON acc.category_name = ac.category AND (ac.is_deleted = FALSE OR ac.is_deleted IS NULL)
+            WHERE (acc.is_deleted = FALSE OR acc.is_deleted IS NULL)
+            GROUP BY acc.id
+            ORDER BY acc.category_name
         `);
-        res.json({ success: true, data: categories });
+
+        // Convert BigInt count to number if necessary (though mariadb driver usually handles it, explicit conversion is safer)
+        const categoriesWithCount = categories.map(cat => ({
+            ...cat,
+            credential_count: Number(cat.credential_count)
+        }));
+
+        res.json({ success: true, data: categoriesWithCount });
     } catch (error) {
         console.error('Get credential categories error:', error);
         res.status(500).json({ success: false, message: 'Error fetching categories' });

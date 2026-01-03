@@ -160,6 +160,7 @@ const SupplierList = () => {
                                         <th>Contact Person</th>
                                         <th>Email</th>
                                         <th>Phone</th>
+                                        <th>Asset Count</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -170,6 +171,7 @@ const SupplierList = () => {
                                             <td>{supplier.contact_person || '-'}</td>
                                             <td>{supplier.email || '-'}</td>
                                             <td>{supplier.phone || '-'}</td>
+                                            <td><span className="badge badge-info">{supplier.asset_count || 0}</span></td>
                                             <td>
                                                 <div className="action-buttons">
                                                     {hasPermission('asset.suppliers.manage') && (
@@ -232,6 +234,10 @@ const SupplierList = () => {
                                                 <div className="detail-item">
                                                     <span className="label">Email</span>
                                                     <span className="value">{supplier.email || '-'}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Asset Count</span>
+                                                    <span className="value badge badge-info">{supplier.asset_count || 0}</span>
                                                 </div>
                                                 <div className="detail-item">
                                                     <span className="label">Phone</span>
