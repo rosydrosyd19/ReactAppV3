@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../config/database');
 const { verifyToken, checkPermission } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -458,6 +459,65 @@ router.get('/logs', checkPermission('sysadmin.logs.view'), async (req, res) => {
     } catch (error) {
         console.error('Get logs error:', error);
         res.status(500).json({ success: false, message: 'Error fetching logs' });
+    }
+});
+
+// ==================== SETTINGS ====================
+
+// Get all settings (public read for now, but good to have authenticated)
+router.get('/settings', async (req, res) => {
+    try {
+        const settings = await db.query('SELECT setting_key, setting_value, description FROM sysadmin_settings');
+        const settingsMap = {};
+        settings.forEach(s => {
+            settingsMap[s.setting_key] = s.setting_value;
+        });
+        res.json({ success: true, data: settingsMap });
+    } catch (error) {
+        console.error('Get settings error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching settings' });
+    }
+});
+
+// Update settings
+router.put('/settings', checkPermission('sysadmin.settings.manage'), async (req, res) => {
+    try {
+        const settings = req.body;
+        const keys = Object.keys(settings);
+
+        if (keys.length === 0) {
+            return res.status(400).json({ success: false, message: 'No settings provided' });
+        }
+
+        for (const key of keys) {
+            await db.query(
+                `INSERT INTO sysadmin_settings (setting_key, setting_value) 
+                 VALUES (?, ?) 
+                 ON DUPLICATE KEY UPDATE setting_value = ?`,
+                [key, settings[key], settings[key]]
+            );
+        }
+
+        await logActivity(req.user.id, 'UPDATE_SETTINGS', 'sysadmin', 'settings', null, settings, req);
+        res.json({ success: true, message: 'Settings updated successfully' });
+    } catch (error) {
+        console.error('Update settings error:', error);
+        res.status(500).json({ success: false, message: 'Error updating settings' });
+    }
+});
+
+// Upload favicon/logo
+router.post('/settings/upload', checkPermission('sysadmin.settings.manage'), upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+
+        const fileUrl = `/uploads/${req.file.filename}`;
+        res.json({ success: true, url: fileUrl });
+    } catch (error) {
+        console.error('Upload setting file error:', error);
+        res.status(500).json({ success: false, message: 'Error uploading file' });
     }
 });
 

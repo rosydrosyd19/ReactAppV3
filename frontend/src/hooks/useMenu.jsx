@@ -7,8 +7,10 @@ import {
     FiMapPin,
     FiTool,
     FiSettings,
+    FiShoppingBag,
     FiActivity,
     FiTruck,
+    FiSliders,
 } from 'react-icons/fi';
 
 export const useMenu = () => {
@@ -48,6 +50,13 @@ export const useMenu = () => {
                     icon: <FiShield />,
                     show: hasPermission('sysadmin.roles.view'),
                     group: 'Master',
+                },
+                {
+                    title: 'Configuration',
+                    path: '/sysadmin/settings',
+                    icon: <FiSliders />,
+                    group: 'System',
+                    show: true // Public for now, add permission check later if needed
                 },
                 {
                     title: 'Activity Logs',

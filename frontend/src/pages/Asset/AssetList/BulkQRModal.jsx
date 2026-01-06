@@ -58,7 +58,7 @@ const DEFAULT_PRESETS = [
 const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
     const [presets, setPresets] = useState(DEFAULT_PRESETS);
     const [selectedPresetId, setSelectedPresetId] = useState('a4');
-    const [startOffset, setStartOffset] = useState(0); // New: Start Position Offset
+    const [startOffset, setStartOffset] = useState(0); // New State
 
     // Current Settings
     const [settings, setSettings] = useState(DEFAULT_PRESETS[0]);
@@ -258,15 +258,15 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
 
     const itemsPerPage = calculateItemsPerPage();
 
-    // Create display list with offset padding
-    const displayAssets = [
+    // Prepare processed assets with empty slots for offset
+    const processedAssets = [
         ...Array(startOffset).fill(null),
         ...assets
     ];
 
-    const totalPages = Math.ceil(displayAssets.length / itemsPerPage);
+    const totalPages = Math.ceil(processedAssets.length / itemsPerPage);
     const pages = Array.from({ length: totalPages }, (_, i) => {
-        return displayAssets.slice(i * itemsPerPage, (i + 1) * itemsPerPage);
+        return processedAssets.slice(i * itemsPerPage, (i + 1) * itemsPerPage);
     });
 
     const handlePrint = () => {
@@ -406,10 +406,9 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                     ${pages.map((pageAssets, i) => `
                         <div class="page-container">
                             <div class="qr-grid">
-                                ${pageAssets.map((asset, idx) => {
+                                ${pageAssets.map(asset => {
             if (!asset) {
-                // Render empty placeholder
-                return `<div class="qr-item" style="border: none;"></div>`;
+                return `<div class="qr-item" style="border: none"></div>`;
             }
             return `
                                     <div class="qr-item">
@@ -419,8 +418,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                         </div>
                                         <p>${asset.asset_tag}</p>
                                     </div>
-                                    `;
-        }).join('')}
+                                `}).join('')}
                             </div>
                         </div>
                     `).join('')}
@@ -606,13 +604,13 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                         </div>
                     </div>
 
-
-
-                    {/* Start Position / Skip Labels */}
+                    {/* Grid Layout */}
                     <div className="mb-4" style={{ marginBottom: '16px' }}>
-                        <h3 className="font-semibold mb-2" style={{ fontSize: '14px', marginBottom: '8px' }}>Start Position</h3>
+                        <h3 className="font-semibold mb-2" style={{ fontSize: '14px', marginBottom: '8px' }}>Grid Layout</h3>
+
+                        {/* Skip Labels Input */}
                         <div className="mb-2">
-                            <label className="text-xs">Skip Labels (Start at...)</label>
+                            <label className="text-xs">Skip Initial Labels</label>
                             <input
                                 type="number"
                                 min="0"
@@ -621,13 +619,8 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                 value={startOffset}
                                 onChange={e => setStartOffset(Math.max(0, parseInt(e.target.value) || 0))}
                             />
-                            <div className="text-right text-xs">Start at position: {startOffset + 1}</div>
                         </div>
-                    </div>
 
-                    {/* Grid Layout */}
-                    <div className="mb-4" style={{ marginBottom: '16px' }}>
-                        <h3 className="font-semibold mb-2" style={{ fontSize: '14px', marginBottom: '8px' }}>Grid Layout</h3>
                         <div className="mb-2">
                             <label className="text-xs">Columns</label>
                             <input type="range" min="1" max="10" className="w-full" style={{ width: '100%' }} value={settings.columns} onChange={e => handleColumnsChange(Number(e.target.value))} />
@@ -753,17 +746,20 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                     Pg {index + 1}
                                 </div>
                                 <div style={gridStyle}>
-                                    {pageAssets.map((asset, idx) => {
+                                    {pageAssets.map((asset, assetIndex) => {
                                         if (!asset) {
                                             return (
-                                                <div key={`empty-${idx}`} className="preview-item" style={{
-                                                    border: 'none', // Invisible
+                                                <div key={`empty-${index}-${assetIndex}`} className="preview-item" style={{
+                                                    border: '1px dashed #ccc', // Visual indicator for skipped
+                                                    borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
+                                                    padding: '2px',
                                                     aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
                                                     height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
                                                     width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
                                                 }}></div>
                                             );
                                         }
+
                                         return (
                                             <div key={asset.id} className="preview-item" style={{
                                                 border: settings.showBorder ? '1px solid #ddd' : 'none',
@@ -847,7 +843,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

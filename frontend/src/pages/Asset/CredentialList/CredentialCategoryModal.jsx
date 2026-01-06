@@ -5,6 +5,7 @@ import Toast from '../../../components/Toast/Toast';
 
 const CredentialCategoryModal = ({ isOpen, onClose, onSuccess, category = null }) => {
     const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -12,8 +13,10 @@ const CredentialCategoryModal = ({ isOpen, onClose, onSuccess, category = null }
         if (isOpen) {
             if (category) {
                 setName(category.category_name);
+                setDescription(category.description || '');
             } else {
                 setName('');
+                setDescription('');
             }
             setError('');
         }
@@ -27,14 +30,14 @@ const CredentialCategoryModal = ({ isOpen, onClose, onSuccess, category = null }
         try {
             if (category) {
                 // Update
-                const res = await axios.put(`/asset/credentials/categories/${category.id}`, { category_name: name });
+                const res = await axios.put(`/asset/credentials/categories/${category.id}`, { category_name: name, description });
                 if (res.data.success) {
                     onSuccess('Category updated successfully');
                     onClose();
                 }
             } else {
                 // Create
-                const res = await axios.post('/asset/credentials/categories', { category_name: name });
+                const res = await axios.post('/asset/credentials/categories', { category_name: name, description });
                 if (res.data.success) {
                     onSuccess('Category created successfully');
                     onClose();
@@ -70,6 +73,16 @@ const CredentialCategoryModal = ({ isOpen, onClose, onSuccess, category = null }
                                 placeholder="e.g. Server, Database, SaaS"
                                 required
                                 autoFocus
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Description</label>
+                            <textarea
+                                className="form-input"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Optional description..."
+                                rows="3"
                             />
                         </div>
                     </div>

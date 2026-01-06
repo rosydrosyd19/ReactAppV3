@@ -1,12 +1,14 @@
 import './Sidebar.css';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useConfig } from '../../contexts/ConfigContext';
 import { FiMenu } from 'react-icons/fi';
 import { useMenu } from '../../hooks/useMenu';
 
 const Sidebar = ({ isOpen, onClose }) => {
     const location = useLocation();
     const { hasPermission, hasModule } = useAuth(); // kept for potential other uses, though useMenu handles logic
+    const { config } = useConfig();
     const activeModule = localStorage.getItem('activeModule');
 
     const menuItems = useMenu();
@@ -26,7 +28,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
             <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
-                    <h2>ReactAppV3</h2>
+                    <h2>{config.app_name || 'ReactAppV3'}</h2>
                     <button className="sidebar-toggle" onClick={onClose} aria-label="Close sidebar">
                         <FiMenu />
                     </button>

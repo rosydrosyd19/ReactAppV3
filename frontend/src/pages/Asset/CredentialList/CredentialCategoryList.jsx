@@ -123,6 +123,7 @@ const CredentialCategoryList = () => {
                             <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Description</th>
                                     <th>Count</th>
                                     <th>Created At</th>
                                     <th style={{ width: '150px' }}>Actions</th>
@@ -140,6 +141,7 @@ const CredentialCategoryList = () => {
                                                     <span style={{ fontWeight: 500 }}>{category.category_name}</span>
                                                 </div>
                                             </td>
+                                            <td>{category.description || '-'}</td>
                                             <td><span className="badge badge-info">{category.credential_count || 0}</span></td>
                                             <td>{new Date(category.created_at).toLocaleDateString()}</td>
                                             <td>
@@ -203,6 +205,12 @@ const CredentialCategoryList = () => {
 
                             {expandedItemId === category.id && (
                                 <div className="mobile-list-details">
+                                    {category.description && (
+                                        <div style={{ padding: '0 1rem 1rem', color: 'var(--text-secondary)', fontSize: '14px', borderBottom: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+                                            <strong>Description:</strong> <br />
+                                            {category.description}
+                                        </div>
+                                    )}
                                     <div className="mobile-actions">
                                         <button
                                             className="action-btn edit"

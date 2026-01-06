@@ -33,7 +33,7 @@ router.get('/categories', authenticateToken, async (req, res) => {
 // Create credential category
 router.post('/categories', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
     try {
-        const { category_name } = req.body;
+        const { category_name, description } = req.body;
 
         const existing = await db.query('SELECT id FROM asset_credential_categories WHERE category_name = ?', [category_name]);
         if (existing.length > 0) {
@@ -41,8 +41,8 @@ router.post('/categories', authenticateToken, checkPermission('asset.credentials
         }
 
         const result = await db.query(
-            'INSERT INTO asset_credential_categories (category_name, created_by) VALUES (?, ?)',
-            [category_name, req.user.id]
+            'INSERT INTO asset_credential_categories (category_name, description, created_by) VALUES (?, ?, ?)',
+            [category_name, description, req.user.id]
         );
 
         res.status(201).json({ success: true, data: { id: result.insertId.toString(), name: category_name } });
@@ -55,7 +55,7 @@ router.post('/categories', authenticateToken, checkPermission('asset.credentials
 // Update credential category
 router.put('/categories/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
     try {
-        const { category_name } = req.body;
+        const { category_name, description } = req.body;
         const { id } = req.params;
 
         // Check if name exists for other ID
@@ -65,8 +65,8 @@ router.put('/categories/:id', authenticateToken, checkPermission('asset.credenti
         }
 
         await db.query(
-            'UPDATE asset_credential_categories SET category_name = ? WHERE id = ?',
-            [category_name, id]
+            'UPDATE asset_credential_categories SET category_name = ?, description = ? WHERE id = ?',
+            [category_name, description, id]
         );
 
         res.json({ success: true, message: 'Category updated successfully' });
