@@ -7,7 +7,26 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-// Apply authentication to all routes
+
+// ==================== SETTINGS (Public Read) ====================
+// Define public routes BEFORE applying authentication middleware
+
+// Get all settings (public read)
+router.get('/settings', async (req, res) => {
+    try {
+        const settings = await db.query('SELECT setting_key, setting_value, description FROM sysadmin_settings');
+        const settingsMap = {};
+        settings.forEach(s => {
+            settingsMap[s.setting_key] = s.setting_value;
+        });
+        res.json({ success: true, data: settingsMap });
+    } catch (error) {
+        console.error('Get settings error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching settings' });
+    }
+});
+
+// Apply authentication to all OTHER routes
 router.use(verifyToken);
 
 // ==================== USERS ====================
@@ -464,20 +483,7 @@ router.get('/logs', checkPermission('sysadmin.logs.view'), async (req, res) => {
 
 // ==================== SETTINGS ====================
 
-// Get all settings (public read for now, but good to have authenticated)
-router.get('/settings', async (req, res) => {
-    try {
-        const settings = await db.query('SELECT setting_key, setting_value, description FROM sysadmin_settings');
-        const settingsMap = {};
-        settings.forEach(s => {
-            settingsMap[s.setting_key] = s.setting_value;
-        });
-        res.json({ success: true, data: settingsMap });
-    } catch (error) {
-        console.error('Get settings error:', error);
-        res.status(500).json({ success: false, message: 'Error fetching settings' });
-    }
-});
+
 
 // Update settings
 router.put('/settings', checkPermission('sysadmin.settings.manage'), async (req, res) => {

@@ -1,7 +1,7 @@
 import './CredentialDetail.css';
 import '../../SysAdmin/UserDetail.css'; // Inheritar base styles from UserDetail
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
@@ -34,6 +34,7 @@ import {
 const CredentialDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { hasPermission } = useAuth();
 
     // State
@@ -164,7 +165,13 @@ const CredentialDetail = () => {
                 <div className="header-left">
                     <button
                         className="btn btn-outline"
-                        onClick={() => navigate('/asset/credentials')}
+                        onClick={() => {
+                            if (location.state?.from) {
+                                navigate(location.state.from);
+                            } else {
+                                navigate('/asset/credentials');
+                            }
+                        }}
                     >
                         <FiArrowLeft /> <span>Back</span>
                     </button>

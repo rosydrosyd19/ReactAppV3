@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFolder, FiLock, FiChevronDown } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFolder, FiLock, FiChevronDown, FiEye } from 'react-icons/fi';
 import Toast from '../../../components/Toast/Toast';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import CredentialCategoryModal from './CredentialCategoryModal';
@@ -8,6 +9,7 @@ import '../AssetList/AssetList.css'; // Reusing AssetList styles for consistency
 
 const CredentialCategoryList = () => {
     const [categories, setCategories] = useState([]);
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -138,7 +140,9 @@ const CredentialCategoryList = () => {
                                                     <div className="icon-placeholder" style={{ background: 'var(--bg-secondary)', padding: '8px', borderRadius: '8px', display: 'flex' }}>
                                                         <FiLock color="var(--primary-color)" />
                                                     </div>
-                                                    <span style={{ fontWeight: 500 }}>{category.category_name}</span>
+                                                    <span style={{ fontWeight: 500 }}>
+                                                        {category.category_name}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td>{category.description || '-'}</td>
@@ -146,6 +150,13 @@ const CredentialCategoryList = () => {
                                             <td>{new Date(category.created_at).toLocaleDateString()}</td>
                                             <td>
                                                 <div className="action-buttons">
+                                                    <button
+                                                        className="btn-icon"
+                                                        onClick={() => navigate(`/asset/credential-categories/${category.id}`)}
+                                                        title="View"
+                                                    >
+                                                        <FiEye />
+                                                    </button>
                                                     <button
                                                         className="btn-icon"
                                                         onClick={() => handleEdit(category)}

@@ -2,6 +2,10 @@
 jalankan migration saat update di server
 node database/migrations/add-description-to-credential-categories.js
 node database/migrations/create_sysadmin_settings.js
+node database/migrations/create_asset_maintenance.js
+node database/migrations/add_maintenance_permissions.js
+
+tambahkan view detail pada cedential categories
 
 Lengkapi menu maintenence
 

@@ -30,6 +30,34 @@ router.get('/categories', authenticateToken, async (req, res) => {
     }
 });
 
+// Get credential category by ID
+router.get('/categories/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const categories = await db.query(`
+            SELECT acc.*, COUNT(ac.id) as credential_count
+            FROM asset_credential_categories acc
+            LEFT JOIN asset_credentials ac ON acc.category_name = ac.category AND (ac.is_deleted = FALSE OR ac.is_deleted IS NULL)
+            WHERE acc.id = ? AND (acc.is_deleted = FALSE OR acc.is_deleted IS NULL)
+            GROUP BY acc.id
+        `, [id]);
+
+        if (categories.length === 0) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+
+        const category = {
+            ...categories[0],
+            credential_count: Number(categories[0].credential_count)
+        };
+
+        res.json({ success: true, data: category });
+    } catch (error) {
+        console.error('Get credential category error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching category' });
+    }
+});
+
 // Create credential category
 router.post('/categories', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
     try {
