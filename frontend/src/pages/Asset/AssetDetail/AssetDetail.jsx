@@ -534,7 +534,7 @@ const AssetDetail = ({ readOnly = false }) => {
                                             <th>Performed By</th>
                                             {isAuthenticated && <th>Cost</th>}
                                             <th>Status</th>
-                                            {hasPermission('asset.maintenance.manage') && <th>Action</th>}
+                                            {hasPermission('asset.maintenance.manage') || hasPermission('asset.maintenance.view') ? <th>Action</th> : null}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -555,15 +555,28 @@ const AssetDetail = ({ readOnly = false }) => {
                                                         {record.status}
                                                     </span>
                                                 </td>
-                                                {hasPermission('asset.maintenance.manage') && (
+                                                {(hasPermission('asset.maintenance.manage') || hasPermission('asset.maintenance.view')) && (
                                                     <td>
-                                                        <button
-                                                            className="btn-icon"
-                                                            onClick={() => handleEditMaintenance(record)}
-                                                            title="Edit Maintenance"
-                                                        >
-                                                            <FiEdit2 />
-                                                        </button>
+                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                            {hasPermission('asset.maintenance.view') && (
+                                                                <button
+                                                                    className="btn-icon"
+                                                                    onClick={() => navigate(`/asset/maintenance/${record.id}`, { state: { from: location.pathname } })}
+                                                                    title="View Details"
+                                                                >
+                                                                    <FiEye />
+                                                                </button>
+                                                            )}
+                                                            {hasPermission('asset.maintenance.manage') && (
+                                                                <button
+                                                                    className="btn-icon"
+                                                                    onClick={() => handleEditMaintenance(record)}
+                                                                    title="Edit Maintenance"
+                                                                >
+                                                                    <FiEdit2 />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 )}
                                             </tr>
@@ -615,15 +628,26 @@ const AssetDetail = ({ readOnly = false }) => {
                                                     )}
                                                 </div>
 
-                                                {hasPermission('asset.maintenance.manage') && (
-                                                    <div style={{ marginTop: '0.75rem' }}>
-                                                        <button
-                                                            className="btn btn-outline btn-sm"
-                                                            onClick={() => handleEditMaintenance(record)}
-                                                            style={{ width: '100%' }}
-                                                        >
-                                                            <FiEdit2 /> Edit Record
-                                                        </button>
+                                                {(hasPermission('asset.maintenance.manage') || hasPermission('asset.maintenance.view')) && (
+                                                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '8px' }}>
+                                                        {hasPermission('asset.maintenance.view') && (
+                                                            <button
+                                                                className="btn btn-outline btn-sm"
+                                                                onClick={() => navigate(`/asset/maintenance/${record.id}`, { state: { from: location.pathname } })}
+                                                                style={{ flex: 1 }}
+                                                            >
+                                                                <FiEye /> View
+                                                            </button>
+                                                        )}
+                                                        {hasPermission('asset.maintenance.manage') && (
+                                                            <button
+                                                                className="btn btn-outline btn-sm"
+                                                                onClick={() => handleEditMaintenance(record)}
+                                                                style={{ flex: 1 }}
+                                                            >
+                                                                <FiEdit2 /> Edit
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>

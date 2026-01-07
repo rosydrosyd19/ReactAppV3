@@ -157,7 +157,7 @@ const MaintenanceDetail = () => {
                                     className="btn-icon"
                                     onClick={() => navigate(`/asset/items/${maintenance.asset_id}`, { state: { from: location.pathname } })}
                                     title="View Asset Details"
-                                    style={{ fontSize: '1rem', color: '#fff' }}
+                                    style={{ fontSize: '1rem' }}
                                 >
                                     <FiEye />
                                 </button>
