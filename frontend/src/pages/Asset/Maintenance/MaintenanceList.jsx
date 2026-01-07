@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
-import { FiPlus, FiEdit2, FiTrash2, FiTool, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiTool, FiSearch, FiFilter, FiEye } from 'react-icons/fi';
 import Pagination from '../../../components/Pagination/Pagination';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
@@ -8,6 +9,7 @@ import MaintenanceModal from './MaintenanceModal';
 import '../AssetList/AssetList.css'; // Reuse AssetList styles
 
 const MaintenanceList = () => {
+    const navigate = useNavigate();
     const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -171,6 +173,13 @@ const MaintenanceList = () => {
                                         <td>{record.performed_by || '-'}</td>
                                         <td>
                                             <div className="action-buttons">
+                                                <button
+                                                    className="btn-icon"
+                                                    onClick={() => navigate(`/asset/maintenance/${record.id}`)}
+                                                    title="View Details"
+                                                >
+                                                    <FiEye />
+                                                </button>
                                                 <button
                                                     className="btn-icon"
                                                     onClick={() => setModal({ isOpen: true, data: record })}

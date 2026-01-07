@@ -930,6 +930,30 @@ router.get('/maintenance', checkPermission('asset.maintenance.view'), async (req
     }
 });
 
+router.get('/maintenance/:id', checkPermission('asset.maintenance.view'), async (req, res) => {
+    try {
+        const [maintenance] = await db.query(`
+            SELECT m.*, 
+            a.asset_tag, 
+            a.asset_name, 
+            u.username as created_by_username
+            FROM asset_maintenance m
+            INNER JOIN asset_items a ON m.asset_id = a.id
+            LEFT JOIN sysadmin_users u ON m.created_by = u.id
+            WHERE m.id = ?
+        `, [req.params.id]);
+
+        if (!maintenance) {
+            return res.status(404).json({ success: false, message: 'Maintenance record not found' });
+        }
+
+        res.json({ success: true, data: maintenance });
+    } catch (error) {
+        console.error('Get maintenance detail error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching maintenance detail' });
+    }
+});
+
 router.post('/maintenance', checkPermission('asset.maintenance.manage'), async (req, res) => {
     try {
         const {

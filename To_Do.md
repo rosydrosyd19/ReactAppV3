@@ -1,14 +1,4 @@
-## New Feature 
-jalankan migration saat update di server
-node database/migrations/add-description-to-credential-categories.js
-node database/migrations/create_sysadmin_settings.js
-node database/migrations/create_asset_maintenance.js
-node database/migrations/add_maintenance_permissions.js
-
-tambahkan view detail pada cedential categories
-
-Lengkapi menu maintenence
-
+## New Feature
 tambahkan menu untuk simpan nomer admin IT
 
 Tambahkan fitur request maintenence di halaman detail asset untuk user yang melakukan scan. requet harus bisa di lakukan baik untuk user yang sudah login maupun belum login. untuk menu ini bila sudah dilakukan input form dan sublit Sistem akan membuka tab baru untuk link WA dengan template pesan misal https://wa.me/628xxxx?text=Request%20Anda%20sedang%20diproses

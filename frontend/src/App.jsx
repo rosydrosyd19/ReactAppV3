@@ -23,6 +23,7 @@ import CredentialDetail from './pages/Asset/CredentialList/CredentialDetail'; //
 import CredentialCategoryList from './pages/Asset/CredentialList/CredentialCategoryList'; // New
 import CredentialCategoryDetail from './pages/Asset/CredentialList/CredentialCategoryDetail'; // New
 import MaintenanceList from './pages/Asset/Maintenance/MaintenanceList'; // New
+import MaintenanceDetail from './pages/Asset/Maintenance/MaintenanceDetail'; // New
 import ModuleSelection from './pages/Modules/ModuleSelection';
 import Profile from './pages/Profile/Profile'; // New
 
@@ -116,6 +117,7 @@ function App() {
                 <Route path="locations" element={<LocationList />} />
                 <Route path="locations/:id" element={<LocationDetail />} />
                 <Route path="maintenance" element={<MaintenanceList />} />
+                <Route path="maintenance/:id" element={<MaintenanceDetail />} />
                 <Route path="credentials" element={<CredentialList />} />
                 <Route path="credentials/:id" element={<CredentialDetail />} />
                 <Route path="credential-categories" element={<CredentialCategoryList />} />
