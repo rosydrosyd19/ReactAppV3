@@ -1,6 +1,7 @@
 ## New Feature
 Lakukan ketika up ke server
 alter_asset_maintenance_check.js
+alter_asset_maintenance_image.js
 
 pada report issue buat Status otomatis di-set ke 'requests' agar admin tau mana aja asset yang di lakukan report issue ke admin
 

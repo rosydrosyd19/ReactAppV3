@@ -114,16 +114,22 @@
         /* Hide text on mobile */
     }
 
-    /* Exception for guest login button: show text and make it full width */
-    .user-detail.asset-detail-override .header-actions button.btn-login-guest {
+    /* Exception for guest login/request buttons: show text and make them full width */
+    .user-detail.asset-detail-override .header-actions .guest-actions-wrapper {
         grid-column: 1 / -1;
         /* Span all columns */
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .user-detail.asset-detail-override .header-actions .guest-actions-wrapper button {
+        flex: 1;
         display: flex;
         align-items: center;
         gap: 8px;
     }
 
-    .user-detail.asset-detail-override .header-actions button.btn-login-guest span {
+    .user-detail.asset-detail-override .header-actions .guest-actions-wrapper button span {
         display: inline;
         /* Show text */
     }

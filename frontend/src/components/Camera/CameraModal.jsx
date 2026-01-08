@@ -22,6 +22,13 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
 
     const startCamera = async () => {
         setError('');
+
+        // Check if browser supports mediaDevices (often undefined in insecure contexts like HTTP)
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setError('Camera access requires a secure connection (HTTPS) or localhost. Please use the "From Gallery" option instead.');
+            return;
+        }
+
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment' }
@@ -33,7 +40,12 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
             }
         } catch (err) {
             console.error("Error accessing camera:", err);
-            setError('Could not access camera. Please ensure you have granted camera permissions.');
+            // Handle specific error types if needed, but generic fallback is good
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setError('Camera permission denied. Please allow camera access in your browser settings.');
+            } else {
+                setError('Could not access camera. Please ensure you have granted camera permissions.');
+            }
         }
     };
 

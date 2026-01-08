@@ -99,8 +99,8 @@ router.get('/public/:id', async (req, res) => {
 });
 
 
-// Maintenance Request (Public)
-router.post('/maintenance-request', async (req, res) => {
+// Maintenance Request (Public) with Image Support
+router.post('/maintenance-request', upload.single('image'), async (req, res) => {
     try {
         const { asset_id, issue_description, requester_name, requester_phone } = req.body;
 
@@ -163,12 +163,14 @@ router.post('/maintenance-request', async (req, res) => {
         const ticketNumber = `${prefix}${sequence}`;
 
         // 3. Insert into Database
+        const request_image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
         const result = await db.query(
             `INSERT INTO asset_maintenance (
                 asset_id, maintenance_type, maintenance_date, description, status, 
-                ticket_number, requester_name, requester_phone, created_by
-            ) VALUES (?, 'corrective', NOW(), ?, 'scheduled', ?, ?, ?, ?)`,
-            [asset_id, issue_description, ticketNumber, finalRequesterName, finalRequesterPhone, userId]
+                ticket_number, requester_name, requester_phone, created_by, request_image_url
+            ) VALUES (?, 'corrective', NOW(), ?, 'scheduled', ?, ?, ?, ?, ?)`,
+            [asset_id, issue_description, ticketNumber, finalRequesterName, finalRequesterPhone, userId, request_image_url]
         );
 
         // 4. Send Notifications

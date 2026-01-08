@@ -546,12 +546,27 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                     <div className="form-group">
                                         <label className="form-label">Image</label>
                                         {!imagePreview ? (
-                                            <div className="image-upload-area-small" style={{ flexDirection: 'row', gap: '1rem', padding: '1rem' }}>
-                                                <div
-                                                    className="upload-placeholder-content"
-                                                    onClick={() => document.getElementById('modal-image-upload').click()}
-                                                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '1rem', border: '1px dashed var(--border-color)', borderRadius: '8px', flex: 1 }}
-                                                >
+                                            <div className="upload-actions">
+                                                <div className="upload-btn-wrapper">
+                                                    <button
+                                                        type="button"
+                                                        className="btn-upload btn-camera"
+                                                        onClick={() => setShowCamera(true)}
+                                                    >
+                                                        <FiCamera size={24} />
+                                                        <span>Take Photo</span>
+                                                    </button>
+                                                </div>
+
+                                                <div className="upload-btn-wrapper">
+                                                    <button
+                                                        type="button"
+                                                        className="btn-upload btn-gallery"
+                                                        onClick={() => document.getElementById('modal-image-upload').click()}
+                                                    >
+                                                        <FiUpload size={24} />
+                                                        <span>Upload Image</span>
+                                                    </button>
                                                     <input
                                                         id="modal-image-upload"
                                                         type="file"
@@ -559,17 +574,6 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                                         onChange={handleImageChange}
                                                         style={{ display: 'none' }}
                                                     />
-                                                    <FiUpload className="upload-icon" style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }} />
-                                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Upload Image</span>
-                                                </div>
-
-                                                <div
-                                                    className="upload-placeholder-content"
-                                                    onClick={() => setShowCamera(true)}
-                                                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '1rem', border: '1px dashed var(--border-color)', borderRadius: '8px', flex: 1 }}
-                                                >
-                                                    <FiCamera className="upload-icon" style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }} />
-                                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Use Camera</span>
                                                 </div>
                                             </div>
                                         ) : (

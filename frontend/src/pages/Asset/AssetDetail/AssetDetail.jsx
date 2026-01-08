@@ -169,9 +169,14 @@ const AssetDetail = ({ readOnly = false }) => {
     const handleSubmitRequest = async (formData) => {
         try {
             setLoading(true);
-            const response = await axios.post('/asset/maintenance-request', {
-                asset_id: id,
-                ...formData
+
+            // Append asset_id to the FormData object
+            formData.append('asset_id', id);
+
+            const response = await axios.post('/asset/maintenance-request', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
             if (response.data.success) {
@@ -384,7 +389,7 @@ const AssetDetail = ({ readOnly = false }) => {
                 <div className="header-actions">
                     {/* Show Login button for guests in read-only mode */}
                     {readOnly && !isAuthenticated && (
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="guest-actions-wrapper" style={{ display: 'flex', gap: '10px' }}>
                             <button className="btn btn-warning" onClick={() => setShowRequestModal(true)} title="Report Issue">
                                 <FiAlertTriangle /> <span>Report Issue</span>
                             </button>

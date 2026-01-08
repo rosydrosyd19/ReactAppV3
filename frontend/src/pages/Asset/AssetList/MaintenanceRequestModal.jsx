@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiSave, FiAlertCircle } from 'react-icons/fi';
+import { FiX, FiSave, FiAlertCircle, FiCamera, FiImage, FiTrash2 } from 'react-icons/fi';
+import CameraModal from '../../../components/Camera/CameraModal';
 import './MaintenanceRequestModal.css';
 
 const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
     const [formData, setFormData] = useState({
         requester_name: '',
         requester_phone: '',
-        issue_description: ''
+        issue_description: '',
+        image: null,
+        imagePreview: null
     });
     const [errors, setErrors] = useState({});
+    const [showCamera, setShowCamera] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -16,9 +20,12 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
             setFormData({
                 requester_name: user ? user.full_name : '',
                 requester_phone: user ? user.phone : '',
-                issue_description: ''
+                issue_description: '',
+                image: null,
+                imagePreview: null
             });
             setErrors({});
+            setShowCamera(false);
         }
     }, [isOpen, user]);
 
@@ -37,10 +44,48 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
         return Object.keys(newErrors).length === 0;
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFormData({
+                ...formData,
+                image: file,
+                imagePreview: URL.createObjectURL(file)
+            });
+        }
+    };
+
+    const handleCameraCapture = (file) => {
+        if (file) {
+            setFormData({
+                ...formData,
+                image: file,
+                imagePreview: URL.createObjectURL(file)
+            });
+            setShowCamera(false);
+        }
+    };
+
+    const removeImage = () => {
+        setFormData({
+            ...formData,
+            image: null,
+            imagePreview: null
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validate()) {
-            onSubmit(formData);
+            // Use FormData for file upload
+            const data = new FormData();
+            data.append('requester_name', formData.requester_name);
+            data.append('requester_phone', formData.requester_phone);
+            data.append('issue_description', formData.issue_description);
+            if (formData.image) {
+                data.append('image', formData.image);
+            }
+            onSubmit(data);
         }
     };
 
@@ -127,6 +172,56 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
                             />
                             {errors.issue_description && <span className="error-text">{errors.issue_description}</span>}
                         </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Attach Photo (Optional)</label>
+
+                            {!formData.imagePreview ? (
+                                <div className="upload-actions">
+                                    <div className="upload-btn-wrapper">
+                                        <button
+                                            type="button"
+                                            className="btn-upload btn-camera"
+                                            onClick={() => setShowCamera(true)}
+                                        >
+                                            <FiCamera size={24} />
+                                            <span>Take Photo</span>
+                                        </button>
+                                    </div>
+
+                                    <div className="upload-btn-wrapper">
+                                        <button
+                                            type="button"
+                                            className="btn-upload btn-gallery"
+                                            onClick={() => document.getElementById('gallery-input').click()}
+                                        >
+                                            <FiImage size={24} />
+                                            <span>From Gallery</span>
+                                        </button>
+                                        <input
+                                            id="gallery-input"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            disabled={loading}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="image-preview-container">
+                                    <img src={formData.imagePreview} alt="Preview" className="image-preview" />
+                                    <button
+                                        type="button"
+                                        className="btn btn-danger btn-sm remove-image-btn"
+                                        onClick={removeImage}
+                                        disabled={loading}
+                                    >
+                                        <FiTrash2 /> Remove
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>
@@ -138,6 +233,12 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
                     </div>
                 </form>
             </div>
+
+            <CameraModal
+                isOpen={showCamera}
+                onClose={() => setShowCamera(false)}
+                onCapture={handleCameraCapture}
+            />
         </div>
     );
 };

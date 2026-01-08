@@ -283,3 +283,43 @@
 .input-with-icon-left input.form-input {
     padding-left: 40px !important;
 }
+
+/* Consistent File Upload Styles (Matching MaintenanceRequestModal) */
+.upload-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.btn-upload {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-tertiary);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+    gap: 8px;
+    height: 100px;
+}
+
+.btn-upload:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(37, 99, 235, 0.05);
+    color: var(--primary-color);
+}
+
+.btn-camera:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-gallery:hover {
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
