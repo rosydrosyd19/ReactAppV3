@@ -1,0 +1,3 @@
+[2026-01-08T09:19:53.291Z] TypeError: settingsRows.forEach is not a function
+    at C:\Users\Rosyd\Documents\React-js\ReactAppV3\backend\routes\asset.js:183:22
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

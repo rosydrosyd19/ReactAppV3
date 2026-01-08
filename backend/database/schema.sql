@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS asset_maintenance (
   cost DECIMAL(15,2),
   description TEXT,
   next_maintenance_date DATE,
-  status ENUM('scheduled', 'in_progress', 'completed', 'cancelled') DEFAULT 'scheduled',
+  status ENUM('scheduled', 'in_progress', 'completed', 'cancelled', 'requests') DEFAULT 'requests',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   created_by INT,

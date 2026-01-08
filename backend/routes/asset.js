@@ -169,7 +169,7 @@ router.post('/maintenance-request', upload.single('image'), async (req, res) => 
             `INSERT INTO asset_maintenance (
                 asset_id, maintenance_type, maintenance_date, description, status, 
                 ticket_number, requester_name, requester_phone, created_by, request_image_url
-            ) VALUES (?, 'corrective', NOW(), ?, 'scheduled', ?, ?, ?, ?, ?)`,
+            ) VALUES (?, 'corrective', NOW(), ?, 'requests', ?, ?, ?, ?, ?)`,
             [asset_id, issue_description, ticketNumber, finalRequesterName, finalRequesterPhone, userId, request_image_url]
         );
 
@@ -178,7 +178,7 @@ router.post('/maintenance-request', upload.single('image'), async (req, res) => 
         const [asset] = await db.query('SELECT asset_tag, asset_name FROM asset_items WHERE id = ?', [asset_id]);
 
         // Fetch Settings
-        const [settingsRows] = await db.query("SELECT * FROM sysadmin_settings");
+        const settingsRows = await db.query("SELECT * FROM sysadmin_settings");
         let config = {};
         settingsRows.forEach(row => {
             config[row.setting_key] = row.setting_value;

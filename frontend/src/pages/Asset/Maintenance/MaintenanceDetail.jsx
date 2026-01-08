@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';
-import { FiArrowLeft, FiTool, FiCalendar, FiDollarSign, FiUser, FiInfo, FiEdit2, FiClock, FiEye } from 'react-icons/fi';
+import { FiArrowLeft, FiTool, FiCalendar, FiDollarSign, FiUser, FiInfo, FiEdit2, FiClock, FiEye, FiImage } from 'react-icons/fi';
 import MaintenanceModal from './MaintenanceModal';
 import Toast from '../../../components/Toast/Toast';
 
@@ -14,6 +14,8 @@ const MaintenanceDetail = () => {
     const [error, setError] = useState('');
     const [showEditModal, setShowEditModal] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+    const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/api$/, '');
 
     const fetchMaintenanceDetail = async () => {
         setLoading(true);
@@ -67,6 +69,7 @@ const MaintenanceDetail = () => {
     const getStatusBadge = (status) => {
         switch (status) {
             case 'scheduled': return <span className="badge badge-warning">Scheduled</span>;
+            case 'requests': return <span className="badge badge-primary">Requests</span>;
             case 'in_progress': return <span className="badge badge-primary">In Progress</span>;
             case 'completed': return <span className="badge badge-success">Completed</span>;
             default: return <span className="badge">{status}</span>;
@@ -127,6 +130,23 @@ const MaintenanceDetail = () => {
                         </div>
                     </div>
                 </div>
+
+                {maintenance.request_image_url && (
+                    <div className="card">
+                        <div className="card-header">
+                            <h2><FiImage /> Request Image</h2>
+                        </div>
+                        <div className="card-body">
+                            <div className="image-container" style={{ maxWidth: '100%', overflow: 'hidden', borderRadius: '8px' }}>
+                                <img
+                                    src={`${BASE_URL}${maintenance.request_image_url}`}
+                                    alt="Maintenance Request"
+                                    style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="card">
                     <div className="card-header">
