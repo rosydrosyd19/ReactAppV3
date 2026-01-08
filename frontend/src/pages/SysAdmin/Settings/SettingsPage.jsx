@@ -3,6 +3,7 @@ import { useConfig } from '../../../contexts/ConfigContext';
 import Toast from '../../../components/Toast/Toast';
 import { FiSave, FiUpload, FiPlus, FiTrash } from 'react-icons/fi';
 import axios from '../../../utils/axios';
+import { compressImage } from '../../../utils/imageCompression';
 
 const SettingsPage = () => {
     const { config, updateConfig } = useConfig();
@@ -89,10 +90,12 @@ const SettingsPage = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
         try {
+            const compressedFile = await compressImage(file);
+
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+
             const res = await axios.post('/sysadmin/settings/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -101,6 +104,7 @@ const SettingsPage = () => {
                 showToast('Icon uploaded successfully', 'success');
             }
         } catch (error) {
+            console.error("Upload/Compression failed:", error);
             showToast('Failed to upload icon', 'error');
         }
     };

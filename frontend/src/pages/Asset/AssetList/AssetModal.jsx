@@ -5,6 +5,7 @@ import SearchableSelect from '../../../components/Form/SearchableSelect';
 import Toast from '../../../components/Toast/Toast';
 import { QuickAddCategoryModal, QuickAddLocationModal, QuickAddSupplierModal } from './QuickAddModals';
 import CameraModal from '../../../components/Camera/CameraModal';
+import { compressImage } from '../../../utils/imageCompression';
 import './AssetModal.css';
 
 const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId = null }) => {
@@ -205,15 +206,27 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
         }));
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            setSelectedImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedFile = await compressImage(file);
+                setSelectedImage(compressedFile);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result);
+                };
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                console.error("Compression failed:", error);
+                // Fallback to original file if compression fails
+                setSelectedImage(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     };
 
@@ -222,14 +235,25 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
         setImagePreview(null);
     };
 
-    const handleCameraCapture = (file) => {
+    const handleCameraCapture = async (file) => {
         if (file) {
-            setSelectedImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedFile = await compressImage(file);
+                setSelectedImage(compressedFile);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result);
+                };
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                console.error("Compression failed:", error);
+                setSelectedImage(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     };
 

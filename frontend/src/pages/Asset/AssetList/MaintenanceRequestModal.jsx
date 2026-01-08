@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiX, FiSave, FiAlertCircle, FiCamera, FiImage, FiTrash2 } from 'react-icons/fi';
 import CameraModal from '../../../components/Camera/CameraModal';
+import { compressImage } from '../../../utils/imageCompression';
 import './MaintenanceRequestModal.css';
 
 const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
@@ -44,25 +45,46 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            setFormData({
-                ...formData,
-                image: file,
-                imagePreview: URL.createObjectURL(file)
-            });
+            try {
+                const compressedFile = await compressImage(file);
+                setFormData({
+                    ...formData,
+                    image: compressedFile,
+                    imagePreview: URL.createObjectURL(compressedFile)
+                });
+            } catch (error) {
+                console.error("Compression failed:", error);
+                setFormData({
+                    ...formData,
+                    image: file,
+                    imagePreview: URL.createObjectURL(file)
+                });
+            }
         }
     };
 
-    const handleCameraCapture = (file) => {
+    const handleCameraCapture = async (file) => {
         if (file) {
-            setFormData({
-                ...formData,
-                image: file,
-                imagePreview: URL.createObjectURL(file)
-            });
-            setShowCamera(false);
+            try {
+                const compressedFile = await compressImage(file);
+                setFormData({
+                    ...formData,
+                    image: compressedFile,
+                    imagePreview: URL.createObjectURL(compressedFile)
+                });
+                setShowCamera(false);
+            } catch (error) {
+                console.error("Compression failed:", error);
+                setFormData({
+                    ...formData,
+                    image: file,
+                    imagePreview: URL.createObjectURL(file)
+                });
+                setShowCamera(false);
+            }
         }
     };
 

@@ -724,6 +724,17 @@ router.post('/assets/:id/checkout', checkPermission('asset.items.checkout'), asy
 
 
 
+// Increment QR Print Count
+router.post('/assets/:id/qr-print', checkPermission('asset.items.view'), async (req, res) => {
+    try {
+        await db.query('UPDATE asset_items SET qr_print_count = qr_print_count + 1 WHERE id = ?', [req.params.id]);
+        res.json({ success: true, message: 'QR print count incremented' });
+    } catch (error) {
+        console.error('QR print increment error:', error);
+        res.status(500).json({ success: false, message: 'Error incrementing QR print count' });
+    }
+});
+
 // ==================== CATEGORIES ====================
 
 router.get('/categories', checkPermission('asset.items.view'), async (req, res) => {

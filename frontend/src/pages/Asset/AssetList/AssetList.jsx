@@ -416,8 +416,8 @@ const AssetList = () => {
                                         <th>Name</th>
                                         <th>Location</th>
                                         <th>Assigned To</th>
-                                        <th>Condition</th>
-                                        <th>Status</th>
+                                        <th>Status / Condition</th>
+                                        <th style={{ textAlign: 'center' }}>QR Prints</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -455,14 +455,15 @@ const AssetList = () => {
                                                             : '-'}
                                             </td>
                                             <td>
-                                                <span style={{ textTransform: 'capitalize' }}>
-                                                    {asset.condition_status || '-'}
-                                                </span>
-                                            </td>
-                                            <td>
                                                 <span className={getStatusBadge(asset.status)}>
                                                     {asset.status}
                                                 </span>
+                                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', textTransform: 'capitalize' }}>
+                                                    {asset.condition_status || '-'}
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {asset.qr_print_count || 0}
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
@@ -776,12 +777,14 @@ const AssetList = () => {
                 assetName={qrAsset?.asset_name}
                 assetTag={qrAsset?.asset_tag}
                 serialNumber={qrAsset?.serial_number}
+                onSuccess={() => fetchAssets()}
             />
 
             <BulkQRModal
                 isOpen={showBulkQRModal}
                 onClose={() => setShowBulkQRModal(false)}
                 assets={getSelectedAssetsList()}
+                onSuccess={() => fetchAssets()}
             />
 
             <MaintenanceModal

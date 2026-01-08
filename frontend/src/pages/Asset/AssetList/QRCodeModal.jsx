@@ -1,9 +1,10 @@
 import React from 'react';
 import QRCode from 'react-qr-code';
 import { FiX, FiDownload, FiPrinter } from 'react-icons/fi';
+import axios from '../../../utils/axios';
 import './AssetModal.css'; // Reusing AssetModal styles for consistency
 
-const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag, serialNumber }) => {
+const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag, serialNumber, onSuccess }) => {
     if (!isOpen) return null;
 
     const qrValue = `${window.location.origin}/asset/scan/${assetId}`;
@@ -75,9 +76,17 @@ const QRCodeModal = ({ isOpen, onClose, assetId, assetName, assetTag, serialNumb
 
         printWindow.document.close();
         printWindow.focus();
-        setTimeout(() => {
+        setTimeout(async () => {
             printWindow.print();
             printWindow.close();
+
+            // Increment print count
+            try {
+                await axios.post(`/asset/assets/${assetId}/qr-print`);
+                if (onSuccess) onSuccess();
+            } catch (error) {
+                console.error('Failed to increment QR print count', error);
+            }
         }, 500);
     };
 

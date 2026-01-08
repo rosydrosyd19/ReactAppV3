@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../../utils/axios';
-import { FiPlus, FiEdit2, FiTrash2, FiTool, FiSearch, FiFilter, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiTool, FiSearch, FiFilter, FiEye, FiChevronDown } from 'react-icons/fi';
 import Pagination from '../../../components/Pagination/Pagination';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
@@ -20,6 +20,7 @@ const MaintenanceList = () => {
     const [modal, setModal] = useState({ isOpen: false, data: null });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
+    const [expandedId, setExpandedId] = useState(null); // For mobile view expansion
 
     const fetchMaintenance = async () => {
         setLoading(true);
@@ -138,7 +139,7 @@ const MaintenanceList = () => {
                         <thead>
                             <tr>
                                 <th>Asset</th>
-                                <th>Type</th>
+                                <th>Type / Ticket No</th>
                                 <th>Date</th>
                                 <th>Cost</th>
                                 <th>Status</th>
@@ -164,7 +165,12 @@ const MaintenanceList = () => {
                                             <div><strong>{record.asset_tag}</strong></div>
                                             <div className="text-secondary" style={{ fontSize: '12px' }}>{record.asset_name}</div>
                                         </td>
-                                        <td>{record.maintenance_type}</td>
+                                        <td>
+                                            <div>{record.maintenance_type}</div>
+                                            <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#666' }}>
+                                                {record.ticket_number || '-'}
+                                            </div>
+                                        </td>
                                         <td>{new Date(record.maintenance_date).toLocaleDateString()}</td>
                                         <td>
                                             {record.cost && !isNaN(parseFloat(record.cost))
@@ -203,6 +209,77 @@ const MaintenanceList = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+                {/* Mobile View */}
+                <div className="mobile-list">
+                    {loading ? (
+                        <div className="loading-container">
+                            <div className="loading-spinner"></div>
+                        </div>
+                    ) : maintenanceRecords.length === 0 ? (
+                        <div className="empty-state">No records found</div>
+                    ) : (
+                        maintenanceRecords.map(record => (
+                            <div key={record.id} className="mobile-list-item">
+                                <div
+                                    className="mobile-list-main"
+                                    onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
+                                >
+                                    <div className="mobile-asset-icon">
+                                        <FiTool />
+                                        <div className={`status-dot ${record.status === 'completed' ? 'active' :
+                                                record.status === 'scheduled' ? 'warning' : 'danger'
+                                            }`}></div>
+                                    </div>
+                                    <div className="mobile-asset-info">
+                                        <div className="asset-primary-text">
+                                            <span className="asset-tag">{record.ticket_number || '-'}</span>
+                                            <span className="category-badge-small">{record.maintenance_type}</span>
+                                        </div>
+                                        <div className="asset-secondary-text">
+                                            {record.asset_name} ({record.asset_tag})
+                                        </div>
+                                    </div>
+                                    <div className={`mobile-expand-icon ${expandedId === record.id ? 'rotated' : ''}`}>
+                                        <FiChevronDown />
+                                    </div>
+                                </div>
+                                {expandedId === record.id && (
+                                    <div className="mobile-list-details">
+                                        <div className="detail-grid">
+                                            <div className="detail-item">
+                                                <span className="label">Date</span>
+                                                <span className="value">{new Date(record.maintenance_date).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <span className="label">Cost</span>
+                                                <span className="value">
+                                                    {record.cost && !isNaN(parseFloat(record.cost))
+                                                        ? `$${parseFloat(record.cost).toFixed(2)}`
+                                                        : '-'}
+                                                </span>
+                                            </div>
+                                            <div className="detail-item full-width">
+                                                <span className="label">Status</span>
+                                                <span className="value">{getStatusBadge(record.status)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="mobile-actions">
+                                            <button className="action-btn view" onClick={() => navigate(`/asset/maintenance/${record.id}`)}>
+                                                <FiEye /> View
+                                            </button>
+                                            <button className="action-btn edit" onClick={() => setModal({ isOpen: true, data: record })}>
+                                                <FiEdit2 /> Edit
+                                            </button>
+                                            <button className="action-btn delete" onClick={() => setConfirmModal({ isOpen: true, id: record.id })}>
+                                                <FiTrash2 /> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
                 </div>
                 {(totalPages > 1 || totalItems > 0) && (
                     <Pagination

@@ -104,6 +104,10 @@ const MaintenanceDetail = () => {
                     <div className="card-body">
                         <div className="info-grid">
                             <div className="info-item">
+                                <label><FiTool /> Ticket Number</label>
+                                <p>{maintenance.ticket_number || '-'}</p>
+                            </div>
+                            <div className="info-item">
                                 <label><FiTool /> Maintenance Type</label>
                                 <p style={{ textTransform: 'capitalize' }}>{maintenance.maintenance_type}</p>
                             </div>

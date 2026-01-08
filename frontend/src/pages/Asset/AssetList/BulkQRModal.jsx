@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
+import axios from '../../../utils/axios';
 import { FiX, FiPrinter, FiSave, FiTrash2, FiSettings, FiLayout, FiMaximize, FiType, FiBox } from 'react-icons/fi';
 import './AssetModal.css';
 
@@ -55,7 +56,7 @@ const DEFAULT_PRESETS = [
     }
 ];
 
-const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
+const BulkQRModal = ({ isOpen, onClose, assets = [], onSuccess }) => {
     const [presets, setPresets] = useState(DEFAULT_PRESETS);
     const [selectedPresetId, setSelectedPresetId] = useState('a4');
     const [startOffset, setStartOffset] = useState(0); // New State
@@ -462,6 +463,17 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
             printWindow.focus();
             printWindow.print();
             printWindow.close();
+
+            // Increment print count for all assets
+            try {
+                Promise.all(assets.map(asset => axios.post(`/asset/assets/${asset.id}/qr-print`)))
+                    .then(() => {
+                        if (onSuccess) onSuccess();
+                    })
+                    .catch(err => console.error('Error incrementing generic bulk counts', err));
+            } catch (error) {
+                console.error('Failed to initiate bulk increment', error);
+            }
         }, 1000); // 1s wait suitable for large lists
     };
 
