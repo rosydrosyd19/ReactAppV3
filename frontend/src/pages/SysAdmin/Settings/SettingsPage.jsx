@@ -23,6 +23,10 @@ const SettingsPage = () => {
     const [manualPhone, setManualPhone] = useState('');
     const [selectedUser, setSelectedUser] = useState('');
 
+    // Message Templates State
+    const [templateAdmin, setTemplateAdmin] = useState('');
+    const [templateUser, setTemplateUser] = useState('');
+
     useEffect(() => {
         if (activeTab === 'whatsapp') {
             fetchUsers();
@@ -67,6 +71,10 @@ const SettingsPage = () => {
             } else {
                 setAdminPhones([]);
             }
+
+            // Load Templates
+            setTemplateAdmin(config.whatsapp_template_admin_request || 'New Maintenance Request:\nAsset: {asset_name} ({asset_tag})\nIssue: {issue_description}\nBy: {requester_name}');
+            setTemplateUser(config.whatsapp_template_user_request || 'Your maintenance request for {asset_name} has been received.\nTicket: {ticket_number}');
         }
     }, [config]);
 
@@ -120,7 +128,9 @@ const SettingsPage = () => {
                 whatsapp_api_url: whatsappApiUrl,
                 whatsapp_api_token: whatsappApiToken,
                 whatsapp_secret_key: whatsappSecretKey,
-                admin_it_phones: JSON.stringify(adminPhones)
+                admin_it_phones: JSON.stringify(adminPhones),
+                whatsapp_template_admin_request: templateAdmin,
+                whatsapp_template_user_request: templateUser
             });
             showToast('WhatsApp settings updated successfully', 'success');
         } catch (error) {
@@ -177,47 +187,49 @@ const SettingsPage = () => {
                 </div>
             </div>
 
-            <div style={{ maxWidth: '600px', paddingTop: '20px' }}>
+            <div style={{ paddingTop: '20px' }}>
                 {/* System Configuration Tab */}
                 {activeTab === 'system' && (
                     <div className="fade-in">
-                        <div className="form-group">
-                            <label className="form-label">Application Name</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={appName}
-                                onChange={(e) => setAppName(e.target.value)}
-                                placeholder="e.g. My Company App"
-                                required
-                            />
-                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
-                                This name will be displayed in the sidebar.
-                            </small>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+                            <div className="form-group">
+                                <label className="form-label">Application Name</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={appName}
+                                    onChange={(e) => setAppName(e.target.value)}
+                                    placeholder="e.g. My Company App"
+                                    required
+                                />
+                                <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
+                                    This name will be displayed in the sidebar.
+                                </small>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Browser Tab Title</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={pageTitle}
+                                    onChange={(e) => setPageTitle(e.target.value)}
+                                    placeholder="e.g. Dashboard - My Company"
+                                />
+                                <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
+                                    Title shown in the browser tab.
+                                </small>
+                            </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Browser Tab Title</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={pageTitle}
-                                onChange={(e) => setPageTitle(e.target.value)}
-                                placeholder="e.g. Dashboard - My Company"
-                            />
-                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
-                                Title shown in the browser tab.
-                            </small>
-                        </div>
-
-                        <div className="form-group">
+                        <div className="form-group" style={{ marginTop: '20px' }}>
                             <label className="form-label">Browser Favicon</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 {appIcon && (
                                     <img
                                         src={appIcon}
                                         alt="Favicon Preview"
-                                        style={{ width: '128px', height: '128px', objectFit: 'contain', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px' }}
+                                        style={{ width: '64px', height: '64px', objectFit: 'contain', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px' }}
                                     />
                                 )}
                                 <label className="btn btn-outline btn-sm" style={{ cursor: 'pointer' }}>
@@ -236,7 +248,7 @@ const SettingsPage = () => {
                             </small>
                         </div>
 
-                        <div style={{ marginTop: '20px', marginBottom: '10px' }}>
+                        <div style={{ marginTop: '30px', marginBottom: '10px' }}>
                             <button
                                 type="button"
                                 className="btn btn-primary"
@@ -253,276 +265,356 @@ const SettingsPage = () => {
                 {/* WhatsApp Configuration Tab */}
                 {activeTab === 'whatsapp' && (
                     <div className="fade-in">
-                        <div className="form-group">
-                            <label className="form-label">WhatsApp API URL</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                value={whatsappApiUrl}
-                                onChange={(e) => setWhatsappApiUrl(e.target.value)}
-                                placeholder="https://api.whatsapp.com/..."
-                            />
-                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
-                                The endpoint for sending WhatsApp messages.
-                            </small>
+                        {/* API Credentials Section */}
+                        <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-primary)' }}>
+                            <h3 style={{ fontSize: '16px', marginTop: 0, marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>API Configuration</h3>
+                            <div className="form-group">
+                                <label className="form-label">WhatsApp API URL</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={whatsappApiUrl}
+                                    onChange={(e) => setWhatsappApiUrl(e.target.value)}
+                                    placeholder="https://api.whatsapp.com/..."
+                                />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '15px' }}>
+                                <div className="form-group">
+                                    <label className="form-label">WhatsApp API Token</label>
+                                    <input
+                                        type="password"
+                                        className="form-input"
+                                        value={whatsappApiToken}
+                                        onChange={(e) => setWhatsappApiToken(e.target.value)}
+                                        placeholder="*************"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">WhatsApp Secret Key</label>
+                                    <input
+                                        type="password"
+                                        className="form-input"
+                                        value={whatsappSecretKey}
+                                        onChange={(e) => setWhatsappSecretKey(e.target.value)}
+                                        placeholder="*************"
+                                    />
+                                    <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
+                                        Secret Key to bypass IP whitelist (if enabled).
+                                    </small>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">WhatsApp API Token</label>
-                            <input
-                                type="password"
-                                className="form-input"
-                                value={whatsappApiToken}
-                                onChange={(e) => setWhatsappApiToken(e.target.value)}
-                                placeholder="*************"
-                            />
-                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
-                                Security token for authenticating with the API.
-                            </small>
-                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
+                            {/* Left Column: Admin Phones */}
+                            <div>
+                                <div style={{ height: '100%', padding: '20px', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column' }}>
+                                    <h4 style={{ fontSize: '15px', marginBottom: '16px', marginTop: 0 }}>IT Admin Phone Numbers</h4>
 
-                        <div className="form-group">
-                            <label className="form-label">WhatsApp Secret Key</label>
-                            <input
-                                type="password"
-                                className="form-input"
-                                value={whatsappSecretKey}
-                                onChange={(e) => setWhatsappSecretKey(e.target.value)}
-                                placeholder="*************"
-                            />
-                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>
-                                Secret Key to bypass IP whitelist (if enabled).
-                            </small>
-                        </div>
-
-                        {/* Admin IT Phones Section */}
-                        <div style={{ marginTop: '24px', padding: '16px', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                            <h4 style={{ fontSize: '15px', marginBottom: '16px', marginTop: 0 }}>IT Admin Phone Numbers</h4>
-
-                            {/* List of Numbers */}
-                            <div style={{ marginBottom: '16px' }}>
-                                {adminPhones.length > 0 ? (
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                        {adminPhones.map((phone, index) => (
-                                            <div key={index} style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                background: 'var(--bg-secondary)',
-                                                padding: '4px 12px',
-                                                borderRadius: '20px',
-                                                border: '1px solid var(--border-color)',
-                                                fontSize: '13px'
-                                            }}>
-                                                <span>{phone}</span>
+                                    <div style={{ flex: 1, marginBottom: '20px' }}>
+                                        {/* Add New Number Controls */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
+                                            {/* Add from User */}
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                                                <div style={{ flex: '1 1 200px' }}>
+                                                    <label className="form-label" style={{ fontSize: '13px' }}>Add from Registered User</label>
+                                                    <select
+                                                        className="form-input"
+                                                        value={selectedUser}
+                                                        onChange={(e) => setSelectedUser(e.target.value)}
+                                                        style={{ fontSize: '14px' }}
+                                                    >
+                                                        <option value="">-- Select User --</option>
+                                                        {users.map(user => (
+                                                            <option key={user.id} value={user.id}>
+                                                                {user.username} {user.full_name ? `(${user.full_name})` : ''} - {user.phone || 'No Phone'}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                                 <button
+                                                    type="button"
+                                                    className="btn btn-secondary btn-sm"
+                                                    disabled={!selectedUser}
                                                     onClick={() => {
-                                                        const newPhones = adminPhones.filter((_, i) => i !== index);
-                                                        setAdminPhones(newPhones);
+                                                        const user = users.find(u => u.id == selectedUser);
+                                                        if (user && user.phone) {
+                                                            if (!adminPhones.includes(user.phone)) {
+                                                                setAdminPhones([...adminPhones, user.phone]);
+                                                                setSelectedUser('');
+                                                            } else {
+                                                                showToast('Phone number already exists in list', 'error');
+                                                            }
+                                                        } else {
+                                                            showToast('Selected user has no phone number', 'error');
+                                                        }
                                                     }}
-                                                    style={{
-                                                        background: 'none',
-                                                        border: 'none',
-                                                        color: 'var(--error-color)',
-                                                        marginLeft: '8px',
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center'
-                                                    }}
+                                                    style={{ marginBottom: '2px', height: '38px', whiteSpace: 'nowrap' }}
                                                 >
-                                                    <FiTrash size={12} />
+                                                    <FiPlus /> Add
                                                 </button>
                                             </div>
-                                        ))}
+
+                                            <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)' }}>- OR -</div>
+
+                                            {/* Add Manually */}
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                                                <div style={{ flex: '1 1 200px' }}>
+                                                    <label className="form-label" style={{ fontSize: '13px' }}>Add Manually</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-input"
+                                                        value={manualPhone}
+                                                        onChange={(e) => setManualPhone(e.target.value)}
+                                                        placeholder="e.g. 62812345678"
+                                                        style={{ fontSize: '14px' }}
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-secondary btn-sm"
+                                                    disabled={!manualPhone}
+                                                    onClick={() => {
+                                                        if (manualPhone) {
+                                                            if (!adminPhones.includes(manualPhone)) {
+                                                                setAdminPhones([...adminPhones, manualPhone]);
+                                                                setManualPhone('');
+                                                            } else {
+                                                                showToast('Phone number already exists in list', 'error');
+                                                            }
+                                                        }
+                                                    }}
+                                                    style={{ marginBottom: '2px', height: '38px', whiteSpace: 'nowrap' }}
+                                                >
+                                                    <FiPlus /> Add
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <label className="form-label" style={{ fontSize: '13px' }}>Registered Admin Numbers:</label>
+                                        <div style={{
+                                            background: 'var(--bg-secondary)',
+                                            borderRadius: '6px',
+                                            padding: '10px',
+                                            minHeight: '100px',
+                                            maxHeight: '200px',
+                                            overflowY: 'auto',
+                                            border: '1px solid var(--border-color)'
+                                        }}>
+                                            {adminPhones.length > 0 ? (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                    {adminPhones.map((phone, index) => (
+                                                        <div key={index} style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            background: '#fff',
+                                                            padding: '6px 12px',
+                                                            borderRadius: '20px',
+                                                            border: '1px solid var(--border-color)',
+                                                            fontSize: '13px',
+                                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                                        }}>
+                                                            <span style={{ fontWeight: '500' }}>{phone}</span>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const newPhones = adminPhones.filter((_, i) => i !== index);
+                                                                    setAdminPhones(newPhones);
+                                                                }}
+                                                                style={{
+                                                                    background: 'none',
+                                                                    border: 'none',
+                                                                    color: 'var(--error-color)',
+                                                                    marginLeft: '8px',
+                                                                    cursor: 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    padding: '2px'
+                                                                }}
+                                                                title="Remove"
+                                                            >
+                                                                <FiTrash size={14} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 0, textAlign: 'center', padding: '20px' }}>No admin numbers added yet.</p>
+                                            )}
+                                        </div>
+                                        <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '8px' }}>
+                                            These numbers will receive notifications when a maintenance request is submitted.
+                                        </small>
                                     </div>
-                                ) : (
-                                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>No admin numbers added yet.</p>
-                                )}
+                                </div>
                             </div>
 
-                            {/* Add New Number Controls */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {/* Right Column: Templates */}
+                            <div>
+                                <div style={{ padding: '20px', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+                                    <h4 style={{ fontSize: '15px', marginBottom: '16px', marginTop: 0 }}>Message Templates</h4>
 
-                                {/* Add from User */}
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label className="form-label" style={{ fontSize: '12px' }}>Add from Registered User</label>
-                                        <select
-                                            className="form-input"
-                                            value={selectedUser}
-                                            onChange={(e) => setSelectedUser(e.target.value)}
-                                            style={{ fontSize: '13px' }}
-                                        >
-                                            <option value="">-- Select User --</option>
-                                            {users.map(user => (
-                                                <option key={user.id} value={user.id}>
-                                                    {user.username} {user.full_name ? `(${user.full_name})` : ''} - {user.phone || 'No Phone'}
-                                                </option>
-                                            ))}
-                                        </select>
+                                    {/* Placeholders Info Compact */}
+                                    <div style={{ marginBottom: '20px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px', fontSize: '12px', border: '1px solid var(--border-color)' }}>
+                                        <strong style={{ display: 'block', marginBottom: '8px', fontSize: '13px' }}>Available Placeholders:</strong>
+                                        <p style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                                            These variables will be replaced with actual data when sending the message.
+                                        </p>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 16px', alignItems: 'baseline' }}>
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{asset_tag}'}</code>
+                                            <span>The unique tag of the asset (e.g., A-001)</span>
+
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{asset_name}'}</code>
+                                            <span>The name/model of the asset (e.g., Dell Laptop)</span>
+
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{issue_description}'}</code>
+                                            <span>The problem reported by the user</span>
+
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{ticket_number}'}</code>
+                                            <span>The generated ticket ID (e.g., MT-202401-001)</span>
+
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{requester_name}'}</code>
+                                            <span>Name of the person requesting maintenance</span>
+
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{requester_phone}'}</code>
+                                            <span>Phone number of the requester</span>
+
+                                            <code style={{ color: 'var(--primary-color)', background: 'transparent', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>{'{request_date}'}</code>
+                                            <span>Date and time of the request</span>
+                                        </div>
                                     </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label" style={{ fontSize: '13px', fontWeight: 'bold' }}>To Admins:</label>
+                                        <textarea
+                                            className="form-input"
+                                            value={templateAdmin}
+                                            onChange={(e) => setTemplateAdmin(e.target.value)}
+                                            rows="5"
+                                            placeholder="Message sent to IT Admins..."
+                                            style={{ fontSize: '13px', fontFamily: 'inherit', lineHeight: '1.5' }}
+                                        />
+                                    </div>
+
+                                    <div className="form-group" style={{ marginTop: '16px' }}>
+                                        <label className="form-label" style={{ fontSize: '13px', fontWeight: 'bold' }}>To Requester:</label>
+                                        <textarea
+                                            className="form-input"
+                                            value={templateUser}
+                                            onChange={(e) => setTemplateUser(e.target.value)}
+                                            rows="5"
+                                            placeholder="Message sent to Requester..."
+                                            style={{ fontSize: '13px', fontFamily: 'inherit', lineHeight: '1.5' }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons & Test Section */}
+                        <div style={{ marginTop: '30px', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', gap: '10px' }}>
                                     <button
                                         type="button"
-                                        className="btn btn-secondary btn-sm"
-                                        disabled={!selectedUser}
-                                        onClick={() => {
-                                            const user = users.find(u => u.id == selectedUser);
-                                            if (user && user.phone) {
-                                                if (!adminPhones.includes(user.phone)) {
-                                                    setAdminPhones([...adminPhones, user.phone]);
-                                                    setSelectedUser('');
-                                                } else {
-                                                    showToast('Phone number already exists in list', 'error');
-                                                }
-                                            } else {
-                                                showToast('Selected user has no phone number', 'error');
+                                        className="btn btn-primary"
+                                        disabled={loading}
+                                        onClick={handleWhatsAppSave}
+                                    >
+                                        <FiSave style={{ marginRight: '8px' }} />
+                                        Save WhatsApp Settings
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline"
+                                        onClick={async (e) => {
+                                            if (!whatsappApiUrl || !whatsappApiToken) {
+                                                showToast('Please enter both URL and Token', 'error');
+                                                return;
+                                            }
+                                            const btn = e.currentTarget;
+                                            const originalText = btn.innerText;
+                                            btn.innerText = 'Testing...';
+                                            btn.disabled = true;
+                                            try {
+                                                await axios.post('/sysadmin/settings/test-whatsapp', {
+                                                    whatsapp_api_url: whatsappApiUrl,
+                                                    whatsapp_api_token: whatsappApiToken,
+                                                    whatsapp_secret_key: whatsappSecretKey
+                                                });
+                                                showToast('Connection successful!', 'success');
+                                            } catch (err) {
+                                                showToast(err.response?.data?.message || 'Connection failed', 'error');
+                                            } finally {
+                                                btn.innerText = originalText;
+                                                btn.disabled = false;
                                             }
                                         }}
-                                        style={{ marginBottom: '2px' }}
                                     >
-                                        <FiPlus /> Add
+                                        Test Connection
                                     </button>
                                 </div>
+                            </div>
 
-                                <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)' }}>- OR -</div>
-
-                                {/* Add Manually */}
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label className="form-label" style={{ fontSize: '12px' }}>Add Manually</label>
+                            <div style={{ padding: '20px', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                <h4 style={{ fontSize: '14px', marginBottom: '15px' }}>Send Test Message</h4>
+                                <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                                    <div style={{ flex: '1', minWidth: '200px' }}>
+                                        <label className="form-label" style={{ fontSize: '12px' }}>Test Phone Number</label>
                                         <input
                                             type="text"
                                             className="form-input"
-                                            value={manualPhone}
-                                            onChange={(e) => setManualPhone(e.target.value)}
-                                            placeholder="e.g. 62812345678"
+                                            value={testPhone}
+                                            onChange={(e) => setTestPhone(e.target.value)}
+                                            placeholder="e.g. 6281234567890"
+                                            style={{ fontSize: '13px' }}
+                                        />
+                                    </div>
+                                    <div style={{ flex: '2', minWidth: '300px' }}>
+                                        <label className="form-label" style={{ fontSize: '12px' }}>Test Message Content</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={testMessage}
+                                            onChange={(e) => setTestMessage(e.target.value)}
+                                            placeholder="Test message..."
                                             style={{ fontSize: '13px' }}
                                         />
                                     </div>
                                     <button
                                         type="button"
-                                        className="btn btn-secondary btn-sm"
-                                        disabled={!manualPhone}
-                                        onClick={() => {
-                                            if (manualPhone) {
-                                                if (!adminPhones.includes(manualPhone)) {
-                                                    setAdminPhones([...adminPhones, manualPhone]);
-                                                    setManualPhone('');
-                                                } else {
-                                                    showToast('Phone number already exists in list', 'error');
-                                                }
+                                        className="btn btn-secondary"
+                                        style={{ height: '38px' }}
+                                        onClick={async (e) => {
+                                            if (!whatsappApiUrl || !whatsappApiToken || !testPhone || !testMessage) {
+                                                showToast('All fields required for test message', 'error');
+                                                return;
+                                            }
+                                            const btn = e.currentTarget;
+                                            const originalText = btn.innerText;
+                                            btn.innerText = 'Sending...';
+                                            btn.disabled = true;
+                                            try {
+                                                await axios.post('/sysadmin/settings/send-test-whatsapp', {
+                                                    whatsapp_api_url: whatsappApiUrl,
+                                                    whatsapp_api_token: whatsappApiToken,
+                                                    whatsapp_secret_key: whatsappSecretKey,
+                                                    test_phone: testPhone,
+                                                    test_message: testMessage
+                                                });
+                                                showToast('Message sent successfully!', 'success');
+                                            } catch (err) {
+                                                showToast(err.response?.data?.message || 'Failed to send message', 'error');
+                                            } finally {
+                                                btn.innerText = originalText;
+                                                btn.disabled = false;
                                             }
                                         }}
-                                        style={{ marginBottom: '2px' }}
                                     >
-                                        <FiPlus /> Add
+                                        Send
                                     </button>
                                 </div>
                             </div>
-                            <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '8px' }}>
-                                These numbers will receive maintenance request notifications.
-                            </small>
-                        </div>
-
-                        <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                disabled={loading}
-                                onClick={handleWhatsAppSave}
-                            >
-                                <FiSave style={{ marginRight: '8px' }} />
-                                Save WhatsApp Settings
-                            </button>
-
-                            <button
-                                type="button"
-                                className="btn btn-outline btn-sm"
-                                onClick={async (e) => {
-                                    if (!whatsappApiUrl || !whatsappApiToken) {
-                                        showToast('Please enter both URL and Token', 'error');
-                                        return;
-                                    }
-                                    const btn = e.currentTarget;
-                                    const originalText = btn.innerText;
-                                    btn.innerText = 'Testing...';
-                                    btn.disabled = true;
-                                    try {
-                                        await axios.post('/sysadmin/settings/test-whatsapp', {
-                                            whatsapp_api_url: whatsappApiUrl,
-                                            whatsapp_api_token: whatsappApiToken,
-                                            whatsapp_secret_key: whatsappSecretKey
-                                        });
-                                        showToast('Connection successful!', 'success');
-                                    } catch (err) {
-                                        showToast(err.response?.data?.message || 'Connection failed', 'error');
-                                    } finally {
-                                        btn.innerText = originalText;
-                                        btn.disabled = false;
-                                    }
-                                }}
-                            >
-                                Test Connection
-                            </button>
-                        </div>
-
-                        <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                            <h4 style={{ fontSize: '14px', marginBottom: '12px' }}>Send Test Message</h4>
-                            <div className="form-row">
-                                <div className="form-group half">
-                                    <label className="form-label" style={{ fontSize: '12px' }}>Phone Number</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={testPhone}
-                                        onChange={(e) => setTestPhone(e.target.value)}
-                                        placeholder="e.g. 6281234567890"
-                                        style={{ fontSize: '13px' }}
-                                    />
-                                </div>
-                                <div className="form-group half">
-                                    <label className="form-label" style={{ fontSize: '12px' }}>Message</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        value={testMessage}
-                                        onChange={(e) => setTestMessage(e.target.value)}
-                                        placeholder="Test message..."
-                                        style={{ fontSize: '13px' }}
-                                    />
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                                style={{ marginTop: '8px' }}
-                                onClick={async (e) => {
-                                    if (!whatsappApiUrl || !whatsappApiToken || !testPhone || !testMessage) {
-                                        showToast('All fields required for test message', 'error');
-                                        return;
-                                    }
-                                    const btn = e.currentTarget;
-                                    const originalText = btn.innerText;
-                                    btn.innerText = 'Sending...';
-                                    btn.disabled = true;
-                                    try {
-                                        await axios.post('/sysadmin/settings/send-test-whatsapp', {
-                                            whatsapp_api_url: whatsappApiUrl,
-                                            whatsapp_api_token: whatsappApiToken,
-                                            whatsapp_secret_key: whatsappSecretKey,
-                                            test_phone: testPhone,
-                                            test_message: testMessage
-                                        });
-                                        showToast('Message sent successfully!', 'success');
-                                    } catch (err) {
-                                        showToast(err.response?.data?.message || 'Failed to send message', 'error');
-                                    } finally {
-                                        btn.innerText = originalText;
-                                        btn.disabled = false;
-                                    }
-                                }}
-                            >
-                                Send Test Message
-                            </button>
                         </div>
                     </div>
                 )}

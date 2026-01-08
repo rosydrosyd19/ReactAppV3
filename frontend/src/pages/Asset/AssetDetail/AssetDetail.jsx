@@ -11,6 +11,7 @@ import Toast from '../../../components/Toast/Toast';
 import CheckOutModal from '../AssetList/CheckOutModal';
 import CheckInModal from '../AssetList/CheckInModal';
 import MaintenanceModal from '../AssetList/MaintenanceModal';
+import MaintenanceRequestModal from '../AssetList/MaintenanceRequestModal';
 import { BsQrCode } from 'react-icons/bs'; // Correctly imported
 import QRCode from 'react-qr-code';
 import {
@@ -35,7 +36,8 @@ import {
     FiPrinter,
     FiLock,
     FiEye,
-    FiEyeOff
+    FiEyeOff,
+    FiAlertTriangle
 } from 'react-icons/fi';
 
 const PasswordReveal = ({ password }) => {
@@ -58,7 +60,7 @@ const AssetDetail = ({ readOnly = false }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { hasPermission, isAuthenticated } = useAuth();
+    const { hasPermission, isAuthenticated, user } = useAuth();
     const [asset, setAsset] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -159,6 +161,30 @@ const AssetDetail = ({ readOnly = false }) => {
         }
         setMaintenanceRecord(null);
         setShowMaintenanceModal(true);
+    };
+
+    const handleSubmitRequest = async (formData) => {
+        try {
+            setLoading(true);
+            const response = await axios.post('/asset/maintenance-request', {
+                asset_id: id,
+                ...formData
+            });
+
+            if (response.data.success) {
+                setToastMessage('Maintenance request submitted successfully!');
+                setShowToast(true);
+                setShowRequestModal(false);
+                // Refresh asset details to see updated status if changed, although usually it just creates a ticket
+                // But if we want to show it in history, we might need to refresh history too if we display 'scheduled' requests
+                fetchMaintenanceRecords();
+            }
+        } catch (error) {
+            console.error('Error submitting request:', error);
+            alert(error.response?.data?.message || 'Failed to submit maintenance request');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEditMaintenance = (record) => {
@@ -355,13 +381,21 @@ const AssetDetail = ({ readOnly = false }) => {
                 <div className="header-actions">
                     {/* Show Login button for guests in read-only mode */}
                     {readOnly && !isAuthenticated && (
-                        <button className="btn btn-primary btn-login-guest" onClick={() => navigate('/login', { state: { from: location } })} title="Login">
-                            <FiUser /> <span>Login</span>
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button className="btn btn-warning" onClick={() => setShowRequestModal(true)} title="Report Issue">
+                                <FiAlertTriangle /> <span>Report Issue</span>
+                            </button>
+                            <button className="btn btn-primary btn-login-guest" onClick={() => navigate('/login', { state: { from: location } })} title="Login">
+                                <FiUser /> <span>Login</span>
+                            </button>
+                        </div>
                     )}
 
                     {showActions && (
                         <>
+                            <button className="btn btn-warning" onClick={() => setShowRequestModal(true)} title="Report Issue">
+                                <FiAlertTriangle /> <span>Report Issue</span>
+                            </button>
                             {asset.status === 'available' && hasPermission('asset.items.checkout') && (
                                 <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
                                     <FiLogOut /> <span>Check Out</span>
@@ -1018,6 +1052,14 @@ const AssetDetail = ({ readOnly = false }) => {
                 assetId={id}
                 maintenanceId={maintenanceRecord?.id}
                 initialData={maintenanceRecord}
+            />
+
+            <MaintenanceRequestModal
+                isOpen={showRequestModal}
+                onClose={() => setShowRequestModal(false)}
+                onSubmit={handleSubmitRequest}
+                user={user}
+                loading={loading}
             />
         </div >
     );

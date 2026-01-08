@@ -3,6 +3,8 @@ const db = require('../config/database');
 const { verifyToken, checkPermission, checkAnyPermission } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
 const upload = require('../middleware/upload');
+const { sendWhatsAppMessage } = require('../utils/whatsapp');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -96,6 +98,148 @@ router.get('/public/:id', async (req, res) => {
     }
 });
 
+
+// Maintenance Request (Public)
+router.post('/maintenance-request', async (req, res) => {
+    try {
+        const { asset_id, issue_description, requester_name, requester_phone } = req.body;
+
+        if (!asset_id || !issue_description) {
+            return res.status(400).json({ success: false, message: 'Asset ID and issue description are required' });
+        }
+
+        // 1. Identify Requester (Guest or User)
+        let userId = null;
+        let finalRequesterName = requester_name;
+        let finalRequesterPhone = requester_phone;
+
+        if (req.headers.authorization) {
+            try {
+                const token = req.headers.authorization.split(' ')[1];
+                if (token) {
+                    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                    const [users] = await db.query('SELECT id, full_name, phone FROM sysadmin_users WHERE id = ?', [decoded.userId]);
+                    if (users) {
+                        userId = users.id;
+                        // Use user info if not explicitly provided (or override? Plan said use if logged in)
+                        // If frontend sends manual input even if logged in, we might honor it, but let's default to user data if missing.
+                        if (!finalRequesterName) finalRequesterName = users.full_name;
+                        if (!finalRequesterPhone) finalRequesterPhone = users.phone;
+                    }
+                }
+            } catch (err) {
+                console.warn('Token verification failed for maintenance request:', err.message);
+                // Continue as guest
+            }
+        }
+
+        if (!finalRequesterName || !finalRequesterPhone) {
+            return res.status(400).json({ success: false, message: 'Name and Phone number are required' });
+        }
+
+        // 2. Generate Ticket Number (MT-YYYYMMDD-XXX)
+        const date = new Date();
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}${mm}${dd}`;
+        const prefix = `MT-${dateStr}-`;
+
+        const [lastTicket] = await db.query(
+            `SELECT ticket_number FROM asset_maintenance 
+             WHERE ticket_number LIKE ? 
+             ORDER BY LENGTH(ticket_number) DESC, ticket_number DESC LIMIT 1`,
+            [`${prefix}%`]
+        );
+
+        let sequence = '001';
+        if (lastTicket && lastTicket.ticket_number) {
+            const parts = lastTicket.ticket_number.split('-');
+            const lastSeq = parts[parts.length - 1];
+            if (/^\d+$/.test(lastSeq)) {
+                sequence = String(parseInt(lastSeq, 10) + 1).padStart(3, '0');
+            }
+        }
+        const ticketNumber = `${prefix}${sequence}`;
+
+        // 3. Insert into Database
+        const result = await db.query(
+            `INSERT INTO asset_maintenance (
+                asset_id, maintenance_type, maintenance_date, description, status, 
+                ticket_number, requester_name, requester_phone, created_by
+            ) VALUES (?, 'corrective', NOW(), ?, 'scheduled', ?, ?, ?, ?)`,
+            [asset_id, issue_description, ticketNumber, finalRequesterName, finalRequesterPhone, userId]
+        );
+
+        // 4. Send Notifications
+        // Fetch Asset Details for placeholders
+        const [asset] = await db.query('SELECT asset_tag, asset_name FROM asset_items WHERE id = ?', [asset_id]);
+
+        // Fetch Settings
+        const [settingsRows] = await db.query("SELECT * FROM sysadmin_settings");
+        let config = {};
+        settingsRows.forEach(row => {
+            config[row.setting_key] = row.setting_value;
+        });
+
+        // Prepare Placeholders
+        const placeholders = {
+            '{asset_tag}': asset ? asset.asset_tag : 'Unknown',
+            '{asset_name}': asset ? asset.asset_name : 'Unknown',
+            '{issue_description}': issue_description,
+            '{request_date}': `${dd}-${mm}-${yyyy}`,
+            '{requester_name}': finalRequesterName,
+            '{requester_phone}': finalRequesterPhone,
+            '{ticket_number}': ticketNumber
+        };
+
+        const replacePlaceholders = (template) => {
+            if (!template) return '';
+            let msg = template;
+            for (const [key, value] of Object.entries(placeholders)) {
+                msg = msg.replace(new RegExp(key, 'g'), value || '');
+            }
+            return msg;
+        };
+
+        // Send to Admins
+        if (config.admin_it_phones) {
+            try {
+                let adminPhones = [];
+                try {
+                    const parsed = JSON.parse(config.admin_it_phones);
+                    if (Array.isArray(parsed)) adminPhones = parsed;
+                    else adminPhones = [String(parsed)];
+                } catch (e) {
+                    adminPhones = [String(config.admin_it_phones)];
+                }
+
+                const adminMsg = replacePlaceholders(config.whatsapp_template_admin_request);
+                if (adminMsg) {
+                    for (const phone of adminPhones) {
+                        if (phone) await sendWhatsAppMessage(phone, adminMsg);
+                    }
+                }
+            } catch (e) {
+                console.error('Error sending admin notifications:', e);
+            }
+        }
+
+        // Send to User
+        if (config.whatsapp_template_user_request && finalRequesterPhone) {
+            const userMsg = replacePlaceholders(config.whatsapp_template_user_request);
+            if (userMsg) {
+                await sendWhatsAppMessage(finalRequesterPhone, userMsg);
+            }
+        }
+
+        res.status(201).json({ success: true, message: 'Maintenance request submitted successfully', ticket_number: ticketNumber });
+
+    } catch (error) {
+        console.error('Maintenance Request Error:', error);
+        res.status(500).json({ success: false, message: 'Error submitting maintenance request' });
+    }
+});
 
 // Apply authentication to all routes below
 router.use(verifyToken);
