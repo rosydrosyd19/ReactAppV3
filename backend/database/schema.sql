@@ -114,6 +114,15 @@ CREATE TABLE IF NOT EXISTS sysadmin_activity_logs (
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Settings Table
+CREATE TABLE IF NOT EXISTS sysadmin_settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  setting_key VARCHAR(100) UNIQUE NOT NULL,
+  setting_value TEXT,
+  description TEXT,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ================================================
 -- ASSET MANAGEMENT MODULE TABLES (Prefix: asset_)
 -- ================================================
@@ -390,7 +399,8 @@ INSERT INTO sysadmin_permissions (module_name, permission_name, permission_key, 
 ('sysadmin', 'View Roles', 'sysadmin.roles.view', 'View roles and permissions'),
 ('sysadmin', 'Manage Roles', 'sysadmin.roles.manage', 'Create, edit, delete roles'),
 ('sysadmin', 'Assign Permissions', 'sysadmin.permissions.assign', 'Assign permissions to roles/users'),
-('sysadmin', 'View Activity Logs', 'sysadmin.logs.view', 'View system activity logs')
+('sysadmin', 'View Activity Logs', 'sysadmin.logs.view', 'View system activity logs'),
+('sysadmin', 'Manage Settings', 'sysadmin.settings.manage', 'Manage application settings')
 ON DUPLICATE KEY UPDATE permission_key=permission_key;
 
 -- Insert permissions for Asset Management module
