@@ -11,7 +11,7 @@ Selamat datang di dokumentasi ReactAppV3! Pilih panduan sesuai kebutuhan Anda.
    - Login pertama kali
 
 2. **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - 📊 Apa yang sudah dibuat
-   - Fitur-fitur lengkap
+   - Fitur-fitur lengkap (termasuk WhatsApp Integration)
    - Struktur project
    - API endpoints
    - Database schema

@@ -1,7 +1,9 @@
 ## New Feature
-tambahkan menu untuk simpan nomer admin IT
+tambahkan menu untuk simpan nomer admin IT inputan harus bisa lebih dari 1 nomer telfone
 
-Tambahkan fitur request maintenence di halaman detail asset untuk user yang melakukan scan. requet harus bisa di lakukan baik untuk user yang sudah login maupun belum login. untuk menu ini bila sudah dilakukan input form dan sublit Sistem akan membuka tab baru untuk link WA dengan template pesan misal https://wa.me/628xxxx?text=Request%20Anda%20sedang%20diproses
+tambahkan form pada whatsapp configuration untuk template pesan request maintenence ke admin IT dan user yang melakukan request maintenence buatkan form tersendiri untuk admin IT dan user yang melakukan request maintenence.
+
+Tambahkan fitur request maintenence di halaman detail asset untuk user yang melakukan scan. requet harus bisa di lakukan baik untuk user yang sudah login maupun belum login. untuk menu ini bila sudah dilakukan input form dan sublit Sistem akan mengirim pesan ke nomor admin IT yang sudah disimpan dan ke nomer user yang melakukan request maintenence dengan template pesan yang ada di setting administrator
 
 
 Menu baru List IP Address
@@ -9,8 +11,6 @@ Menu baru List IP Address
 Menu baru Accessories
 
 Menu baru Licenses
-
-Menu baru Maintenence Modul Asset
 
 buat master untuk menu role
 
@@ -23,3 +23,5 @@ pada category asset tambahkan inputan maintenance schedule untuk Next Maintenanc
 
 hide Purchase & Warranty pada asset detail scan yang belum login
 hide Purchase & Warranty pada asset detail scan System Information
+
+tambahkan fitur untuk setting desain cetak print qrcode

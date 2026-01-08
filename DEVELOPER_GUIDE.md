@@ -400,3 +400,29 @@ sudo chown -R www-data:www-data /var/www/ReactAppV3
 ---
 
 Happy coding! 🚀
+
+## 📱 WhatsApp Integration (Wablas)
+
+### Configuration
+WhatsApp settings are stored in the `sysadmin_settings` table as key-value pairs:
+- `whatsapp_api_url`: The Wablas API endpoint (e.g., https://bdg.wablas.com)
+- `whatsapp_api_token`: Your API Token
+- `whatsapp_secret_key`: Your Secret Key (if IP whitelist is enabled)
+
+### Sending Messages
+Use the `axios` instance which automatically handles auth headers if needed, but for Wablas we use query params.
+
+**Backend Implementation:**
+The settings are retrieved securely from the database. The `sysadmin` module handles the proxying of requests to Wablas to keep credentials secure on the server.
+
+**Endpoints:**
+1. `GET /api/sysadmin/settings/test-whatsapp`
+   - Validates connection and checks device status.
+2. `POST /api/sysadmin/settings/send-test-whatsapp`
+   - Sends a test message to a specific number.
+   - Payload: `{ phone, message }`
+
+### Settings UI
+The Settings page (`/sysadmin/settings`) uses a **Tabbed Interface** to separate System Config from WhatsApp Config.
+- **System Tab**: App Name, Title, Icon
+- **WhatsApp Tab**: URL, Token, Secret Key, Test Tools

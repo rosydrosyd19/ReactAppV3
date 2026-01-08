@@ -359,7 +359,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 display: ${settings.showName ? 'block' : 'none'};
-                line-height: 1.1;
+                line-height: 1;
                 color: black;
             }
             .qr-item p {
@@ -371,7 +371,7 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 display: ${settings.showTag ? 'block' : 'none'};
-                line-height: 1.1;
+                line-height: 1;
                 color: black;
             }
             .qr-wrapper {
@@ -472,6 +472,24 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
     const isCustomWidth = settings.labelWidth !== null && settings.labelWidth > 0;
     const calcWidth = getCalculatedLabelWidth();
     const displayWidth = isCustomWidth ? settings.labelWidth : calcWidth;
+
+    // Calculate text sizes for preview (matching print logic)
+    let finalLabelWidthMm = 0;
+    if (isCustomWidth) {
+        finalLabelWidthMm = settings.unit === 'in' ? settings.labelWidth * 25.4 : settings.labelWidth;
+    } else {
+        const pageWMm = settings.unit === 'in' ? settings.width * 25.4 : settings.width;
+        const marginLMm = settings.unit === 'in' ? settings.marginLeft * 25.4 : settings.marginLeft;
+        const marginRMm = settings.unit === 'in' ? settings.marginRight * 25.4 : settings.marginRight;
+        const gapXMm = settings.unit === 'in' ? settings.gapX * 25.4 : settings.gapX;
+
+        const avail = pageWMm - marginLMm - marginRMm;
+        const totalGap = (settings.columns - 1) * gapXMm;
+        finalLabelWidthMm = (avail - totalGap) / settings.columns;
+    }
+
+    const previewTitleSizeMm = finalLabelWidthMm * (settings.textSize / 100);
+    const previewTagSizeMm = finalLabelWidthMm * (Math.max(2, settings.textSize - 2) / 100);
 
     // Preview styles
     const pageStyle = {
@@ -750,21 +768,23 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                         if (!asset) {
                                             return (
                                                 <div key={`empty-${index}-${assetIndex}`} className="preview-item" style={{
-                                                    border: '1px dashed #ccc', // Visual indicator for skipped
+                                                    border: 'none',
                                                     borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
-                                                    padding: '2px',
+                                                    padding: '1px',
                                                     aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
                                                     height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
                                                     width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
+                                                    textAlign: 'center'
                                                 }}></div>
                                             );
                                         }
 
                                         return (
                                             <div key={asset.id} className="preview-item" style={{
-                                                border: settings.showBorder ? '1px solid #ddd' : 'none',
+                                                border: settings.showBorder ? '1px solid #ccc' : 'none',
                                                 borderRadius: settings.shape === 'circle' ? '50%' : settings.shape === 'rounded' ? '12px' : '0',
-                                                padding: '2px',
+                                                padding: '1px',
+                                                textAlign: 'center',
                                                 aspectRatio: (settings.labelHeight && settings.labelHeight > 0) ? 'auto' : '1/1',
                                                 height: (settings.labelHeight && settings.labelHeight > 0) ? `${settings.labelHeight}${uLabel}` : 'auto',
                                                 width: isCustomWidth ? `${settings.labelWidth}${uLabel}` : 'auto',
@@ -772,26 +792,24 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                                 flexDirection: 'column',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                gap: '0px',
+                                                gap: '0',
                                                 overflow: 'hidden',
                                                 color: 'black',
-                                                containerType: 'size'
+                                                position: 'relative'
                                             }}>
-                                                {settings.showName && (
-                                                    <h3 style={{
-                                                        margin: '0',
-                                                        fontSize: `${settings.textSize}cqi`,
-                                                        width: '98%',
-                                                        whiteSpace: 'nowrap',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        textAlign: 'center',
-                                                        color: 'black',
-                                                        flexShrink: 0
-                                                    }}>
-                                                        {getSerialDisplay(asset)}
-                                                    </h3>
-                                                )}
+                                                <h3 style={{
+                                                    margin: '0',
+                                                    fontSize: `${previewTitleSizeMm}mm`,
+                                                    width: '98%',
+                                                    overflow: 'hidden',
+                                                    whiteSpace: 'nowrap',
+                                                    textOverflow: 'ellipsis',
+                                                    display: settings.showName ? 'block' : 'none',
+                                                    lineHeight: '1',
+                                                    color: 'black'
+                                                }}>
+                                                    {getSerialDisplay(asset)}
+                                                </h3>
 
                                                 {/* Flexible QR Wrapper 
                                                 size controlled by width % and aspect ratio
@@ -818,22 +836,20 @@ const BulkQRModal = ({ isOpen, onClose, assets = [] }) => {
                                                     />
                                                 </div>
 
-                                                {settings.showTag && (
-                                                    <p style={{
-                                                        margin: '0',
-                                                        fontSize: `${Math.max(2, settings.textSize - 2)}cqi`,
-                                                        fontWeight: 'bold',
-                                                        width: '98%',
-                                                        whiteSpace: 'nowrap',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        textAlign: 'center',
-                                                        color: 'black',
-                                                        flexShrink: 0
-                                                    }}>
-                                                        {asset.asset_tag}
-                                                    </p>
-                                                )}
+                                                <p style={{
+                                                    margin: '0',
+                                                    fontSize: `${previewTagSizeMm}mm`,
+                                                    fontWeight: 'bold',
+                                                    width: '98%',
+                                                    overflow: 'hidden',
+                                                    whiteSpace: 'nowrap',
+                                                    textOverflow: 'ellipsis',
+                                                    display: settings.showTag ? 'block' : 'none',
+                                                    lineHeight: '1',
+                                                    color: 'black'
+                                                }}>
+                                                    {asset.asset_tag}
+                                                </p>
                                             </div>
                                         )
                                     })}

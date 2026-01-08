@@ -18,6 +18,12 @@ Aplikasi manajemen aset modular dengan React.js dan MariaDB yang dapat berjalan 
 - ✅ Check-in/Check-out system
 - ✅ Component dan License management
 - ✅ Upload gambar untuk asset
+- ✅ WhatsApp Integration (Wablas API)
+
+### Modul Integrasi (Baru)
+- ✅ WhatsApp Notification System
+- ✅ Connection Test & Test Message Features
+- ✅ Tab-based Settings Management
 
 ## 🏗️ Arsitektur
 
@@ -476,6 +482,15 @@ cd /var/www/ReactAppV3/frontend
 npm install
 npm run build
 
-<!-- cd /var/www/ReactAppV3/backend
-npm install
 npm run dev -->
+
+## 🗺️ Roadmap & Upcoming Features
+
+### Maintenance Request System
+- **Public/Private Request Form**: Fitur untuk user (login/non-login) melakukan request maintenance via scan QR code.
+- **WhatsApp Notifications**: Notifikasi otomatis ke Admin IT dan User requester saat status request berubah.
+- **Template Pesan**: Kustomisasi template pesan WhatsApp untuk berbagai status request.
+
+### Enhanced System Administration
+- **Multiple Admin IT Numbers**: Dukungan untuk menyimpan lebih dari 1 nomor WhatsApp Admin IT untuk notifikasi paralel.
+- **IP Address Management**: Whitelisting/Blacklisting IP untuk keamanan tambahan.

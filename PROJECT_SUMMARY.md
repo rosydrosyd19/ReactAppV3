@@ -20,6 +20,7 @@ Saya telah membuatkan **aplikasi manajemen aset modular lengkap** menggunakan Re
 - File upload support
 - Database dengan table prefix (sysadmin_, asset_)
 - Comprehensive error handling
+- WhatsApp Integration via Wablas API
 
 **Files:**
 ```
@@ -55,6 +56,8 @@ backend/
 - Permission-based navigation
 - Axios interceptors untuk auto-logout
 - Beautiful UI dengan gradient dan modern design
+- WhatsApp Configuration dengan connection test
+- Tab-based Settings Management for better UX
 
 **Files:**
 ```
@@ -275,6 +278,13 @@ Modul yang bisa ditambahkan (sudah ada struktur database):
 9. ✅ Reports & Analytics
 10. ✅ QR Code generation
 11. ✅ Dashboard statistics
+12. ✅ WhatsApp Notifications
+
+### Upcoming Features Map
+1. **Maintenance Request System** (Public/Private Form)
+2. **Multiple Admin IT Numbers**
+3. **Template Pesan WhatsApp**
+4. **IP Address Management**
 
 Dan modul baru bisa ditambahkan dengan mudah mengikuti guide di `DEVELOPER_GUIDE.md`!
 

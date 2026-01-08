@@ -527,4 +527,97 @@ router.post('/settings/upload', checkPermission('sysadmin.settings.manage'), upl
     }
 });
 
+// Test WhatsApp Connection
+router.post('/settings/test-whatsapp', checkPermission('sysadmin.settings.manage'), async (req, res) => {
+    try {
+        const { whatsapp_api_url, whatsapp_api_token, whatsapp_secret_key } = req.body;
+
+        if (!whatsapp_api_url || !whatsapp_api_token) {
+            return res.status(400).json({ success: false, message: 'URL and Token are required' });
+        }
+
+        // Dynamically require axios
+        const axios = require('axios');
+
+        // Wablas usually accepts token in Authorization header (no Bearer)
+        // OR as a query parameter 'token'
+        const cleanToken = whatsapp_api_token.trim();
+        const cleanSecret = whatsapp_secret_key ? whatsapp_secret_key.trim() : '';
+
+        // PHP example shows: token=$token.$secret_key
+        const tokenValue = cleanSecret ? `${cleanToken}.${cleanSecret}` : cleanToken;
+
+        // /send-message requires phone and message params, so add dummy values for testing
+        const response = await axios.get(whatsapp_api_url, {
+            params: {
+                token: tokenValue,
+                phone: '628123456789', // Dummy phone for connection test
+                message: 'Connection test', // Axios handles encoding
+                flag: 'instant'
+            },
+            timeout: 5000 // 5 second timeout
+        });
+
+        res.json({
+            success: true,
+            message: 'Connection successful',
+            status: response.status,
+            data: response.data
+        });
+
+    } catch (error) {
+        console.error('WhatsApp Test Error:', error.message);
+        res.status(400).json({
+            success: false,
+            message: 'Connection failed: ' + (error.response?.data?.message || error.message)
+        });
+    }
+});
+
+// Send Test WhatsApp Message
+router.post('/settings/send-test-whatsapp', checkPermission('sysadmin.settings.manage'), async (req, res) => {
+    try {
+        const { whatsapp_api_url, whatsapp_api_token, whatsapp_secret_key, test_phone, test_message } = req.body;
+
+        if (!whatsapp_api_url || !whatsapp_api_token || !test_phone || !test_message) {
+            return res.status(400).json({ success: false, message: 'All fields are required (URL, Token, Phone, Message)' });
+        }
+
+        const axios = require('axios');
+
+        // Remove spaces
+        const cleanToken = whatsapp_api_token.trim();
+        const cleanSecret = whatsapp_secret_key ? whatsapp_secret_key.trim() : '';
+        const cleanPhone = test_phone.trim();
+
+        // PHP example shows: token=$token.$secret_key (concatenated in single param)
+        const tokenValue = cleanSecret ? `${cleanToken}.${cleanSecret}` : cleanToken;
+
+        const params = {
+            token: tokenValue,
+            phone: cleanPhone,
+            message: test_message, // Axios will handle encoding automatically
+            flag: 'instant'
+        };
+
+        const response = await axios.get(whatsapp_api_url, {
+            params: params,
+            timeout: 10000
+        });
+
+        res.json({
+            success: true,
+            message: 'Message sent successfully',
+            data: response.data
+        });
+
+    } catch (error) {
+        console.error('WhatsApp Send Test Error:', error.message);
+        res.status(400).json({
+            success: false,
+            message: 'Failed to send message: ' + (error.response?.data?.message || error.message)
+        });
+    }
+});
+
 module.exports = router;
