@@ -2,8 +2,7 @@
 Lakukan ketika up ke server
 alter_asset_maintenance_check.js
 
-Tambahkan fitur request maintenence di halaman detail asset untuk user yang melakukan scan. requet harus bisa di lakukan baik untuk user yang sudah login maupun belum login. untuk menu ini bila sudah dilakukan input form dan sublit Sistem akan mengirim pesan ke nomor admin IT yang sudah disimpan dan ke nomer user yang melakukan request maintenence dengan template pesan yang ada di setting administrator.
-
+pada report issue buat Status otomatis di-set ke 'requests' agar admin tau mana aja asset yang di lakukan report issue ke admin
 
 Menu baru List IP Address
 

@@ -37,7 +37,8 @@ import {
     FiLock,
     FiEye,
     FiEyeOff,
-    FiAlertTriangle
+    FiAlertTriangle,
+    FiMoreVertical
 } from 'react-icons/fi';
 
 const PasswordReveal = ({ password }) => {
@@ -70,6 +71,8 @@ const AssetDetail = ({ readOnly = false }) => {
     const [maintenanceRecord, setMaintenanceRecord] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [showRequestModal, setShowRequestModal] = useState(false);
+    const [showActionDropdown, setShowActionDropdown] = useState(false);
 
     const renderDescriptionWithLinks = (text) => {
         if (!text) return '-';
@@ -393,9 +396,11 @@ const AssetDetail = ({ readOnly = false }) => {
 
                     {showActions && (
                         <>
+                            {/* Primary Actions (Always Visible) */}
                             <button className="btn btn-warning" onClick={() => setShowRequestModal(true)} title="Report Issue">
                                 <FiAlertTriangle /> <span>Report Issue</span>
                             </button>
+
                             {asset.status === 'available' && hasPermission('asset.items.checkout') && (
                                 <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
                                     <FiLogOut /> <span>Check Out</span>
@@ -407,23 +412,45 @@ const AssetDetail = ({ readOnly = false }) => {
                                 </button>
                             )}
 
-                            {(asset.status === 'available' || asset.status === 'maintenance') && hasPermission('asset.maintenance.manage') && (
-                                <button className="btn btn-outline" onClick={handleMaintenanceClick} title={asset.status === 'maintenance' ? "Update Maintenance" : "Schedule Maintenance"}>
-                                    <FiTool className={asset.status === 'maintenance' ? 'text-warning' : ''} />
-                                    <span>{asset.status === 'maintenance' ? "Update Maintenance" : "Maintenance"}</span>
+                            {/* Secondary Actions (Dropdown) */}
+                            <div className="action-dropdown-container">
+                                <button
+                                    className="btn btn-outline btn-icon-only"
+                                    onClick={() => setShowActionDropdown(!showActionDropdown)}
+                                    title="More Actions"
+                                >
+                                    <FiMoreVertical />
                                 </button>
-                            )}
 
-                            {hasPermission('asset.items.edit') && (
-                                <button className="btn btn-outline" onClick={() => setShowEditModal(true)} title="Edit">
-                                    <FiEdit2 /> <span>Edit</span>
-                                </button>
-                            )}
-                            {hasPermission('asset.items.delete') && (
-                                <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
-                                    <FiTrash2 /> <span>Delete</span>
-                                </button>
-                            )}
+                                {showActionDropdown && (
+                                    <>
+                                        <div
+                                            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }}
+                                            onClick={() => setShowActionDropdown(false)}
+                                        />
+                                        <div className="action-dropdown-menu">
+                                            {(asset.status === 'available' || asset.status === 'maintenance') && hasPermission('asset.maintenance.manage') && (
+                                                <button className="action-dropdown-item" onClick={() => { handleMaintenanceClick(); setShowActionDropdown(false); }}>
+                                                    <FiTool className={asset.status === 'maintenance' ? 'text-warning' : ''} />
+                                                    {asset.status === 'maintenance' ? "Update Maintenance" : "Maintenance"}
+                                                </button>
+                                            )}
+
+                                            {hasPermission('asset.items.edit') && (
+                                                <button className="action-dropdown-item" onClick={() => { setShowEditModal(true); setShowActionDropdown(false); }}>
+                                                    <FiEdit2 /> Edit Asset
+                                                </button>
+                                            )}
+
+                                            {hasPermission('asset.items.delete') && (
+                                                <button className="action-dropdown-item text-danger" onClick={() => { handleDeleteClick(); setShowActionDropdown(false); }}>
+                                                    <FiTrash2 /> Delete Asset
+                                                </button>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </>
                     )}
                 </div>

@@ -83,7 +83,7 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
                                         placeholder="e.g. 62812345678"
                                         disabled={loading}
                                     />
-                                    <small style={{ color: 'var(--text-secondary)' }}>We will update you via WhatsApp.</small>
+                                    <small style={{ color: 'var(--text-secondary)' }}>We will update you via WhatsApp Or Telegram.</small>
                                     {errors.requester_phone && <span className="error-text">{errors.requester_phone}</span>}
                                 </div>
                             </>
@@ -109,8 +109,9 @@ const MaintenanceRequestModal = ({ isOpen, onClose, onSubmit, user, loading }) =
                         )}
 
                         {user && user.phone && (
-                            <div style={{ marginBottom: '15px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                Reporting as: <strong>{user.full_name}</strong> ({user.phone})
+                            <div className="alert alert-warning" style={{ marginBottom: '15px', fontSize: '13px' }}>
+                                <FiAlertCircle style={{ marginRight: '5px', flexShrink: 0 }} />
+                                <span>Ensure your phone number <strong>({user.phone})</strong> is active on WhatsApp / Telegram for updates.</span>
                             </div>
                         )}
 
