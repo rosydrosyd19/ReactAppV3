@@ -84,6 +84,7 @@ const MaintenanceList = () => {
     const getStatusBadge = (status) => {
         switch (status) {
             case 'scheduled': return <span className="badge badge-warning">Scheduled</span>;
+            case 'requests': return <span className="badge badge-info">Requests</span>;
             case 'in_progress': return <span className="badge badge-primary">In Progress</span>;
             case 'completed': return <span className="badge badge-success">Completed</span>;
             default: return <span className="badge">{status}</span>;
@@ -125,6 +126,7 @@ const MaintenanceList = () => {
                             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                         >
                             <option value="">All Status</option>
+                            <option value="requests">Requests</option>
                             <option value="scheduled">Scheduled</option>
                             <option value="in_progress">In Progress</option>
                             <option value="completed">Completed</option>
