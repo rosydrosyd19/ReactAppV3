@@ -1,6 +1,8 @@
 ## New Feature
 Lakukan ketika up ke server
 
+lengkapi menu roles di modul sysadmin
+
 Menu baru List IP Address
 Pilih ROUTER dari database
    ↓
@@ -13,8 +15,6 @@ Validasi otomatis
 Menu baru Accessories
 
 Menu baru Licenses
-
-buat master untuk menu role
 
 ---------------------Not Urgent---------------------
 

@@ -205,7 +205,7 @@ router.post('/maintenance-request', upload.single('image'), async (req, res) => 
         };
 
         // Send to Admins
-        if (config.admin_it_phones) {
+        if (config.whatsapp_enable_admin_notifications === 'true' && config.admin_it_phones) {
             try {
                 let adminPhones = [];
                 try {
@@ -228,10 +228,40 @@ router.post('/maintenance-request', upload.single('image'), async (req, res) => 
         }
 
         // Send to User
-        if (config.whatsapp_template_user_request && finalRequesterPhone) {
+        if (config.whatsapp_enable_user_notifications === 'true' && config.whatsapp_template_user_request && finalRequesterPhone) {
             const userMsg = replacePlaceholders(config.whatsapp_template_user_request);
             if (userMsg) {
                 await sendWhatsAppMessage(finalRequesterPhone, userMsg);
+            }
+        }
+
+        // Send to Telegram Admins
+        if (config.telegram_enable_admin_notifications === 'true' && config.telegram_admin_chat_ids && config.telegram_bot_token) {
+            try {
+                let chatIds = [];
+                try {
+                    chatIds = JSON.parse(config.telegram_admin_chat_ids);
+                } catch (e) {
+                    chatIds = [config.telegram_admin_chat_ids]; // Legacy/Simple string support
+                }
+
+                if (Array.isArray(chatIds) && chatIds.length > 0) {
+                    const telegramMsg = replacePlaceholders(config.telegram_template_admin_request);
+                    if (telegramMsg) {
+                        const axios = require('axios');
+                        const promises = chatIds.map(chatId => {
+                            return axios.post(`https://api.telegram.org/bot${config.telegram_bot_token}/sendMessage`, {
+                                chat_id: chatId,
+                                text: telegramMsg
+                            }, { timeout: 10000 }).catch(err => {
+                                console.error(`Failed to send Telegram to ${chatId}:`, err.message);
+                            });
+                        });
+                        await Promise.all(promises);
+                    }
+                }
+            } catch (error) {
+                console.error('Error sending Telegram notifications:', error);
             }
         }
 
