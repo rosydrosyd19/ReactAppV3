@@ -1,0 +1,329 @@
+/* RoleList.css */
+.role-list {
+    padding: 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.role-list .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.role-list .page-header h1 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.role-list .page-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Card & Search Section */
+.role-list .card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.role-list .search-section {
+    margin-bottom: 1.5rem;
+}
+
+.role-list .input-with-icon {
+    position: relative;
+    max-width: 400px;
+}
+
+.role-list .input-with-icon svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+}
+
+.role-list .input-with-icon input {
+    padding-left: 2.5rem;
+    width: 100%;
+}
+
+/* Table Styles */
+.role-list .desktop-table {
+    overflow-x: auto;
+}
+
+.role-list .table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.role-list .table th,
+.role-list .table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.role-list .table th {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.role-list .table tr:last-child td {
+    border-bottom: none;
+}
+
+.role-list .table td {
+    color: var(--text-primary);
+}
+
+/* Count Badges */
+.role-list .count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 3rem;
+}
+
+/* Buttons */
+.role-list .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.role-list .btn-icon {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.role-list .btn-icon:hover {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+}
+
+.role-list .btn-icon.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Mobile List Styles */
+.role-list .mobile-list {
+    display: none;
+}
+
+/* Loading & Empty States */
+.role-list .loading-container,
+.role-list .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.role-list .loading-spinner {
+    border: 3px solid var(--bg-tertiary);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.role-list .empty-state svg {
+    font-size: 3rem;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+}
+
+.role-list .empty-state h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .role-list .desktop-table {
+        display: none;
+    }
+
+    .role-list .mobile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .role-list .mobile-list-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .role-list .mobile-list-main {
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .role-list .mobile-role-icon {
+        width: 40px;
+        height: 40px;
+        background-color: var(--bg-tertiary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .role-list .mobile-role-info {
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .role-list .role-name {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .role-list .role-desc {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .role-list .mobile-expand-icon {
+        color: var(--text-tertiary);
+        margin-left: 0.5rem;
+        transition: transform 0.2s;
+    }
+
+    .role-list .mobile-expand-icon .rotated {
+        transform: rotate(180deg);
+    }
+
+    .role-list .mobile-list-details {
+        border-top: 1px solid var(--border-color);
+        background-color: var(--bg-tertiary);
+        padding: 1rem;
+        animation: slideDown 0.2s ease-out;
+    }
+
+    .role-list .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .role-list .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .role-list .detail-item .label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .role-list .detail-item .value {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .role-list .mobile-actions {
+        display: flex;
+        gap: 0.75rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .role-list .action-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-weight: 500;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+
+    .role-list .action-btn.edit {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .role-list .action-btn.delete {
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}

@@ -9,6 +9,7 @@ import AssetDashboard from './pages/Dashboard/AssetDashboard'; // New
 import SysAdminDashboard from './pages/Dashboard/SysAdminDashboard'; // New
 import UserList from './pages/SysAdmin/UserList'; // New
 import UserDetail from './pages/SysAdmin/UserDetail'; // New
+import RoleList from './pages/SysAdmin/RoleList'; // New
 import SettingsPage from './pages/SysAdmin/Settings/SettingsPage'; // New
 import AssetList from './pages/Asset/AssetList/AssetList';
 import AssetDetail from './pages/Asset/AssetDetail/AssetDetail'; // New
@@ -26,6 +27,9 @@ import MaintenanceList from './pages/Asset/Maintenance/MaintenanceList'; // New
 import MaintenanceDetail from './pages/Asset/Maintenance/MaintenanceDetail'; // New
 import ModuleSelection from './pages/Modules/ModuleSelection';
 import Profile from './pages/Profile/Profile'; // New
+
+import AccessDenied from './pages/AccessDenied'; // New
+import PermissionRoute from './components/Route/PermissionRoute'; // New
 
 
 // Protected Route Component
@@ -94,34 +98,158 @@ function App() {
               <Route index element={<Navigate to="/modules" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="access-denied" element={<AccessDenied />} />
 
               {/* Sysadmin routes */}
               <Route path="sysadmin">
-                <Route path="dashboard" element={<SysAdminDashboard />} /> {/* New */}
-                <Route path="users" element={<UserList />} />
-                <Route path="users/:id" element={<UserDetail />} />
-                <Route path="roles" element={<div className="card"><h2>Role Management</h2><p>Coming soon...</p></div>} />
+                <Route path="dashboard" element={<SysAdminDashboard />} />
+                <Route
+                  path="users"
+                  element={
+                    <PermissionRoute permission="sysadmin.users.view">
+                      <UserList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route path="users/:id" element={
+                  <PermissionRoute permission="sysadmin.users.view">
+                    <UserDetail />
+                  </PermissionRoute>
+                } />
+                <Route
+                  path="roles"
+                  element={
+                    <PermissionRoute permission="sysadmin.roles.view">
+                      <RoleList />
+                    </PermissionRoute>
+                  }
+                />
                 <Route path="settings" element={<SettingsPage />} />
-                <Route path="logs" element={<div className="card"><h2>Activity Logs</h2><p>Coming soon...</p></div>} />
+                <Route
+                  path="logs"
+                  element={
+                    <PermissionRoute permission="sysadmin.logs.view">
+                      <div className="card"><h2>Activity Logs</h2><p>Coming soon...</p></div>
+                    </PermissionRoute>
+                  }
+                />
               </Route>
 
               {/* Asset routes */}
               <Route path="asset">
-                <Route path="dashboard" element={<AssetDashboard />} /> {/* New */}
-                <Route path="items" element={<AssetList />} />
-                <Route path="items/:id" element={<AssetDetail />} />
-                <Route path="categories" element={<CategoryList />} />
-                <Route path="categories/:id" element={<CategoryDetail />} />
-                <Route path="suppliers" element={<SupplierList />} />
-                <Route path="suppliers/:id" element={<SupplierDetail />} />
-                <Route path="locations" element={<LocationList />} />
-                <Route path="locations/:id" element={<LocationDetail />} />
-                <Route path="maintenance" element={<MaintenanceList />} />
-                <Route path="maintenance/:id" element={<MaintenanceDetail />} />
-                <Route path="credentials" element={<CredentialList />} />
-                <Route path="credentials/:id" element={<CredentialDetail />} />
-                <Route path="credential-categories" element={<CredentialCategoryList />} />
-                <Route path="credential-categories/:id" element={<CredentialCategoryDetail />} />
+                <Route path="dashboard" element={<AssetDashboard />} />
+                <Route
+                  path="items"
+                  element={
+                    <PermissionRoute permission="asset.items.view">
+                      <AssetList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="items/:id"
+                  element={
+                    <PermissionRoute permission="asset.items.view">
+                      <AssetDetail />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="categories"
+                  element={
+                    <PermissionRoute permission="asset.categories.view">
+                      <CategoryList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="categories/:id"
+                  element={
+                    <PermissionRoute permission="asset.categories.view">
+                      <CategoryDetail />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="suppliers"
+                  element={
+                    <PermissionRoute permission="asset.suppliers.view">
+                      <SupplierList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="suppliers/:id"
+                  element={
+                    <PermissionRoute permission="asset.suppliers.view">
+                      <SupplierDetail />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="locations"
+                  element={
+                    <PermissionRoute permission="asset.locations.view">
+                      <LocationList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="locations/:id"
+                  element={
+                    <PermissionRoute permission="asset.locations.view">
+                      <LocationDetail />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="maintenance"
+                  element={
+                    <PermissionRoute permission="asset.maintenance.view">
+                      <MaintenanceList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="maintenance/:id"
+                  element={
+                    <PermissionRoute permission="asset.maintenance.view">
+                      <MaintenanceDetail />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="credentials"
+                  element={
+                    <PermissionRoute permission="asset.credentials.view">
+                      <CredentialList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="credentials/:id"
+                  element={
+                    <PermissionRoute permission="asset.credentials.view">
+                      <CredentialDetail />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="credential-categories"
+                  element={
+                    <PermissionRoute permission="asset.credentials.manage">
+                      <CredentialCategoryList />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="credential-categories/:id"
+                  element={
+                    <PermissionRoute permission="asset.credentials.manage">
+                      <CredentialCategoryDetail />
+                    </PermissionRoute>
+                  }
+                />
               </Route>
             </Route>
 

@@ -41,14 +41,12 @@ const Sidebar = ({ isOpen, onClose }) => {
                         if (item.children) {
                             return (
                                 <div key={index} className="menu-section">
-                                    {/* Removed Section Title as requested */}
-                                    {item.children.map((child, childIndex) => {
-                                        if (!child.show) return null;
-
+                                    {/* Filter visible children first to handle group headers correctly */}
+                                    {item.children.filter(child => child.show).map((child, childIndex, visibleChildren) => {
                                         // Check if we need to render a group header
                                         const showGroupHeader = child.group && (
                                             childIndex === 0 ||
-                                            item.children[childIndex - 1].group !== child.group
+                                            visibleChildren[childIndex - 1].group !== child.group
                                         );
 
                                         return (

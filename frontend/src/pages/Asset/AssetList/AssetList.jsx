@@ -44,6 +44,8 @@ const AssetList = () => {
     const [cloneAssetId, setCloneAssetId] = useState(null);
 
     const [statusFilter, setStatusFilter] = useState('');
+    const [qrPrintMin, setQrPrintMin] = useState(''); // New state
+    const [qrPrintMax, setQrPrintMax] = useState(''); // New state
     const [expandedItemId, setExpandedItemId] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -103,18 +105,20 @@ const AssetList = () => {
 
     useEffect(() => {
         fetchAssets();
-    }, [statusFilter]);
+    }, [statusFilter, qrPrintMin, qrPrintMax]);
 
     // Reset pagination when search or status filter changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, statusFilter]);
+    }, [search, statusFilter, qrPrintMin, qrPrintMax]);
 
     const fetchAssets = async () => {
         try {
             setLoading(true);
             const params = {};
             if (statusFilter) params.status = statusFilter;
+            if (qrPrintMin) params.qr_print_min = qrPrintMin;
+            if (qrPrintMax) params.qr_print_max = qrPrintMax;
             // Removed search param from server call to enable client-side filtering
 
             const response = await axios.get('/asset/assets', { params });
@@ -375,6 +379,27 @@ const AssetList = () => {
                             <option value="maintenance">Maintenance</option>
                             <option value="retired">Retired</option>
                         </select>
+                    </div>
+
+                    <div className="filter-group">
+                        <span style={{ fontSize: '0.9rem', marginRight: '5px', fontWeight: '500' }}>QR Prints:</span>
+                        <input
+                            type="number"
+                            className="form-input"
+                            placeholder="Min"
+                            value={qrPrintMin}
+                            onChange={(e) => setQrPrintMin(e.target.value)}
+                            style={{ width: '70px', padding: '5px' }}
+                        />
+                        <span style={{ margin: '0 5px' }}>-</span>
+                        <input
+                            type="number"
+                            className="form-input"
+                            placeholder="Max"
+                            value={qrPrintMax}
+                            onChange={(e) => setQrPrintMax(e.target.value)}
+                            style={{ width: '70px', padding: '5px' }}
+                        />
                     </div>
                 </div>
 

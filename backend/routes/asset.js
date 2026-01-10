@@ -281,7 +281,7 @@ router.use(verifyToken);
 // Get all assets
 router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
     try {
-        const { status, category_id, location_id, supplier_id, search } = req.query;
+        const { status, category_id, location_id, supplier_id, search, qr_print_min, qr_print_max } = req.query;
 
         let query = `
       SELECT 
@@ -325,6 +325,16 @@ router.get('/assets', checkPermission('asset.items.view'), async (req, res) => {
         if (supplier_id) {
             query += ' AND a.supplier_id = ?';
             params.push(supplier_id);
+        }
+
+        if (qr_print_min) {
+            query += ' AND COALESCE(a.qr_print_count, 0) >= ?';
+            params.push(qr_print_min);
+        }
+
+        if (qr_print_max) {
+            query += ' AND COALESCE(a.qr_print_count, 0) <= ?';
+            params.push(qr_print_max);
         }
 
         if (search) {
@@ -767,7 +777,7 @@ router.post('/assets/:id/qr-print', checkPermission('asset.items.view'), async (
 
 // ==================== CATEGORIES ====================
 
-router.get('/categories', checkPermission('asset.items.view'), async (req, res) => {
+router.get('/categories', checkPermission('asset.categories.view'), async (req, res) => {
     try {
         const categories = await db.query(`
       SELECT c.*, COUNT(a.id) as asset_count
@@ -792,7 +802,7 @@ router.get('/categories', checkPermission('asset.items.view'), async (req, res) 
 });
 
 // Get single category
-router.get('/categories/:id', checkPermission('asset.items.view'), async (req, res) => {
+router.get('/categories/:id', checkPermission('asset.categories.view'), async (req, res) => {
     try {
         const [category] = await db.query('SELECT * FROM asset_categories WHERE id = ?', [req.params.id]);
 
@@ -834,7 +844,7 @@ const generateCode = async (tableName, codeColumn, name) => {
     return `${baseCode}${nextNum}`;
 };
 
-router.post('/categories', checkPermission('asset.categories.manage'), async (req, res) => {
+router.post('/categories', checkPermission('asset.categories.create'), async (req, res) => {
     try {
         const { category_name, description, icon } = req.body;
 
@@ -857,7 +867,7 @@ router.post('/categories', checkPermission('asset.categories.manage'), async (re
     }
 });
 
-router.put('/categories/:id', checkPermission('asset.categories.manage'), async (req, res) => {
+router.put('/categories/:id', checkPermission('asset.categories.edit'), async (req, res) => {
     try {
         const { category_name, description, icon } = req.body;
 
@@ -878,7 +888,7 @@ router.put('/categories/:id', checkPermission('asset.categories.manage'), async 
     }
 });
 
-router.delete('/categories/:id', checkPermission('asset.categories.manage'), async (req, res) => {
+router.delete('/categories/:id', checkPermission('asset.categories.delete'), async (req, res) => {
     try {
         await db.query('UPDATE asset_categories SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Category deleted successfully' });
@@ -890,7 +900,7 @@ router.delete('/categories/:id', checkPermission('asset.categories.manage'), asy
 
 // ==================== LOCATIONS ====================
 
-router.get('/locations', checkPermission('asset.items.view'), async (req, res) => {
+router.get('/locations', checkPermission('asset.locations.view'), async (req, res) => {
     try {
         const locations = await db.query(`
       SELECT l.*, COUNT(CASE WHEN a.is_deleted = 0 OR a.is_deleted IS NULL THEN a.id END) as asset_count, p.location_name as parent_location_name
@@ -915,7 +925,7 @@ router.get('/locations', checkPermission('asset.items.view'), async (req, res) =
     }
 });
 
-router.get('/locations/:id', checkPermission('asset.items.view'), async (req, res) => {
+router.get('/locations/:id', checkPermission('asset.locations.view'), async (req, res) => {
     try {
         const [location] = await db.query(`
             SELECT l.*, p.location_name as parent_location_name
@@ -935,7 +945,7 @@ router.get('/locations/:id', checkPermission('asset.items.view'), async (req, re
     }
 });
 
-router.post('/locations', checkPermission('asset.locations.manage'), async (req, res) => {
+router.post('/locations', checkPermission('asset.locations.create'), async (req, res) => {
     try {
         const { location_name, address, city, state, postal_code, country, parent_location_id } = req.body;
 
@@ -959,7 +969,7 @@ router.post('/locations', checkPermission('asset.locations.manage'), async (req,
     }
 });
 
-router.put('/locations/:id', checkPermission('asset.locations.manage'), async (req, res) => {
+router.put('/locations/:id', checkPermission('asset.locations.edit'), async (req, res) => {
     try {
         const { location_name, address, city, state, postal_code, country, parent_location_id } = req.body;
 
@@ -982,7 +992,7 @@ router.put('/locations/:id', checkPermission('asset.locations.manage'), async (r
     }
 });
 
-router.delete('/locations/:id', checkPermission('asset.locations.manage'), async (req, res) => {
+router.delete('/locations/:id', checkPermission('asset.locations.delete'), async (req, res) => {
     try {
         await db.query('UPDATE asset_locations SET is_deleted = 1 WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Location deleted successfully' });
@@ -994,7 +1004,7 @@ router.delete('/locations/:id', checkPermission('asset.locations.manage'), async
 
 // ==================== SUPPLIERS ====================
 
-router.get('/suppliers', checkPermission('asset.items.view'), async (req, res) => {
+router.get('/suppliers', checkPermission('asset.suppliers.view'), async (req, res) => {
     try {
         const suppliers = await db.query(`
             SELECT s.*, COUNT(a.id) as asset_count
@@ -1017,7 +1027,7 @@ router.get('/suppliers', checkPermission('asset.items.view'), async (req, res) =
     }
 });
 
-router.get('/suppliers/:id', checkPermission('asset.items.view'), async (req, res) => {
+router.get('/suppliers/:id', checkPermission('asset.suppliers.view'), async (req, res) => {
     try {
         const [supplier] = await db.query('SELECT * FROM asset_suppliers WHERE id = ? AND (is_deleted = 0 OR is_deleted IS NULL)', [req.params.id]);
 
@@ -1032,7 +1042,7 @@ router.get('/suppliers/:id', checkPermission('asset.items.view'), async (req, re
     }
 });
 
-router.post('/suppliers', checkPermission('asset.suppliers.manage'), async (req, res) => {
+router.post('/suppliers', checkPermission('asset.suppliers.create'), async (req, res) => {
     try {
         const { supplier_name, contact_person, email, phone, address, website, notes } = req.body;
 
@@ -1057,7 +1067,7 @@ router.post('/suppliers', checkPermission('asset.suppliers.manage'), async (req,
     }
 });
 
-router.put('/suppliers/:id', checkPermission('asset.suppliers.manage'), async (req, res) => {
+router.put('/suppliers/:id', checkPermission('asset.suppliers.edit'), async (req, res) => {
     try {
         const { supplier_name, contact_person, email, phone, address, website, notes } = req.body;
 
@@ -1075,7 +1085,7 @@ router.put('/suppliers/:id', checkPermission('asset.suppliers.manage'), async (r
     }
 });
 
-router.delete('/suppliers/:id', checkPermission('asset.suppliers.manage'), async (req, res) => {
+router.delete('/suppliers/:id', checkPermission('asset.suppliers.delete'), async (req, res) => {
     try {
         // Soft delete
         await db.query('UPDATE asset_suppliers SET is_deleted = 1 WHERE id = ?', [req.params.id]);
@@ -1141,7 +1151,7 @@ router.get('/maintenance/:id', checkPermission('asset.maintenance.view'), async 
     }
 });
 
-router.post('/maintenance', checkPermission('asset.maintenance.manage'), async (req, res) => {
+router.post('/maintenance', checkPermission('asset.maintenance.create'), async (req, res) => {
     try {
         const {
             asset_id, maintenance_type, maintenance_date, performed_by,
@@ -1193,7 +1203,7 @@ router.post('/maintenance', checkPermission('asset.maintenance.manage'), async (
     }
 });
 
-router.put('/maintenance/:id', checkPermission('asset.maintenance.manage'), async (req, res) => {
+router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), async (req, res) => {
     try {
         const {
             maintenance_type, maintenance_date, performed_by,
@@ -1242,7 +1252,7 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.manage'), asyn
     }
 });
 
-router.delete('/maintenance/:id', checkPermission('asset.maintenance.manage'), async (req, res) => {
+router.delete('/maintenance/:id', checkPermission('asset.maintenance.delete'), async (req, res) => {
     try {
         await db.query('DELETE FROM asset_maintenance WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Maintenance record deleted successfully' });

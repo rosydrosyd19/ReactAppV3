@@ -290,18 +290,26 @@ router.get('/roles-list', checkPermission('sysadmin.users.create'), async (req, 
 router.get('/roles', checkPermission('sysadmin.roles.view'), async (req, res) => {
     try {
         const roles = await db.query(`
-      SELECT r.*, COUNT(DISTINCT ur.user_id) as user_count, COUNT(DISTINCT rp.permission_id) as permission_count
-      FROM sysadmin_roles r
-      LEFT JOIN sysadmin_user_roles ur ON r.id = ur.role_id
-      LEFT JOIN sysadmin_role_permissions rp ON r.id = rp.role_id
-      GROUP BY r.id
-      ORDER BY r.created_at DESC
-    `);
+            SELECT 
+                r.*, 
+                (SELECT COUNT(*) FROM sysadmin_user_roles WHERE role_id = r.id) as user_count, 
+                (SELECT COUNT(*) FROM sysadmin_role_permissions WHERE role_id = r.id) as permission_count
+            FROM sysadmin_roles r
+            ORDER BY r.created_at DESC
+        `);
 
-        res.json({ success: true, data: roles });
+        // Convert BigInt to Number to avoid serialization errors
+        const serializedRoles = roles.map(role => ({
+            ...role,
+            id: Number(role.id), // Ensure ID is Number (safe for typical ID ranges)
+            user_count: Number(role.user_count || 0),
+            permission_count: Number(role.permission_count || 0)
+        }));
+
+        res.json({ success: true, data: serializedRoles });
     } catch (error) {
         console.error('Get roles error:', error);
-        res.status(500).json({ success: false, message: 'Error fetching roles' });
+        res.status(500).json({ success: false, message: 'Error fetching roles: ' + error.message });
     }
 });
 
@@ -340,11 +348,21 @@ router.post('/roles', checkPermission('sysadmin.roles.manage'), async (req, res)
             [role_name, description]
         );
 
-        const roleId = result.insertId;
+        const roleId = Number(result.insertId); // Convert BigInt to Number
 
         if (permission_ids && permission_ids.length > 0) {
-            const values = permission_ids.map(permId => [roleId, permId]);
-            await db.query('INSERT INTO sysadmin_role_permissions (role_id, permission_id) VALUES ?', [values]);
+            // Generate placeholders like (?, ?), (?, ?)
+            const placeholders = permission_ids.map(() => '(?, ?)').join(', ');
+            const query = `INSERT INTO sysadmin_role_permissions (role_id, permission_id) VALUES ${placeholders}`;
+
+            // Flatten the values array: [roleId, permId1, roleId, permId2, ...]
+            const flatValues = [];
+            permission_ids.forEach(permId => {
+                flatValues.push(roleId);
+                flatValues.push(permId);
+            });
+
+            await db.query(query, flatValues);
         }
 
         await logActivity(req.user.id, 'CREATE_ROLE', 'sysadmin', 'role', roleId, { role_name }, req);
@@ -352,7 +370,7 @@ router.post('/roles', checkPermission('sysadmin.roles.manage'), async (req, res)
         res.status(201).json({ success: true, data: { id: roleId } });
     } catch (error) {
         console.error('Create role error:', error);
-        res.status(500).json({ success: false, message: 'Error creating role' });
+        res.status(500).json({ success: false, message: 'Error creating role: ' + error.message });
     }
 });
 
@@ -367,12 +385,24 @@ router.put('/roles/:id', checkPermission('sysadmin.roles.manage'), async (req, r
         );
 
         // Update permissions
+        // Update permissions
         if (permission_ids !== undefined) {
             await db.query('DELETE FROM sysadmin_role_permissions WHERE role_id = ?', [req.params.id]);
 
             if (permission_ids.length > 0) {
-                const values = permission_ids.map(permId => [req.params.id, permId]);
-                await db.query('INSERT INTO sysadmin_role_permissions (role_id, permission_id) VALUES ?', [values]);
+                // Generate placeholders like (?, ?), (?, ?)
+                const placeholders = permission_ids.map(() => '(?, ?)').join(', ');
+                const query = `INSERT INTO sysadmin_role_permissions (role_id, permission_id) VALUES ${placeholders}`;
+
+                // Flatten the values array: [roleId, permId1, roleId, permId2, ...]
+                const flatValues = [];
+                const roleIdStr = req.params.id;
+                permission_ids.forEach(permId => {
+                    flatValues.push(roleIdStr);
+                    flatValues.push(permId);
+                });
+
+                await db.query(query, flatValues);
             }
         }
 
@@ -381,7 +411,7 @@ router.put('/roles/:id', checkPermission('sysadmin.roles.manage'), async (req, r
         res.json({ success: true, message: 'Role updated successfully' });
     } catch (error) {
         console.error('Update role error:', error);
-        res.status(500).json({ success: false, message: 'Error updating role' });
+        res.status(500).json({ success: false, message: 'Error updating role: ' + error.message });
     }
 });
 

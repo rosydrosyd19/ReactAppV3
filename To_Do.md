@@ -1,5 +1,7 @@
 ## New Feature
 Lakukan ketika up ke server
+add_credential_permissions_crud.js
+add_granular_asset_permissions.js
 
 lengkapi menu roles di modul sysadmin
 
