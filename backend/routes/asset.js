@@ -1222,7 +1222,7 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), async 
        SET maintenance_type = ?, maintenance_date = ?, performed_by = ?, cost = ?, 
            description = ?, next_maintenance_date = ?, status = ?
        WHERE id = ?`,
-            [maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date, status, req.params.id]
+            [maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date || null, status, req.params.id]
         );
 
         // Handle Asset Status Changes
@@ -1248,7 +1248,7 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), async 
         res.json({ success: true, message: 'Maintenance record updated successfully' });
     } catch (error) {
         console.error('Update maintenance error:', error);
-        res.status(500).json({ success: false, message: 'Error updating maintenance record' });
+        res.status(500).json({ success: false, message: 'Error updating maintenance record', error: error.message });
     }
 });
 
