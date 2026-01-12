@@ -25,6 +25,7 @@ import {
     FiTool,
     FiEdit2,
     FiTrash2,
+    FiCopy,
     FiCheckCircle,
     FiXCircle,
     FiAlertCircle,
@@ -67,6 +68,7 @@ const AssetDetail = ({ readOnly = false }) => {
     const [error, setError] = useState('');
     const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showCloneModal, setShowCloneModal] = useState(false);
     const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
     const [maintenanceRecord, setMaintenanceRecord] = useState(null);
     const [showToast, setShowToast] = useState(false);
@@ -444,6 +446,12 @@ const AssetDetail = ({ readOnly = false }) => {
                                             {hasPermission('asset.items.edit') && (
                                                 <button className="action-dropdown-item" onClick={() => { setShowEditModal(true); setShowActionDropdown(false); }}>
                                                     <FiEdit2 /> Edit Asset
+                                                </button>
+                                            )}
+
+                                            {hasPermission('asset.items.create') && (
+                                                <button className="action-dropdown-item" onClick={() => { setShowCloneModal(true); setShowActionDropdown(false); }}>
+                                                    <FiCopy /> Clone Asset
                                                 </button>
                                             )}
 
@@ -1041,6 +1049,19 @@ const AssetDetail = ({ readOnly = false }) => {
                 onClose={() => setShowEditModal(false)}
                 onSuccess={() => handleAssetUpdated('updated')}
                 assetId={id}
+            />
+
+            {/* Clone Modal */}
+            <AssetModal
+                isOpen={showCloneModal}
+                onClose={() => setShowCloneModal(false)}
+                onSuccess={() => {
+                    setToastMessage('Asset cloned successfully!');
+                    setShowToast(true);
+                    setShowCloneModal(false);
+                }}
+                assetId={null}
+                cloneAssetId={id}
             />
 
             {showToast && (

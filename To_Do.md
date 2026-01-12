@@ -1,9 +1,9 @@
 ## New Feature
 Lakukan ketika up ke server
-add_credential_permissions_crud.js
-add_granular_asset_permissions.js
 
-lengkapi menu roles di modul sysadmin
+Pada react app tambahkan fitur upload image pada add dan edit maintenance image harus terkompes dan harus bisa upload lebih dari 1 image dan munculkan Munculkan imaget di maintenance detail
+
+pada halaman asset detail batasi jumlah  Asset History dan Maintenance Records agar yang muncul 10 terahir saja agar load tidak terlau banyak dan tampilan halaman tidak terlalu panjang serta tambahkan show all agar bisa melihat semua bila showall di klik  Asset History bisa di schrolle ke bawah
 
 Menu baru List IP Address
 Pilih ROUTER dari database

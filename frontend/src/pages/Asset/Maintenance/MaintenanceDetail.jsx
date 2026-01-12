@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import '../../SysAdmin/UserDetail.css';
+import '../AssetDetail/AssetDetail.css';
+import './MaintenanceDetail.css';
 import axios from '../../../utils/axios';
-import { FiArrowLeft, FiTool, FiCalendar, FiDollarSign, FiUser, FiInfo, FiEdit2, FiClock, FiEye, FiImage } from 'react-icons/fi';
+import { FiArrowLeft, FiTool, FiCalendar, FiDollarSign, FiUser, FiInfo, FiEdit2, FiClock, FiEye, FiImage, FiTrash2 } from 'react-icons/fi';
 import MaintenanceModal from './MaintenanceModal';
+import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 
 const MaintenanceDetail = () => {
@@ -13,6 +17,7 @@ const MaintenanceDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
     const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/api$/, '');
@@ -39,6 +44,19 @@ const MaintenanceDetail = () => {
     const handleEditSuccess = () => {
         setToast({ show: true, message: 'Maintenance record updated successfully', type: 'success' });
         fetchMaintenanceDetail();
+    };
+
+    const handleDelete = async () => {
+        try {
+            const res = await axios.delete(`/asset/maintenance/${id}`);
+            if (res.data.success) {
+                navigate('/asset/maintenance', { state: { message: 'Maintenance record deleted successfully' } });
+            }
+        } catch (err) {
+            console.error('Error deleting maintenance record:', err);
+            setToast({ show: true, message: 'Failed to delete maintenance record', type: 'error' });
+            setShowDeleteModal(false);
+        }
     };
 
     if (loading) {
@@ -77,11 +95,11 @@ const MaintenanceDetail = () => {
     };
 
     return (
-        <div className="user-detail">
+        <div className="user-detail asset-detail-override maintenance-detail-override">
             <div className="page-header">
                 <div className="header-left">
                     <button className="btn btn-outline" onClick={() => navigate('/asset/maintenance')}>
-                        <FiArrowLeft /> Back
+                        <FiArrowLeft /> <span>Back</span>
                     </button>
                     <div>
                         <h1>Maintenance Details</h1>
@@ -90,7 +108,10 @@ const MaintenanceDetail = () => {
                 </div>
                 <div className="header-actions">
                     <button className="btn btn-outline" onClick={() => setShowEditModal(true)}>
-                        <FiEdit2 /> Edit
+                        <FiEdit2 /> <span>Edit</span>
+                    </button>
+                    <button className="btn btn-danger" onClick={() => setShowDeleteModal(true)}>
+                        <FiTrash2 /> <span>Delete</span>
                     </button>
                 </div>
             </div>
@@ -196,6 +217,16 @@ const MaintenanceDetail = () => {
                 onClose={() => setShowEditModal(false)}
                 onSuccess={handleEditSuccess}
                 maintenance={maintenance}
+            />
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDelete}
+                title="Delete Maintenance Record"
+                message="Are you sure you want to delete this maintenance record? This action cannot be undone."
+                confirmText="Delete"
+                confirmType="danger"
             />
 
             {toast.show && (

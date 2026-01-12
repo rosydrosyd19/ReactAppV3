@@ -1,0 +1,63 @@
+/* Mobile Overrides for Header Layout */
+@media (max-width: 768px) {
+
+    /* Override grid columns for 2 action buttons so they take 50% each */
+    .user-detail.maintenance-detail-override .header-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    /* Ensure text is visible for these action buttons matching LocationDetail reference */
+    .user-detail.maintenance-detail-override .header-actions button span {
+        display: inline;
+        font-size: 0.85rem;
+    }
+
+    .user-detail.maintenance-detail-override .header-actions button {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    /* Fix Title Layout */
+    .user-detail.maintenance-detail-override .header-left {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+    }
+
+    /* Square Back Button */
+    .user-detail.maintenance-detail-override .header-left .btn {
+        margin-top: 0;
+        margin-left: 0;
+        /* Reset any negative margins */
+        flex-shrink: 0;
+        width: 40px !important;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+    }
+
+    /* Hide Back text on mobile */
+    .user-detail.maintenance-detail-override .header-left .btn span {
+        display: none;
+    }
+
+    /* Ensure title takes remaining space */
+    .user-detail.maintenance-detail-override .header-left>div {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-detail.maintenance-detail-override .header-left>div h1 {
+        font-size: 1.25rem;
+        line-height: 1.3;
+    }
+}
