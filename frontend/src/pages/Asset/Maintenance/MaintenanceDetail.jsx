@@ -156,19 +156,48 @@ const MaintenanceDetail = () => {
                     </div>
                 </div>
 
-                {maintenance.request_image_url && (
+                {/* Unified Images Section */}
+                {(maintenance.request_image_url || (maintenance.images && maintenance.images.length > 0)) && (
                     <div className="card">
                         <div className="card-header">
-                            <h2><FiImage /> Request Image</h2>
+                            <h2><FiImage /> Documentation & Images</h2>
                         </div>
                         <div className="card-body">
-                            <div className="image-container" style={{ maxWidth: '100%', overflow: 'hidden', borderRadius: '8px' }}>
-                                <img
-                                    src={`${BASE_URL}${maintenance.request_image_url}`}
-                                    alt="Maintenance Request"
-                                    style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }}
-                                />
-                            </div>
+                            {/* Request Image Section */}
+                            {maintenance.request_image_url && (
+                                <div style={{ marginBottom: (maintenance.images && maintenance.images.length > 0) ? '24px' : '0' }}>
+                                    <h4 style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reported Issue Image</h4>
+                                    <div className="image-container" style={{ maxWidth: '100%', overflow: 'hidden', borderRadius: '8px' }}>
+                                        <img
+                                            src={`${BASE_URL}${maintenance.request_image_url}`}
+                                            alt="Maintenance Request"
+                                            style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain', cursor: 'pointer' }}
+                                            onClick={() => window.open(`${BASE_URL}${maintenance.request_image_url}`, '_blank')}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Maintenance Images Grid */}
+                            {maintenance.images && maintenance.images.length > 0 && (
+                                <div>
+                                    {maintenance.request_image_url && (
+                                        <h4 style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Maintenance Work Images</h4>
+                                    )}
+                                    <div className="image-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                                        {maintenance.images.map((img, index) => (
+                                            <div key={img.id || index} className="image-item" style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', position: 'relative', paddingTop: '75%' }}>
+                                                <img
+                                                    src={`${BASE_URL}${img.image_url}`}
+                                                    alt={`Maintenance Image ${index + 1}`}
+                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                                                    onClick={() => window.open(`${BASE_URL}${img.image_url}`, '_blank')}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

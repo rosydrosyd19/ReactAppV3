@@ -21,14 +21,28 @@ const storage = multer.diskStorage({
 
 // File filter
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    // Relaxed filter: Check mime type primarily. 
+    // Extensions are not always reliable with Blobs/FormData unless explicitly set.
+    const allowedMimes = [
+        'image/jpeg', 'image/png', 'image/gif',
+        'application/pdf',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
 
-    if (mimetype && extname) {
-        return cb(null, true);
+    if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only images and documents are allowed.'));
+        // Fallback to extension check if mime type is generic/unknown
+        const allowedExts = /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx/i;
+        const extname = allowedExts.test(path.extname(file.originalname).toLowerCase());
+
+        if (extname) {
+            cb(null, true);
+        } else {
+            console.log('Blocked file:', file.originalname, file.mimetype);
+            cb(new Error('Invalid file type. Only images and documents are allowed.'));
+        }
     }
 };
 

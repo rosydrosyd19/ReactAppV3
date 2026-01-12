@@ -53,9 +53,26 @@ async function query(sql, params = []) {
   }
 }
 
+// Execute batch query helper
+async function batch(sql, params = []) {
+  let conn;
+  try {
+    conn = await pool.getConnection();
+    const result = await conn.batch(sql, params);
+    return result;
+  } catch (err) {
+    console.error('Batch error:', err);
+    throw err;
+  } finally {
+    if (conn) conn.release();
+  }
+}
+
 module.exports = {
   pool,
   testConnection,
   getConnection,
-  query
+  getConnection,
+  query,
+  batch
 };

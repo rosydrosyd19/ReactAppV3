@@ -1,9 +1,9 @@
 ## New Feature
 Lakukan ketika up ke server
 
-Pada react app tambahkan fitur upload image pada add dan edit maintenance image harus terkompes dan harus bisa upload lebih dari 1 image dan munculkan Munculkan imaget di maintenance detail
+add_maintenance_images_table.js
 
-di halaman profile tambahkan search untuk filter Assigned Credentials
+Pada react app tambahkan fitur upload image pada add maintenance dan edit maintenance image harus terkompes dan harus bisa upload lebih dari 1 image setiap edit image yang sudah terupload harus bisa di tampilkan dan munculkan Munculkan imaget di maintenance detail
 
 Menu baru List IP Address
 Pilih ROUTER dari database

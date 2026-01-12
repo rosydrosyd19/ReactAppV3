@@ -1129,6 +1129,7 @@ router.get('/maintenance', checkPermission('asset.maintenance.view'), async (req
 
 router.get('/maintenance/:id', checkPermission('asset.maintenance.view'), async (req, res) => {
     try {
+        const maintenanceId = parseInt(req.params.id);
         const [maintenance] = await db.query(`
             SELECT m.*, 
             a.asset_tag, 
@@ -1138,20 +1139,28 @@ router.get('/maintenance/:id', checkPermission('asset.maintenance.view'), async 
             INNER JOIN asset_items a ON m.asset_id = a.id
             LEFT JOIN sysadmin_users u ON m.created_by = u.id
             WHERE m.id = ?
-        `, [req.params.id]);
+        `, [maintenanceId]);
 
         if (!maintenance) {
             return res.status(404).json({ success: false, message: 'Maintenance record not found' });
         }
 
-        res.json({ success: true, data: maintenance });
+        // Fetch images
+        const images = await db.query('SELECT * FROM asset_maintenance_images WHERE maintenance_id = ?', [maintenanceId]);
+
+        // Ensure maintenance is a plain object to attach images
+        // The MySQL driver usually returns RowDataPacket which acts like object, 
+        // but explicitly creating a new object avoids issues.
+        const maintenanceData = { ...maintenance, images: images || [] };
+
+        res.json({ success: true, data: maintenanceData });
     } catch (error) {
         console.error('Get maintenance detail error:', error);
         res.status(500).json({ success: false, message: 'Error fetching maintenance detail' });
     }
 });
 
-router.post('/maintenance', checkPermission('asset.maintenance.create'), async (req, res) => {
+router.post('/maintenance', checkPermission('asset.maintenance.create'), upload.array('images', 5), async (req, res) => {
     try {
         const {
             asset_id, maintenance_type, maintenance_date, performed_by,
@@ -1165,6 +1174,31 @@ router.post('/maintenance', checkPermission('asset.maintenance.create'), async (
             [asset_id, maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date || null, status, req.user.id]
         );
 
+        const maintenanceId = Number(result.insertId);
+        console.log('New Maintenance ID:', maintenanceId);
+
+        // Handle Image Uploads
+        if (req.files && req.files.length > 0) {
+            console.log('Processing images:', req.files.length);
+            const imageValues = req.files.map(file => [maintenanceId, `/uploads/${file.filename}`]);
+
+            // Batch insert images - using Promise.all
+            if (imageValues.length > 0) {
+                try {
+                    const imageQueries = imageValues.map(img => {
+                        return db.query(
+                            'INSERT INTO asset_maintenance_images (maintenance_id, image_url) VALUES (?, ?)',
+                            [img[0], img[1]]
+                        );
+                    });
+                    await Promise.all(imageQueries);
+                    console.log('Images inserted successfully for ID:', maintenanceId);
+                } catch (imgErr) {
+                    console.error('Failed to insert images:', imgErr);
+                }
+            }
+        }
+
         // If maintenance is active (in_progress or scheduled), update asset status to maintenance
         // But typically only 'in_progress' implies the asset is physically under maintenance and unavailable.
         // Let's assume 'in_progress' and 'scheduled' might both mean it's being worked on or about to be.
@@ -1174,7 +1208,7 @@ router.post('/maintenance', checkPermission('asset.maintenance.create'), async (
         // 'scheduled' might just be a plan, asset could still be used?
         // Let's assume 'in_progress' triggers asset status change.
 
-        console.log('Maintenance record created with ID:', result.insertId);
+        console.log('Maintenance record created with ID:', maintenanceId);
 
         let statusNote = '';
         if (status === 'in_progress') {
@@ -1192,7 +1226,7 @@ router.post('/maintenance', checkPermission('asset.maintenance.create'), async (
         );
         console.log('History record inserted.');
 
-        res.status(201).json({ success: true, data: { id: result.insertId.toString() } });
+        res.status(201).json({ success: true, data: { id: maintenanceId.toString() } });
     } catch (error) {
         console.error('Create maintenance error:', error);
         res.status(500).json({
@@ -1203,15 +1237,16 @@ router.post('/maintenance', checkPermission('asset.maintenance.create'), async (
     }
 });
 
-router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), async (req, res) => {
+router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), upload.array('images', 5), async (req, res) => {
     try {
+        const maintenanceId = parseInt(req.params.id);
         const {
             maintenance_type, maintenance_date, performed_by,
             cost, description, next_maintenance_date, status
         } = req.body;
 
         // Get old status to compare
-        const [oldRecord] = await db.query('SELECT status, asset_id FROM asset_maintenance WHERE id = ?', [req.params.id]);
+        const [oldRecord] = await db.query('SELECT status, asset_id FROM asset_maintenance WHERE id = ?', [maintenanceId]);
 
         if (!oldRecord) {
             return res.status(404).json({ success: false, message: 'Maintenance record not found' });
@@ -1224,6 +1259,48 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), async 
        WHERE id = ?`,
             [maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date || null, status, req.params.id]
         );
+
+        // Handle Image Deletions
+        if (req.body.deleted_image_ids) {
+            try {
+                const deletedIds = JSON.parse(req.body.deleted_image_ids);
+                if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+                    const saneIds = deletedIds.map(id => Number(id)).filter(id => !isNaN(id));
+                    if (saneIds.length > 0) {
+                        const placeholders = saneIds.map(() => '?').join(',');
+                        await db.query(
+                            `DELETE FROM asset_maintenance_images WHERE id IN (${placeholders}) AND maintenance_id = ?`,
+                            [...saneIds, maintenanceId]
+                        );
+                        console.log('Deleted images:', saneIds);
+                    }
+                }
+            } catch (err) {
+                console.error('Error deleting images:', err);
+            }
+        }
+
+        // Handle Image Uploads for Update
+        if (req.files && req.files.length > 0) {
+            console.log(`PUT /maintenance/${req.params.id} - Adding ${req.files.length} images`);
+            const imageValues = req.files.map(file => [req.params.id, `/uploads/${file.filename}`]);
+
+            // Batch insert images - using Promise.all
+            if (imageValues.length > 0) {
+                try {
+                    const imageQueries = imageValues.map(img => {
+                        return db.query(
+                            'INSERT INTO asset_maintenance_images (maintenance_id, image_url) VALUES (?, ?)',
+                            [img[0], img[1]]
+                        );
+                    });
+                    await Promise.all(imageQueries);
+                    console.log('Images added successfully to maintenance ID:', req.params.id);
+                } catch (imgErr) {
+                    console.error('Failed to add images on edit:', imgErr);
+                }
+            }
+        }
 
         // Handle Asset Status Changes
         // If changing TO completed, set asset to 'available'
