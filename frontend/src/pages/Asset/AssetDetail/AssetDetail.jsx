@@ -85,7 +85,7 @@ const AssetDetail = ({ readOnly = false }) => {
         const parts = text.split(urlRegex);
 
         return parts.map((part, index) => {
-            if (part.match(urlRegex)) {
+            if (part?.match(urlRegex)) {
                 return (
                     <a
                         key={index}
@@ -598,7 +598,7 @@ const AssetDetail = ({ readOnly = false }) => {
                             <h2><FiTool /> Maintenance Records</h2>
                         </div>
                         <div className="card-body">
-                            <div className="table-responsive maintenance-desktop-table">
+                            <div className="table-responsive maintenance-desktop-table scrollable-list">
                                 <table className="table table-hover">
                                     <thead>
                                         <tr>
@@ -660,7 +660,7 @@ const AssetDetail = ({ readOnly = false }) => {
                             </div>
 
                             {/* Mobile View for Maintenance Records */}
-                            <div className="maintenance-mobile-list">
+                            <div className="maintenance-mobile-list scrollable-list">
                                 <div className="history-timeline">
                                     {displayMaintenance.map((record) => (
                                         <div key={record.id} className="history-item">
@@ -740,7 +740,7 @@ const AssetDetail = ({ readOnly = false }) => {
                     </div>
                     <div className="card-body">
                         {generalHistory.length > 0 ? (
-                            <div className="history-timeline">
+                            <div className="history-timeline scrollable-list">
                                 {generalHistory.map((record, index) => (
                                     <div key={index} className="history-item">
                                         <div className={`history-icon type-${record.action_type}`}>
@@ -796,7 +796,7 @@ const AssetDetail = ({ readOnly = false }) => {
                 </div>
 
                 {/* Purchase & Warranty Card */}
-                < div className="card" >
+                <div className="card">
                     <div className="card-header">
                         <h2><FiDollarSign /> Purchase & Warranty</h2>
                     </div>
