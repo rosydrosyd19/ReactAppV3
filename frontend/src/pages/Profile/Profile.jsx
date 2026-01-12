@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import axios from '../../utils/axios';
 import { useAuth } from '../../contexts/AuthContext';
-import { FiSave, FiUser, FiLock, FiMail, FiPhone, FiAlertCircle, FiEye, FiEyeOff, FiGlobe, FiCopy } from 'react-icons/fi';
+import { FiSave, FiUser, FiLock, FiMail, FiPhone, FiAlertCircle, FiEye, FiEyeOff, FiGlobe, FiCopy, FiSearch } from 'react-icons/fi';
 import './Profile.css';
 
 const Profile = () => {
     const { user, login } = useAuth(); // login used here to potentially update local user state if needed, or we might need a setUser in context
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [searchTerm, setSearchTerm] = useState('');
 
     const [formData, setFormData] = useState({
         full_name: '',
@@ -208,12 +209,32 @@ const Profile = () => {
                     </form>
                 </div>
 
-                {/* Assigned Credentials Section - Search/Filter could go here if needed */}
+                {/* Assigned Credentials Section */}
                 <div className="credentials-section">
-                    <h3>Assigned Credentials</h3>
-                    {credentials.length > 0 ? (
+                    <div className="credentials-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3>Assigned Credentials</h3>
+                        <div className="profile-search-box">
+                            <FiSearch className="profile-search-icon" />
+                            <input
+                                type="text"
+                                className="profile-search-input"
+                                placeholder="Search..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    {credentials.filter(cred =>
+                        cred.platform_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        cred.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        cred.category.toLowerCase().includes(searchTerm.toLowerCase())
+                    ).length > 0 ? (
                         <div className="credentials-list">
-                            {credentials.map(cred => (
+                            {credentials.filter(cred =>
+                                cred.platform_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                cred.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                cred.category.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map(cred => (
                                 <div key={cred.id} className="credential-item">
                                     <div className="credential-icon">
                                         <FiLock />
@@ -258,7 +279,7 @@ const Profile = () => {
                         </div>
                     ) : (
                         <div className="empty-state-small">
-                            <p>No credentials assigned to you.</p>
+                            <p>No credentials found.</p>
                         </div>
                     )}
                 </div>

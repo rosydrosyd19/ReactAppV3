@@ -308,3 +308,32 @@
 .btn-icon-sm:hover {
     color: var(--primary-color);
 }
+
+/* Profile Search Box */
+.profile-search-box {
+    position: relative;
+    width: 200px;
+}
+
+.profile-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.profile-search-input {
+    width: 100%;
+    padding: 8px 8px 8px 35px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    outline: none;
+    transition: border 0.2s;
+}
+
+.profile-search-input:focus {
+    border-color: var(--primary-color);
+}
