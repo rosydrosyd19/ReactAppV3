@@ -777,7 +777,7 @@ router.post('/assets/:id/qr-print', checkPermission('asset.items.view'), async (
 
 // ==================== CATEGORIES ====================
 
-router.get('/categories', checkPermission('asset.categories.view'), async (req, res) => {
+router.get('/categories', checkAnyPermission(['asset.categories.view', 'asset.items.view', 'asset.items.create', 'asset.items.edit']), async (req, res) => {
     try {
         const categories = await db.query(`
       SELECT c.*, COUNT(a.id) as asset_count
@@ -900,7 +900,7 @@ router.delete('/categories/:id', checkPermission('asset.categories.delete'), asy
 
 // ==================== LOCATIONS ====================
 
-router.get('/locations', checkPermission('asset.locations.view'), async (req, res) => {
+router.get('/locations', checkAnyPermission(['asset.locations.view', 'asset.items.view', 'asset.items.create', 'asset.items.edit']), async (req, res) => {
     try {
         const locations = await db.query(`
       SELECT l.*, COUNT(CASE WHEN a.is_deleted = 0 OR a.is_deleted IS NULL THEN a.id END) as asset_count, p.location_name as parent_location_name
@@ -1004,7 +1004,7 @@ router.delete('/locations/:id', checkPermission('asset.locations.delete'), async
 
 // ==================== SUPPLIERS ====================
 
-router.get('/suppliers', checkPermission('asset.suppliers.view'), async (req, res) => {
+router.get('/suppliers', checkAnyPermission(['asset.suppliers.view', 'asset.items.view', 'asset.items.create', 'asset.items.edit']), async (req, res) => {
     try {
         const suppliers = await db.query(`
             SELECT s.*, COUNT(a.id) as asset_count

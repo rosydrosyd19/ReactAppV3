@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiSave, FiUpload, FiXCircle, FiPlus, FiCamera } from 'react-icons/fi';
+import { useAuth } from '../../../contexts/AuthContext';
 import axios from '../../../utils/axios';
 import SearchableSelect from '../../../components/Form/SearchableSelect';
 import Toast from '../../../components/Toast/Toast';
@@ -11,6 +12,7 @@ import './AssetModal.css';
 const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId = null }) => {
     const isEditMode = !!assetId;
     const isCloneMode = !!cloneAssetId;
+    const { hasPermission } = useAuth();
 
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -387,14 +389,16 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                                     placeholder="Select Category"
                                                 />
                                             </div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline btn-quick-add"
-                                                onClick={() => setShowQuickCategory(true)}
-                                                title="Add New Category"
-                                            >
-                                                <FiPlus />
-                                            </button>
+                                            {hasPermission('asset.categories.create') && (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline btn-quick-add"
+                                                    onClick={() => setShowQuickCategory(true)}
+                                                    title="Add New Category"
+                                                >
+                                                    <FiPlus />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
 
@@ -409,14 +413,16 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                                     placeholder="Select Location"
                                                 />
                                             </div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline btn-quick-add"
-                                                onClick={() => setShowQuickLocation(true)}
-                                                title="Add New Location"
-                                            >
-                                                <FiPlus />
-                                            </button>
+                                            {hasPermission('asset.locations.create') && (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline btn-quick-add"
+                                                    onClick={() => setShowQuickLocation(true)}
+                                                    title="Add New Location"
+                                                >
+                                                    <FiPlus />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
 
@@ -506,14 +512,16 @@ const AssetModal = ({ isOpen, onClose, onSuccess, assetId = null, cloneAssetId =
                                                     placeholder="Select Supplier"
                                                 />
                                             </div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline btn-quick-add"
-                                                onClick={() => setShowQuickSupplier(true)}
-                                                title="Add New Supplier"
-                                            >
-                                                <FiPlus />
-                                            </button>
+                                            {hasPermission('asset.suppliers.create') && (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline btn-quick-add"
+                                                    onClick={() => setShowQuickSupplier(true)}
+                                                    title="Add New Supplier"
+                                                >
+                                                    <FiPlus />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
 

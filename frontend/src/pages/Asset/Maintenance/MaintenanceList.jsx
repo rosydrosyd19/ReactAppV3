@@ -88,6 +88,7 @@ const MaintenanceList = () => {
             case 'requests': return <span className="badge badge-info">Requests</span>;
             case 'in_progress': return <span className="badge badge-primary">In Progress</span>;
             case 'completed': return <span className="badge badge-success">Completed</span>;
+            case 'cancelled': return <span className="badge badge-danger">Cancelled</span>;
             default: return <span className="badge">{status}</span>;
         }
     };
@@ -228,7 +229,7 @@ const MaintenanceList = () => {
                                     <div className="mobile-asset-icon">
                                         <FiTool />
                                         <div className={`status-dot ${record.status === 'completed' ? 'active' :
-                                                record.status === 'scheduled' ? 'warning' : 'danger'
+                                            record.status === 'scheduled' ? 'warning' : 'danger'
                                             }`}></div>
                                     </div>
                                     <div className="mobile-asset-info">

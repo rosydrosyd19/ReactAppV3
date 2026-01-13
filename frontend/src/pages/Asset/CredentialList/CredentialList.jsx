@@ -302,7 +302,7 @@ const CredentialList = () => {
                     <h1>Credentials</h1>
                     <p>Manage passwords and account details</p>
                 </div>
-                {hasPermission('asset.credentials.manage') && (
+                {hasPermission('asset.credentials.create') && (
                     <button className="btn btn-primary" onClick={handleCreateClick}>
                         <FiPlus /> Add Credential
                     </button>
@@ -350,7 +350,7 @@ const CredentialList = () => {
                         <FiShield />
                         <h3>No credentials found</h3>
                         <p>Start by adding your first credential</p>
-                        {hasPermission('asset.credentials.manage') && (
+                        {hasPermission('asset.credentials.create') && (
                             <button className="btn btn-primary" onClick={handleCreateClick}>
                                 <FiPlus /> Add Credential
                             </button>
@@ -436,83 +436,87 @@ const CredentialList = () => {
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
-                                                    {hasPermission('asset.credentials.manage') && (
-                                                        <>
-                                                            <button
-                                                                className="btn-icon"
-                                                                title="View Details"
-                                                                onClick={() => navigate(`/asset/credentials/${item.id}`)}
-                                                            >
-                                                                <FiEye />
-                                                            </button>
-                                                            <button
-                                                                className="btn-icon"
-                                                                title="Edit"
-                                                                onClick={() => handleEditClick(item.id)}
-                                                            >
-                                                                <FiEdit2 />
-                                                            </button>
-                                                            <button
-                                                                className="btn-icon btn-danger"
-                                                                title="Delete"
-                                                                onClick={() => handleDeleteClick(item)}
-                                                            >
-                                                                <FiTrash2 />
-                                                            </button>
+                                                    <button
+                                                        className="btn-icon"
+                                                        title="View Details"
+                                                        onClick={() => navigate(`/asset/credentials/${item.id}`)}
+                                                    >
+                                                        <FiEye />
+                                                    </button>
+                                                    {hasPermission('asset.credentials.edit') && (
+                                                        <button
+                                                            className="btn-icon"
+                                                            title="Edit"
+                                                            onClick={() => handleEditClick(item.id)}
+                                                        >
+                                                            <FiEdit2 />
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.credentials.delete') && (
+                                                        <button
+                                                            className="btn-icon btn-danger"
+                                                            title="Delete"
+                                                            onClick={() => handleDeleteClick(item)}
+                                                        >
+                                                            <FiTrash2 />
+                                                        </button>
+                                                    )}
 
-                                                            <div className="action-dropdown-container" style={{ position: 'relative' }}>
+                                                    <div className="action-dropdown-container" style={{ position: 'relative' }}>
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => toggleDropdown(item.id)}
+                                                            title="More Actions"
+                                                        >
+                                                            <FiMoreVertical />
+                                                        </button>
+                                                        {activeDropdownId === item.id && (
+                                                            <div className="action-dropdown-menu">
                                                                 <button
-                                                                    className="btn-icon"
-                                                                    onClick={() => toggleDropdown(item.id)}
-                                                                    title="More Actions"
+                                                                    className="dropdown-item"
+                                                                    onClick={() => {
+                                                                        navigate(`/asset/credentials/${item.id}`);
+                                                                        setActiveDropdownId(null);
+                                                                    }}
                                                                 >
-                                                                    <FiMoreVertical />
+                                                                    <FiEye /> View Details
                                                                 </button>
-                                                                {activeDropdownId === item.id && (
-                                                                    <div className="action-dropdown-menu">
-                                                                        <button
-                                                                            className="dropdown-item"
-                                                                            onClick={() => {
-                                                                                navigate(`/asset/credentials/${item.id}`);
-                                                                                setActiveDropdownId(null);
-                                                                            }}
-                                                                        >
-                                                                            <FiEye /> View Details
-                                                                        </button>
-                                                                        <button
-                                                                            className="dropdown-item"
-                                                                            onClick={() => {
-                                                                                handleOpenCheckOut(item);
-                                                                                setActiveDropdownId(null);
-                                                                            }}
-                                                                        >
-                                                                            <FiLogOut className="text-primary" /> Check Out
-                                                                        </button>
-                                                                        <button
-                                                                            className="dropdown-item"
-                                                                            onClick={() => {
-                                                                                handleCloneClick(item.id);
-                                                                                setActiveDropdownId(null);
-                                                                            }}
-                                                                        >
-                                                                            <FiCopy /> Clone
-                                                                        </button>
-                                                                        {item.status !== 'available' && (
-                                                                            <button
-                                                                                className="dropdown-item"
-                                                                                onClick={() => {
-                                                                                    handleOpenCheckIn(item);
-                                                                                    setActiveDropdownId(null);
-                                                                                }}
-                                                                            >
-                                                                                <FiCheckCircle className="text-warning" /> Check In
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
+                                                                {hasPermission('asset.credentials.checkout') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleOpenCheckOut(item);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiLogOut className="text-primary" /> Check Out
+                                                                    </button>
+                                                                )}
+                                                                {hasPermission('asset.credentials.create') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleCloneClick(item.id);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiCopy /> Clone
+                                                                    </button>
+                                                                )}
+                                                                {item.status !== 'available' && hasPermission('asset.credentials.checkin') && (
+                                                                    <button
+                                                                        className="dropdown-item"
+                                                                        onClick={() => {
+                                                                            handleOpenCheckIn(item);
+                                                                            setActiveDropdownId(null);
+                                                                        }}
+                                                                    >
+                                                                        <FiCheckCircle className="text-warning" /> Check In
+                                                                    </button>
                                                                 )}
                                                             </div>
-                                                        </>
-                                                    )}
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr >
@@ -609,63 +613,67 @@ const CredentialList = () => {
                                                 </div>
 
                                                 <div className="mobile-actions">
-                                                    {hasPermission('asset.credentials.manage') && (
-                                                        <>
-                                                            <button
-                                                                className="action-btn view"
-                                                                style={{ backgroundColor: '#6366f1', color: 'white' }}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    navigate(`/asset/credentials/${item.id}`);
-                                                                }}
-                                                            >
-                                                                <FiEye /> <span>View</span>
-                                                            </button>
-                                                            <button
-                                                                className="action-btn checkout"
-                                                                style={{ backgroundColor: '#2563eb', color: 'white' }}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleOpenCheckOut(item);
-                                                                }}
-                                                            >
-                                                                <FiLogOut /> <span>Check Out</span>
-                                                            </button>
-                                                            <button
-                                                                className="action-btn clone"
-                                                                style={{ backgroundColor: '#8b5cf6', color: 'white' }}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleCloneClick(item.id);
-                                                                }}
-                                                            >
-                                                                <FiCopy /> <span>Clone</span>
-                                                            </button>
-                                                            {item.status !== 'available' && (
-                                                                <button
-                                                                    className="action-btn checkin"
-                                                                    style={{ backgroundColor: '#10b981', color: 'white' }}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleOpenCheckIn(item);
-                                                                    }}
-                                                                >
-                                                                    <FiCheckCircle /> <span>Check In</span>
-                                                                </button>
-                                                            )}
-                                                            <button
-                                                                className="action-btn edit"
-                                                                onClick={() => handleEditClick(item.id)}
-                                                            >
-                                                                <FiEdit2 /> <span>Edit</span>
-                                                            </button>
-                                                            <button
-                                                                className="action-btn delete"
-                                                                onClick={() => handleDeleteClick(item)}
-                                                            >
-                                                                <FiTrash2 /> <span>Delete</span>
-                                                            </button>
-                                                        </>
+                                                    <button
+                                                        className="action-btn view"
+                                                        style={{ backgroundColor: '#6366f1', color: 'white' }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/asset/credentials/${item.id}`);
+                                                        }}
+                                                    >
+                                                        <FiEye /> <span>View</span>
+                                                    </button>
+                                                    {hasPermission('asset.credentials.checkout') && (
+                                                        <button
+                                                            className="action-btn checkout"
+                                                            style={{ backgroundColor: '#2563eb', color: 'white' }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenCheckOut(item);
+                                                            }}
+                                                        >
+                                                            <FiLogOut /> <span>Check Out</span>
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.credentials.create') && (
+                                                        <button
+                                                            className="action-btn clone"
+                                                            style={{ backgroundColor: '#8b5cf6', color: 'white' }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleCloneClick(item.id);
+                                                            }}
+                                                        >
+                                                            <FiCopy /> <span>Clone</span>
+                                                        </button>
+                                                    )}
+                                                    {item.status !== 'available' && hasPermission('asset.credentials.checkin') && (
+                                                        <button
+                                                            className="action-btn checkin"
+                                                            style={{ backgroundColor: '#10b981', color: 'white' }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenCheckIn(item);
+                                                            }}
+                                                        >
+                                                            <FiCheckCircle /> <span>Check In</span>
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.credentials.edit') && (
+                                                        <button
+                                                            className="action-btn edit"
+                                                            onClick={() => handleEditClick(item.id)}
+                                                        >
+                                                            <FiEdit2 /> <span>Edit</span>
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.credentials.delete') && (
+                                                        <button
+                                                            className="action-btn delete"
+                                                            onClick={() => handleDeleteClick(item)}
+                                                        >
+                                                            <FiTrash2 /> <span>Delete</span>
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>

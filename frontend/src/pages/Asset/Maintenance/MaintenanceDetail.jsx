@@ -90,6 +90,7 @@ const MaintenanceDetail = () => {
             case 'requests': return <span className="badge badge-info">Requests</span>;
             case 'in_progress': return <span className="badge badge-primary">In Progress</span>;
             case 'completed': return <span className="badge badge-success">Completed</span>;
+            case 'cancelled': return <span className="badge badge-danger">Cancelled</span>;
             default: return <span className="badge">{status}</span>;
         }
     };

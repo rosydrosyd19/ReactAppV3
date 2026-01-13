@@ -181,25 +181,25 @@ const CredentialDetail = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    {hasPermission('asset.credentials.manage') && (
-                        <>
-                            {credential.status === 'available' && (
-                                <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
-                                    <FiLogOut /> <span>Check Out</span>
-                                </button>
-                            )}
-                            {credential.status !== 'available' && (
-                                <button className="btn btn-warning" onClick={() => setShowCheckInModal(true)} title="Check In">
-                                    <FiCheckCircle /> <span>Check In</span>
-                                </button>
-                            )}
-                            <button className="btn btn-outline" onClick={() => setShowEditModal(true)} title="Edit">
-                                <FiEdit2 /> <span>Edit</span>
-                            </button>
-                            <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
-                                <FiTrash2 /> <span>Delete</span>
-                            </button>
-                        </>
+                    {credential.status === 'available' && hasPermission('asset.credentials.checkout') && (
+                        <button className="btn btn-primary" onClick={() => setShowCheckOutModal(true)} title="Check Out">
+                            <FiLogOut /> <span>Check Out</span>
+                        </button>
+                    )}
+                    {credential.status !== 'available' && hasPermission('asset.credentials.checkin') && (
+                        <button className="btn btn-warning" onClick={() => setShowCheckInModal(true)} title="Check In">
+                            <FiCheckCircle /> <span>Check In</span>
+                        </button>
+                    )}
+                    {hasPermission('asset.credentials.edit') && (
+                        <button className="btn btn-outline" onClick={() => setShowEditModal(true)} title="Edit">
+                            <FiEdit2 /> <span>Edit</span>
+                        </button>
+                    )}
+                    {hasPermission('asset.credentials.delete') && (
+                        <button className="btn btn-danger" onClick={handleDeleteClick} title="Delete">
+                            <FiTrash2 /> <span>Delete</span>
+                        </button>
                     )}
                 </div>
             </div>

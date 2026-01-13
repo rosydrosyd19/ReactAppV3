@@ -411,13 +411,31 @@ INSERT INTO sysadmin_permissions (module_name, permission_name, permission_key, 
 ('asset', 'Delete Assets', 'asset.items.delete', 'Delete assets'),
 ('asset', 'Checkout Assets', 'asset.items.checkout', 'Checkout assets to users'),
 ('asset', 'Checkin Assets', 'asset.items.checkin', 'Checkin assets from users'),
-('asset', 'Manage Categories', 'asset.categories.manage', 'Manage asset categories'),
-('asset', 'Manage Locations', 'asset.locations.manage', 'Manage locations'),
-('asset', 'Manage Suppliers', 'asset.suppliers.manage', 'Manage suppliers'),
+('asset', 'View Categories', 'asset.categories.view', 'View asset categories'),
+('asset', 'Create Categories', 'asset.categories.create', 'Create asset categories'),
+('asset', 'Edit Categories', 'asset.categories.edit', 'Edit asset categories'),
+('asset', 'Delete Categories', 'asset.categories.delete', 'Delete asset categories'),
+
+('asset', 'View Locations', 'asset.locations.view', 'View asset locations'),
+('asset', 'Create Locations', 'asset.locations.create', 'Create asset locations'),
+('asset', 'Edit Locations', 'asset.locations.edit', 'Edit asset locations'),
+('asset', 'Delete Locations', 'asset.locations.delete', 'Delete asset locations'),
+
+('asset', 'View Suppliers', 'asset.suppliers.view', 'View asset suppliers'),
+('asset', 'Create Suppliers', 'asset.suppliers.create', 'Create asset suppliers'),
+('asset', 'Edit Suppliers', 'asset.suppliers.edit', 'Edit asset suppliers'),
+('asset', 'Delete Suppliers', 'asset.suppliers.delete', 'Delete asset suppliers'),
 ('asset', 'View Maintenance', 'asset.maintenance.view', 'View maintenance records'),
 ('asset', 'Manage Maintenance', 'asset.maintenance.manage', 'Create and edit maintenance records'),
 ('asset', 'Manage Components', 'asset.components.manage', 'Manage components and spare parts'),
-('asset', 'Manage Licenses', 'asset.licenses.manage', 'Manage software licenses')
+('asset', 'Manage Licenses', 'asset.licenses.manage', 'Manage software licenses'),
+
+('asset', 'View Credentials', 'asset.credentials.view', 'View credentials'),
+('asset', 'Create Credentials', 'asset.credentials.create', 'Create credentials'),
+('asset', 'Edit Credentials', 'asset.credentials.edit', 'Edit credentials'),
+('asset', 'Delete Credentials', 'asset.credentials.delete', 'Delete credentials'),
+('asset', 'Checkout Credentials', 'asset.credentials.checkout', 'Checkout credentials'),
+('asset', 'Checkin Credentials', 'asset.credentials.checkin', 'Checkin credentials')
 ON DUPLICATE KEY UPDATE permission_key=permission_key;
 
 -- Assign all permissions to Super Admin role

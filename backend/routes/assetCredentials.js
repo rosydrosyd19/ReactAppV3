@@ -261,7 +261,7 @@ router.get('/:id', authenticateToken, checkPermission('asset.credentials.view'),
 });
 
 // Create credential
-router.post('/', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.post('/', authenticateToken, checkPermission('asset.credentials.create'), async (req, res) => {
     try {
         const { platform_name, username, password, url, category, description, is_public } = req.body;
 
@@ -287,7 +287,7 @@ router.post('/', authenticateToken, checkPermission('asset.credentials.manage'),
 });
 
 // Update credential
-router.put('/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.put('/:id', authenticateToken, checkPermission('asset.credentials.edit'), async (req, res) => {
     try {
         const { platform_name, username, password, url, category, description, is_public } = req.body;
 
@@ -309,7 +309,7 @@ router.put('/:id', authenticateToken, checkPermission('asset.credentials.manage'
 });
 
 // Delete credential
-router.delete('/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.delete('/:id', authenticateToken, checkPermission('asset.credentials.delete'), async (req, res) => {
     try {
         await db.query('UPDATE asset_credentials SET is_deleted = TRUE WHERE id = ?', [req.params.id]);
         res.json({ success: true, message: 'Credential deleted successfully' });
@@ -320,7 +320,7 @@ router.delete('/:id', authenticateToken, checkPermission('asset.credentials.mana
 });
 
 // Check-out credential
-router.post('/:id/checkout', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.post('/:id/checkout', authenticateToken, checkPermission('asset.credentials.checkout'), async (req, res) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
@@ -405,7 +405,7 @@ router.post('/:id/checkout', authenticateToken, checkPermission('asset.credentia
 });
 
 // Check-in credential
-router.post('/:id/checkin', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.post('/:id/checkin', authenticateToken, checkPermission('asset.credentials.checkin'), async (req, res) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();

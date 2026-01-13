@@ -33,7 +33,7 @@ const ModuleSelection = () => {
             description: 'Manage assets, components, licenses, and consumables',
             icon: <FiBox />,
             path: '/asset/dashboard',
-            show: hasModule('asset') || hasAnyPermission(['VIEW_ASSETS', 'MANAGE_ASSETS']) || true
+            show: hasModule('asset') || hasAnyPermission(['VIEW_ASSETS', 'MANAGE_ASSETS'])
         },
         {
             id: 'sysadmin',
