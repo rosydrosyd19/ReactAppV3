@@ -59,7 +59,7 @@ router.get('/categories/:id', authenticateToken, async (req, res) => {
 });
 
 // Create credential category
-router.post('/categories', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.post('/categories', authenticateToken, checkPermission('asset.credential_categories.create'), async (req, res) => {
     try {
         const { category_name, description } = req.body;
 
@@ -81,7 +81,7 @@ router.post('/categories', authenticateToken, checkPermission('asset.credentials
 });
 
 // Update credential category
-router.put('/categories/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.put('/categories/:id', authenticateToken, checkPermission('asset.credential_categories.edit'), async (req, res) => {
     try {
         const { category_name, description } = req.body;
         const { id } = req.params;
@@ -105,7 +105,7 @@ router.put('/categories/:id', authenticateToken, checkPermission('asset.credenti
 });
 
 // Delete credential category
-router.delete('/categories/:id', authenticateToken, checkPermission('asset.credentials.manage'), async (req, res) => {
+router.delete('/categories/:id', authenticateToken, checkPermission('asset.credential_categories.delete'), async (req, res) => {
     try {
         const { id } = req.params;
 

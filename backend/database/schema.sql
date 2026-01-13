@@ -435,7 +435,11 @@ INSERT INTO sysadmin_permissions (module_name, permission_name, permission_key, 
 ('asset', 'Edit Credentials', 'asset.credentials.edit', 'Edit credentials'),
 ('asset', 'Delete Credentials', 'asset.credentials.delete', 'Delete credentials'),
 ('asset', 'Checkout Credentials', 'asset.credentials.checkout', 'Checkout credentials'),
-('asset', 'Checkin Credentials', 'asset.credentials.checkin', 'Checkin credentials')
+('asset', 'Checkin Credentials', 'asset.credentials.checkin', 'Checkin credentials'),
+('asset', 'View Credential Categories', 'asset.credential_categories.view', 'View credential categories'),
+('asset', 'Create Credential Categories', 'asset.credential_categories.create', 'Create credential categories'),
+('asset', 'Edit Credential Categories', 'asset.credential_categories.edit', 'Edit credential categories'),
+('asset', 'Delete Credential Categories', 'asset.credential_categories.delete', 'Delete credential categories')
 ON DUPLICATE KEY UPDATE permission_key=permission_key;
 
 -- Assign all permissions to Super Admin role

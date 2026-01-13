@@ -133,12 +133,16 @@ const CredentialCategoryDetail = () => {
 
                 {/* Actions */}
                 <div className="header-actions">
-                    <button className="btn btn-outline" onClick={handleEditClick}>
-                        <FiEdit2 /> Edit
-                    </button>
-                    <button className="btn btn-danger" onClick={handleDeleteClick}>
-                        <FiTrash2 /> Delete
-                    </button>
+                    {hasPermission('asset.credential_categories.edit') && (
+                        <button className="btn btn-outline" onClick={handleEditClick}>
+                            <FiEdit2 /> Edit
+                        </button>
+                    )}
+                    {hasPermission('asset.credential_categories.delete') && (
+                        <button className="btn btn-danger" onClick={handleDeleteClick}>
+                            <FiTrash2 /> Delete
+                        </button>
+                    )}
                 </div>
             </div>
 

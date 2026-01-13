@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 import axios from '../../../utils/axios';
 import { FiX, FiSave, FiEye, FiEyeOff, FiPlus } from 'react-icons/fi';
 import SearchableSelect from '../../../components/Form/SearchableSelect';
@@ -21,6 +22,7 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId, cloneId }) 
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const { hasPermission } = useAuth();
 
     useEffect(() => {
         if (isOpen) {
@@ -178,15 +180,17 @@ const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId, cloneId }) 
                                                 required
                                             />
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline btn-quick-add"
-                                            style={{ height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '42px', padding: '0' }}
-                                            onClick={() => setShowQuickCategory(true)}
-                                            title="Add New Category"
-                                        >
-                                            <FiPlus />
-                                        </button>
+                                        {hasPermission('asset.credential_categories.create') && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline btn-quick-add"
+                                                style={{ height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '42px', padding: '0' }}
+                                                onClick={() => setShowQuickCategory(true)}
+                                                title="Add New Category"
+                                            >
+                                                <FiPlus />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

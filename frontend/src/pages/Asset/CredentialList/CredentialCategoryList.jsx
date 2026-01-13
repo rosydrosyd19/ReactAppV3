@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import axios from '../../../utils/axios';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFolder, FiLock, FiChevronDown, FiEye } from 'react-icons/fi';
 import Toast from '../../../components/Toast/Toast';
@@ -18,6 +19,7 @@ const CredentialCategoryList = () => {
     const [categoryToDelete, setCategoryToDelete] = useState(null);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
     const [expandedItemId, setExpandedItemId] = useState(null);
+    const { hasPermission } = useAuth();
 
     const toggleMobileItem = (id) => {
         setExpandedItemId(expandedItemId === id ? null : id);
@@ -93,9 +95,11 @@ const CredentialCategoryList = () => {
                     <h1>Credential Categories</h1>
                     <p>Manage categories for digital assets and credentials</p>
                 </div>
-                <button className="btn btn-primary" onClick={handleAdd}>
-                    <FiPlus /> Add Category
-                </button>
+                {hasPermission('asset.credential_categories.create') && (
+                    <button className="btn btn-primary" onClick={handleAdd}>
+                        <FiPlus /> Add Category
+                    </button>
+                )}
             </div>
 
             <div className="card">
@@ -157,20 +161,24 @@ const CredentialCategoryList = () => {
                                                     >
                                                         <FiEye />
                                                     </button>
-                                                    <button
-                                                        className="btn-icon"
-                                                        onClick={() => handleEdit(category)}
-                                                        title="Edit"
-                                                    >
-                                                        <FiEdit2 />
-                                                    </button>
-                                                    <button
-                                                        className="btn-icon btn-danger"
-                                                        onClick={() => handleDeleteClick(category)}
-                                                        title="Delete"
-                                                    >
-                                                        <FiTrash2 />
-                                                    </button>
+                                                    {hasPermission('asset.credential_categories.edit') && (
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => handleEdit(category)}
+                                                            title="Edit"
+                                                        >
+                                                            <FiEdit2 />
+                                                        </button>
+                                                    )}
+                                                    {hasPermission('asset.credential_categories.delete') && (
+                                                        <button
+                                                            className="btn-icon btn-danger"
+                                                            onClick={() => handleDeleteClick(category)}
+                                                            title="Delete"
+                                                        >
+                                                            <FiTrash2 />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -223,18 +231,22 @@ const CredentialCategoryList = () => {
                                         </div>
                                     )}
                                     <div className="mobile-actions">
-                                        <button
-                                            className="action-btn edit"
-                                            onClick={() => handleEdit(category)}
-                                        >
-                                            <FiEdit2 /> <span>Edit</span>
-                                        </button>
-                                        <button
-                                            className="action-btn delete"
-                                            onClick={() => handleDeleteClick(category)}
-                                        >
-                                            <FiTrash2 /> <span>Delete</span>
-                                        </button>
+                                        {hasPermission('asset.credential_categories.edit') && (
+                                            <button
+                                                className="action-btn edit"
+                                                onClick={() => handleEdit(category)}
+                                            >
+                                                <FiEdit2 /> <span>Edit</span>
+                                            </button>
+                                        )}
+                                        {hasPermission('asset.credential_categories.delete') && (
+                                            <button
+                                                className="action-btn delete"
+                                                onClick={() => handleDeleteClick(category)}
+                                            >
+                                                <FiTrash2 /> <span>Delete</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}

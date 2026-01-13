@@ -237,7 +237,7 @@ function App() {
                 <Route
                   path="credential-categories"
                   element={
-                    <PermissionRoute permission="asset.credentials.manage">
+                    <PermissionRoute permission="asset.credential_categories.view">
                       <CredentialCategoryList />
                     </PermissionRoute>
                   }
@@ -245,7 +245,7 @@ function App() {
                 <Route
                   path="credential-categories/:id"
                   element={
-                    <PermissionRoute permission="asset.credentials.manage">
+                    <PermissionRoute permission="asset.credential_categories.view">
                       <CredentialCategoryDetail />
                     </PermissionRoute>
                   }

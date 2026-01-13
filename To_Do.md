@@ -1,5 +1,7 @@
 Lakukan ketika up ke server
+add_credential_category_permissions.js
 
+pada setiap module buatkan icon untuk masuk ke halaman pribadi saya.
 **Sysadmin Module**
 
 **Asser Module**

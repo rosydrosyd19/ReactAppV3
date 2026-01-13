@@ -113,7 +113,7 @@ export const useMenu = () => {
                     title: 'Credential Categories',
                     path: '/asset/credential-categories',
                     icon: <FiShield />,
-                    show: hasPermission('asset.credentials.manage'), // Keep manage for now as requested only for others? Or did I miss credential categories in user request? User said "Asset Categories, Asset Locations, Asset Suppliers and Maintenance". Didn't say Credential Categories. I'll stick to request.
+                    show: hasPermission('asset.credential_categories.view'),
                     group: 'Master',
                 },
                 {
