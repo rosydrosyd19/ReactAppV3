@@ -1167,11 +1167,16 @@ router.post('/maintenance', checkPermission('asset.maintenance.create'), upload.
             cost, description, next_maintenance_date, status
         } = req.body;
 
+        const maintenance_date_val = maintenance_date || null;
+        const performed_by_val = performed_by || null;
+        const cost_val = cost || null;
+        const next_maintenance_date_val = next_maintenance_date || null;
+
         const result = await db.query(
             `INSERT INTO asset_maintenance 
        (asset_id, maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date, status, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [asset_id, maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date || null, status, req.user.id]
+            [asset_id, maintenance_type, maintenance_date_val, performed_by_val, cost_val, description, next_maintenance_date_val, status, req.user.id]
         );
 
         const maintenanceId = Number(result.insertId);
@@ -1252,12 +1257,17 @@ router.put('/maintenance/:id', checkPermission('asset.maintenance.edit'), upload
             return res.status(404).json({ success: false, message: 'Maintenance record not found' });
         }
 
+        const maintenance_date_val = maintenance_date || null;
+        const performed_by_val = performed_by || null;
+        const cost_val = cost || null;
+        const next_maintenance_date_val = next_maintenance_date || null;
+
         await db.query(
             `UPDATE asset_maintenance 
        SET maintenance_type = ?, maintenance_date = ?, performed_by = ?, cost = ?, 
            description = ?, next_maintenance_date = ?, status = ?
        WHERE id = ?`,
-            [maintenance_type, maintenance_date, performed_by, cost, description, next_maintenance_date || null, status, req.params.id]
+            [maintenance_type, maintenance_date_val, performed_by_val, cost_val, description, next_maintenance_date_val, status, req.params.id]
         );
 
         // Handle Image Deletions
