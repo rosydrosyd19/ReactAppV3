@@ -1,13 +1,13 @@
-import Pagination from '../../components/Pagination/Pagination';
 import './UserList.css';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from '../../utils/axios';
-import { useAuth } from '../../contexts/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../../../utils/axios';
+import { useAuth } from '../../../contexts/AuthContext';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
-import ConfirmationModal from '../../components/Modal/ConfirmationModal';
-import Toast from '../../components/Toast/Toast';
+import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
+import Toast from '../../../components/Toast/Toast';
+import Pagination from '../../../components/Pagination/Pagination';
 import {
     FiPlus,
     FiSearch,
@@ -55,7 +55,7 @@ const UserList = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/sysadmin/users');
+            const response = await api.get('/sysadmin/users');
             if (response.data.success) {
                 setUsers(response.data.data);
             }
@@ -75,7 +75,7 @@ const UserList = () => {
     const confirmDelete = async () => {
         try {
             setLoading(true); // Or use specific loading state for modal
-            const response = await axios.delete(`/sysadmin/users/${selectedUserId}`);
+            const response = await api.delete(`/sysadmin/users/${selectedUserId}`);
             if (response.data.success) {
                 setToastMessage('User successfully deleted');
                 setShowToast(true);

@@ -4,7 +4,7 @@ import { FiX, FiSave, FiTool, FiUpload, FiImage, FiTrash, FiCamera } from 'react
 import SearchableSelect from '../../../components/Form/SearchableSelect';
 import imageCompression from 'browser-image-compression';
 import CameraModal from '../../../components/Camera/CameraModal';
-import '../AssetList/AssetModal.css'; // Reuse styles from AssetList
+import '../Assets/AssetModal.css'; // Reuse styles from Assets
 
 const MaintenanceModal = ({ isOpen, onClose, onSuccess, maintenance = null }) => {
     const isEditMode = !!maintenance;

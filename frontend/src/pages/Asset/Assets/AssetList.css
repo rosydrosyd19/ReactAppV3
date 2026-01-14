@@ -2,6 +2,28 @@
     max-width: 1400px;
 }
 
+.bulk-actions-bar {
+    background: var(--bg-primary);
+    /* Changed to use primary/accent color background */
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: var(--primary-color);
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Space between count and buttons */
+    gap: 15px;
+    margin-bottom: 1.5rem;
+}
+
+.bulk-actions-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -21,25 +43,27 @@
     font-size: 14px;
 }
 
+/* Filters Bar Refinement */
 .filters-bar {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .search-form {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
     flex: 1;
+    /* Allow it to grow and fill available space */
     min-width: 300px;
+    /* Ensure it doesn't get too small */
 }
 
 .search-form .input-with-icon {
-    flex: 1;
-    position: relative;
-    display: flex;
-    align-items: center;
+    width: 100%;
 }
 
 .search-form .input-with-icon svg {
@@ -53,19 +77,71 @@
     padding-left: 40px;
 }
 
+/* Filter Groups - Strict Row Layout */
 .filter-group {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: row !important;
+    /* Force row */
+    align-items: center !important;
+    /* Force center alignment */
+    flex-wrap: nowrap !important;
+    /* Prevent wrapping inside group */
+    gap: 12px;
+    background-color: var(--bg-secondary);
+    /* Hint of background for grouping */
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    /* Subtle border */
+    height: 42px;
+    /* Fixed height for alignment */
 }
 
 .filter-group svg {
     color: var(--text-secondary);
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .filter-group .form-select {
     min-width: 150px;
+    max-width: 200px;
+    border: none;
+    /* Remove border from select since container has it */
+    background: transparent;
+    padding: 0;
+    height: 100%;
+}
+
+.filter-group .form-select:focus {
+    box-shadow: none;
+}
+
+.qr-filter-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.qr-filter-inputs input {
+    width: 60px;
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    height: 30px;
+    text-align: center;
+    background: var(--bg-color);
+    /* Ensure white/dark input bg */
+}
+
+.qr-filter-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    margin-right: -4px;
+    /* Slight visual adjustment */
 }
 
 .loading-container {

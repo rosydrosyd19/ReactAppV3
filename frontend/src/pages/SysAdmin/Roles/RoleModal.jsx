@@ -1,7 +1,7 @@
 import './RoleModal.css';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiX, FiSave, FiCheckSquare } from 'react-icons/fi';
-import axios from '../../utils/axios';
+import api from '../../../utils/axios';
 
 const RoleModal = ({ isOpen, onClose, onSuccess, role = null }) => {
     const [formData, setFormData] = useState({
@@ -36,7 +36,7 @@ const RoleModal = ({ isOpen, onClose, onSuccess, role = null }) => {
     const fetchPermissions = async () => {
         try {
             setFetchingPerms(true);
-            const response = await axios.get('/sysadmin/permissions');
+            const response = await api.get('/sysadmin/permissions');
             if (response.data.success) {
                 setAllPermissions(response.data.data);
             }
@@ -51,7 +51,7 @@ const RoleModal = ({ isOpen, onClose, onSuccess, role = null }) => {
     const fetchRoleDetails = async (roleId) => {
         try {
             setLoading(true);
-            const response = await axios.get(`/sysadmin/roles/${roleId}`);
+            const response = await api.get(`/sysadmin/roles/${roleId}`);
             if (response.data.success) {
                 const roleData = response.data.data;
                 setFormData({
@@ -126,10 +126,10 @@ const RoleModal = ({ isOpen, onClose, onSuccess, role = null }) => {
         try {
             if (role) {
                 // Update
-                await axios.put(`/sysadmin/roles/${role.id}`, formData);
+                await api.put(`/sysadmin/roles/${role.id}`, formData);
             } else {
                 // Create
-                await axios.post('/sysadmin/roles', formData);
+                await api.post('/sysadmin/roles', formData);
             }
             onSuccess();
             handleClose();

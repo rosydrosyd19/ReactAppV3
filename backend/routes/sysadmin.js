@@ -499,6 +499,19 @@ router.get('/logs', checkPermission('sysadmin.logs.view'), async (req, res) => {
             params.push(`%${action}%`);
         }
 
+        if (req.query.search) {
+            const search = req.query.search;
+            query += ` AND (
+                l.action LIKE ? OR 
+                l.module LIKE ? OR 
+                l.details LIKE ? OR 
+                l.ip_address LIKE ? OR
+                u.username LIKE ?
+            )`;
+            const searchParam = `%${search}%`;
+            params.push(searchParam, searchParam, searchParam, searchParam, searchParam);
+        }
+
         query += ' ORDER BY l.created_at DESC LIMIT ? OFFSET ?';
         params.push(parseInt(limit), parseInt(offset));
 
@@ -508,6 +521,27 @@ router.get('/logs', checkPermission('sysadmin.logs.view'), async (req, res) => {
     } catch (error) {
         console.error('Get logs error:', error);
         res.status(500).json({ success: false, message: 'Error fetching logs' });
+    }
+});
+
+// Get single activity log
+router.get('/logs/:id', checkPermission('sysadmin.logs.view'), async (req, res) => {
+    try {
+        const [log] = await db.query(`
+            SELECT l.*, u.username, u.full_name, u.email
+            FROM sysadmin_activity_logs l
+            LEFT JOIN sysadmin_users u ON l.user_id = u.id
+            WHERE l.id = ?
+        `, [req.params.id]);
+
+        if (!log) {
+            return res.status(404).json({ success: false, message: 'Log not found' });
+        }
+
+        res.json({ success: true, data: log });
+    } catch (error) {
+        console.error('Get log detail error:', error);
+        res.status(500).json({ success: false, message: 'Error fetching log details' });
     }
 });
 
@@ -647,6 +681,27 @@ router.post('/settings/send-test-whatsapp', checkPermission('sysadmin.settings.m
             success: false,
             message: 'Failed to send message: ' + (error.response?.data?.message || error.message)
         });
+    }
+});
+
+// Manual Cleanup Logs
+router.delete('/logs/cleanup', checkPermission('sysadmin.logs.view'), async (req, res) => {
+    try {
+        const days = 100; // Retention period
+        const result = await db.query(
+            'DELETE FROM sysadmin_activity_logs WHERE created_at < NOW() - INTERVAL ? DAY',
+            [days]
+        );
+
+        await logActivity(req.user.id, 'CLEANUP_LOGS', 'sysadmin', 'logs', null, { deleted_count: result.affectedRows }, req);
+
+        res.json({
+            success: true,
+            message: `Cleanup successful. Deleted ${result.affectedRows} logs older than ${days} days.`
+        });
+    } catch (error) {
+        console.error('Cleanup logs error:', error);
+        res.status(500).json({ success: false, message: 'Error cleaning up logs' });
     }
 });
 

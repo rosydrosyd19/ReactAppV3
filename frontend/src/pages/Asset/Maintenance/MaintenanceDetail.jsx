@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import '../../SysAdmin/UserDetail.css';
-import '../AssetDetail/AssetDetail.css';
+import '../../SysAdmin/Users/UserDetail.css';
+import '../Assets/AssetDetail.css';
 import './MaintenanceDetail.css';
 import axios from '../../../utils/axios';
 import { FiArrowLeft, FiTool, FiCalendar, FiDollarSign, FiUser, FiInfo, FiEdit2, FiClock, FiEye, FiImage, FiTrash2 } from 'react-icons/fi';

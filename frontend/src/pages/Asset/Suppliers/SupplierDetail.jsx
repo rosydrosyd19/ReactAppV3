@@ -8,25 +8,26 @@ import {
     FiTrash2,
     FiBox,
     FiDollarSign,
-    FiGrid,
-    FiSearch,
     FiEye,
-    FiMapPin
+    FiTruck,
+    FiPhone,
+    FiMail,
+    FiGlobe
 } from 'react-icons/fi';
-import LocationModal from './LocationModal';
+import SupplierModal from './SupplierModal';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
-import '../../SysAdmin/UserDetail.css'; // Import shared detail styles
-import './LocationDetail.css';
+import '../../SysAdmin/Users/UserDetail.css'; // Import shared detail styles
+import './SupplierDetail.css';
 
-const LocationDetail = () => {
+const SupplierDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
     const { hasPermission } = useAuth();
 
     // Data states
-    const [locationData, setLocationData] = useState(null);
+    const [supplierData, setSupplierData] = useState(null);
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -38,20 +39,37 @@ const LocationDetail = () => {
     const [toastMessage, setToastMessage] = useState('');
 
     useEffect(() => {
-        fetchLocationData();
+        fetchSupplierData();
     }, [id]);
 
-    const fetchLocationData = async () => {
+    const fetchSupplierData = async () => {
         try {
             setLoading(true);
-            // Fetch location details
-            const locRes = await axios.get(`/asset/locations/${id}`);
-            if (!locRes.data.success) throw new Error('Failed to load location');
-            setLocationData(locRes.data.data);
+            // Fetch supplier details - finding from list first or adding endpoint?
+            // Usually we have GET /asset/suppliers/:id. Let's assume it exists or use list filtering if not?
+            // The list uses GET /asset/suppliers. Backend might not have detail endpoint yet.
+            // Let's check if GET /asset/suppliers/:id exists. If not, we fetch all and find.
+            // Based on routes/asset.js I saw earlier, there was GET /suppliers, POST, PUT, DELETE.
+            // I probably need to add GET /suppliers/:id to backend if it's missing, OR just filter from list.
+            // Filtering from list is safer if I'm not sure about backend changes.
+            // But efficient way is ID. Let's try to query with ID.
 
-            // Fetch assets in this location
+            // Actually, let's verify backend routes first or assume I can add it.
+            // The backend I viewed earlier had:
+            // router.get('/suppliers', ...)
+            // router.post('/suppliers', ...)
+            // router.put('/suppliers/:id', ...)
+            // router.delete('/suppliers/:id', ...)
+            // It MISSING GET /suppliers/:id.
+
+            // I will implement GET /suppliers/:id on backend as well.
+            const supRes = await axios.get(`/asset/suppliers/${id}`);
+            if (!supRes.data.success) throw new Error('Failed to load supplier');
+            setSupplierData(supRes.data.data);
+
+            // Fetch assets supplied by this supplier
             const assetsRes = await axios.get(`/asset/assets`, {
-                params: { location_id: id }
+                params: { supplier_id: id }
             });
             if (assetsRes.data.success) {
                 setAssets(assetsRes.data.data);
@@ -74,24 +92,23 @@ const LocationDetail = () => {
 
     const confirmDelete = async () => {
         try {
-            await axios.delete(`/asset/locations/${id}`);
-            setToastMessage('Location deleted successfully');
+            await axios.delete(`/asset/suppliers/${id}`);
+            setToastMessage('Supplier deleted successfully');
             setShowToast(true);
             setTimeout(() => {
-                navigate('/asset/locations');
+                navigate('/asset/suppliers');
             }, 1000);
         } catch (error) {
-            console.error('Error deleting location:', error);
-            // Optionally show error toast
+            console.error('Error deleting supplier:', error);
         } finally {
             setShowDeleteModal(false);
         }
     };
 
     const handleEditSuccess = () => {
-        setToastMessage('Location updated successfully');
+        setToastMessage('Supplier updated successfully');
         setShowToast(true);
-        fetchLocationData();
+        fetchSupplierData();
         setShowEditModal(false);
     };
 
@@ -103,83 +120,130 @@ const LocationDetail = () => {
         </div>
     );
 
-    if (error || !locationData) return (
+    if (error || !supplierData) return (
         <div className="user-detail">
             <div className="error-container">
                 <h3>Error</h3>
-                <p>{error || 'Location not found'}</p>
-                <button className="btn btn-primary" onClick={() => navigate('/asset/locations')}>
+                <p>{error || 'Supplier not found'}</p>
+                <button className="btn btn-primary" onClick={() => navigate('/asset/suppliers')}>
                     <FiArrowLeft /> Back
                 </button>
             </div>
         </div>
     );
 
-    // Calculate total value
+    // Calculate total value of supplied assets
     const totalValue = assets.reduce((sum, asset) => sum + (Number(asset.purchase_cost) || 0), 0);
 
     return (
-        <div className="user-detail location-detail-override">
+        <div className="user-detail supplier-detail-override">
             {/* Header */}
             <div className="page-header">
                 <div className="header-left">
-                    <button className="btn btn-outline" onClick={() => navigate('/asset/locations')}>
+                    <button className="btn btn-outline" onClick={() => navigate('/asset/suppliers')}>
                         <FiArrowLeft /> <span>Back</span>
                     </button>
                     <div>
                         <h1>
-                            <FiMapPin className="text-primary" style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
-                            {locationData.location_name}
-                            <span className="location-code-badge" style={{ marginLeft: '10px', fontSize: '0.9rem', verticalAlign: 'middle' }}>{locationData.location_code}</span>
+                            <FiTruck className="text-primary" style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                            {supplierData.supplier_name}
                         </h1>
-                        <p>{[locationData.address, locationData.city, locationData.state, locationData.country].filter(Boolean).join(', ') || 'No address details'}</p>
-                        {locationData.parent_location_name && (
-                            <p style={{ fontSize: '13px', marginTop: '4px' }}>
-                                Parent: <strong>{locationData.parent_location_name}</strong>
-                            </p>
-                        )}
+                        <p>
+                            {[
+                                supplierData.contact_person,
+                                supplierData.city
+                            ].filter(Boolean).join(' • ') || 'Supplier Details'}
+                        </p>
                     </div>
                 </div>
 
                 {/* Actions */}
                 <div className="header-actions">
-                    <button className="btn btn-outline" onClick={handleEditClick}>
-                        <FiEdit2 /> <span>Edit</span>
-                    </button>
-                    <button className="btn btn-danger" onClick={handleDeleteClick}>
-                        <FiTrash2 /> <span>Delete</span>
-                    </button>
+                    {hasPermission('asset.suppliers.manage') && (
+                        <>
+                            <button className="btn btn-outline" onClick={handleEditClick}>
+                                <FiEdit2 /> <span>Edit</span>
+                            </button>
+                            <button className="btn btn-danger" onClick={handleDeleteClick}>
+                                <FiTrash2 /> <span>Delete</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
             <div className="detail-content">
-                {/* Stats Overview */}
-                <div className="location-stats-grid">
-                    <div className="location-stat-card">
-                        <div className="location-stat-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6' }}>
+                {/* Contact Info Cards */}
+                <div className="supplier-stats-grid">
+                    <div className="supplier-stat-card">
+                        <div className="supplier-stat-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6' }}>
                             <FiBox />
                         </div>
-                        <div className="location-stat-info">
-                            <h3>Total Assets</h3>
+                        <div className="supplier-stat-info">
+                            <h3>Assets Supplied</h3>
                             <p>{assets.length}</p>
                         </div>
                     </div>
 
-                    <div className="location-stat-card">
-                        <div className="location-stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
+                    <div className="supplier-stat-card">
+                        <div className="supplier-stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
                             <FiDollarSign />
                         </div>
-                        <div className="location-stat-info">
+                        <div className="supplier-stat-info">
                             <h3>Total Value</h3>
                             <p>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(totalValue)}</p>
                         </div>
                     </div>
                 </div>
 
+                {/* Info Grid */}
+                <div className="card" style={{ marginBottom: '2rem' }}>
+                    <div className="card-header">
+                        <h2>Contact Information</h2>
+                    </div>
+                    <div className="card-body" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                        <div>
+                            <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Contact Person</label>
+                            <div style={{ fontWeight: '500' }}>{supplierData.contact_person || '-'}</div>
+                        </div>
+                        <div>
+                            <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Email</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <FiMail className="text-secondary" />
+                                {supplierData.email ? <a href={`mailto:${supplierData.email}`} style={{ color: 'var(--primary-color)' }}>{supplierData.email}</a> : '-'}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Phone</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <FiPhone className="text-secondary" />
+                                {supplierData.phone || '-'}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Website</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <FiGlobe className="text-secondary" />
+                                {supplierData.website ? <a href={supplierData.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)' }}>{supplierData.website}</a> : '-'}
+                            </div>
+                        </div>
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Address</label>
+                            <div>{supplierData.address || '-'}</div>
+                        </div>
+                        {supplierData.notes && (
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label className="form-label" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Notes</label>
+                                <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>{supplierData.notes}</div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* Assets List Table */}
                 <div className="card">
                     <div className="card-header">
-                        <h2><FiBox /> Assets in this Location</h2>
+                        <h2><FiBox /> Supplied Assets</h2>
                     </div>
                     <div className="card-body">
                         <div className="table-responsive assets-table-wrapper">
@@ -190,7 +254,7 @@ const LocationDetail = () => {
                                         <th>Name</th>
                                         <th>Model</th>
                                         <th>Status</th>
-                                        <th>Assigned To</th>
+                                        <th>Location</th>
                                         <th>Cost</th>
                                         <th>Actions</th>
                                     </tr>
@@ -199,9 +263,7 @@ const LocationDetail = () => {
                                     {assets.length > 0 ? (
                                         assets.map(asset => (
                                             <tr key={asset.id}>
-                                                <td>
-                                                    {asset.asset_tag}
-                                                </td>
+                                                <td>{asset.asset_tag}</td>
                                                 <td>{asset.asset_name}</td>
                                                 <td>{asset.model || '-'}</td>
                                                 <td>
@@ -209,7 +271,7 @@ const LocationDetail = () => {
                                                         {asset.status}
                                                     </span>
                                                 </td>
-                                                <td>{asset.assigned_to_username || asset.assigned_to_asset_name || '-'}</td>
+                                                <td>{asset.location_name || '-'}</td>
                                                 <td>
                                                     {asset.purchase_cost
                                                         ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(asset.purchase_cost)
@@ -232,7 +294,7 @@ const LocationDetail = () => {
                                         <tr>
                                             <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
                                                 <FiBox style={{ fontSize: '2rem', marginBottom: '0.5rem', display: 'block', margin: '0 auto 0.5rem' }} />
-                                                No assets found in this location
+                                                No assets found for this supplier
                                             </td>
                                         </tr>
                                     )}
@@ -266,9 +328,9 @@ const LocationDetail = () => {
                                                         : '-'}
                                                 </span>
                                             </div>
-                                            {asset.assigned_to_username && (
+                                            {asset.location_name && (
                                                 <div className="mobile-info-row">
-                                                    <FiArrowLeft className="text-secondary" /> <span>{asset.assigned_to_username}</span>
+                                                    <FiArrowLeft className="text-secondary" /> <span>{asset.location_name}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -288,7 +350,7 @@ const LocationDetail = () => {
                             ) : (
                                 <div className="empty-state">
                                     <FiBox />
-                                    <p>No assets found in this location</p>
+                                    <p>No assets found for this supplier</p>
                                 </div>
                             )}
                         </div>
@@ -296,19 +358,19 @@ const LocationDetail = () => {
                 </div>
             </div>
 
-            <LocationModal
+            <SupplierModal
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 onSuccess={handleEditSuccess}
-                location={locationData}
+                supplier={supplierData}
             />
 
             <ConfirmationModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={confirmDelete}
-                title="Delete Location"
-                message={`Are you sure you want to delete "${locationData.location_name}"?`}
+                title="Delete Supplier"
+                message={`Are you sure you want to delete "${supplierData.supplier_name}"?`}
                 confirmText="Delete"
                 type="danger"
             />
@@ -324,4 +386,4 @@ const LocationDetail = () => {
     );
 };
 
-export default LocationDetail;
+export default SupplierDetail;

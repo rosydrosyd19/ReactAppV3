@@ -1,8 +1,12 @@
-Lakukan ketika up ke server
-add_credential_category_permissions.js
+## NB : Bila ada tampilan yang tidak berkenan karna terlalu panjang saran untuk di ubah "Menggunakan layout 2 kolom"
 
-pada setiap module buatkan icon untuk masuk ke halaman pribadi saya.
+Lakukan ketika up ke server
+create_sysadmin_activity_logs.js
+
+
 **Sysadmin Module**
+
+Menu baru Activity Logs
 
 **Asser Module**
 
@@ -22,6 +26,8 @@ Menu baru Licenses
 
 ---------------------Not Urgent---------------------
 
+Buatkan watermark untuk donasi ke pembuat
+
 Tambahkan fitur drag and drop saat add atau edit asset
 
 pada category asset tambahkan inputan maintenance schedule untuk Next Maintenance. Kemudian tambahkan centang saat add atau edit asset untuk next maintenence mengikuti category asset atau seting scadule manual
@@ -31,6 +37,8 @@ hide Purchase & Warranty pada asset detail scan yang belum login
 hide Purchase & Warranty pada asset detail scan System Information
 
 tambahkan fitur untuk setting desain cetak print qrcode
+
+
 
 **HR Module**
 buatkan modul baru modul meliputi 

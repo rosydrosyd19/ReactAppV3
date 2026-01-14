@@ -330,28 +330,22 @@ const AssetList = () => {
             </div>
 
             <div className="card">
-                <div className="filters-bar">
-                    {/* Bulk Actions Menu (conditionally rendered) */}
-                    {selectedAssets.size > 0 && (
-                        <div className="bulk-actions" style={{
-                            background: 'var(--bg-secondary)',
-                            padding: '10px 15px',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '15px',
-                            marginBottom: '10px',
-                            border: '1px solid var(--border-color)'
-                        }}>
-                            <span style={{ fontWeight: 'bold' }}>{selectedAssets.size} selected</span>
-                            <button className="btn btn-outline btn-sm" onClick={handleBulkQRClick}>
+                {/* Bulk Actions Menu (conditionally rendered) */}
+                {selectedAssets.size > 0 && (
+                    <div className="bulk-actions-bar">
+                        <span style={{ fontWeight: 'bold' }}>{selectedAssets.size} selected</span>
+                        <div className="bulk-actions-buttons">
+                            <button className="btn btn-outline btn-sm shadow-sm" style={{ background: 'var(--bg-color)' }} onClick={handleBulkQRClick}>
                                 <BsQrCode /> Print QR Codes
                             </button>
                             <button className="btn btn-text btn-sm" onClick={() => setSelectedAssets(new Set())}>
                                 Clear Selection
                             </button>
                         </div>
-                    )}
+                    </div>
+                )}
+
+                <div className="filters-bar">
 
                     <div className="search-form">
                         <div className="input-with-icon">
@@ -382,24 +376,24 @@ const AssetList = () => {
                     </div>
 
                     <div className="filter-group">
-                        <span style={{ fontSize: '0.9rem', marginRight: '5px', fontWeight: '500' }}>QR Prints:</span>
-                        <input
-                            type="number"
-                            className="form-input"
-                            placeholder="Min"
-                            value={qrPrintMin}
-                            onChange={(e) => setQrPrintMin(e.target.value)}
-                            style={{ width: '70px', padding: '5px' }}
-                        />
-                        <span style={{ margin: '0 5px' }}>-</span>
-                        <input
-                            type="number"
-                            className="form-input"
-                            placeholder="Max"
-                            value={qrPrintMax}
-                            onChange={(e) => setQrPrintMax(e.target.value)}
-                            style={{ width: '70px', padding: '5px' }}
-                        />
+                        <span className="qr-filter-label">QR Prints:</span>
+                        <div className="qr-filter-inputs">
+                            <input
+                                type="number"
+                                className="form-input"
+                                placeholder="Min"
+                                value={qrPrintMin}
+                                onChange={(e) => setQrPrintMin(e.target.value)}
+                            />
+                            <span>-</span>
+                            <input
+                                type="number"
+                                className="form-input"
+                                placeholder="Max"
+                                value={qrPrintMax}
+                                onChange={(e) => setQrPrintMax(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </div>
 

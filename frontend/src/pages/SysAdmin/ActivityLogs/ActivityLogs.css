@@ -1,0 +1,341 @@
+.activity-logs,
+.activity-log-detail {
+    padding-bottom: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-header .header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Header Left (for Detail Pages) */
+.header-left {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.header-left>div h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.2;
+}
+
+.header-left>div p {
+    margin: 0.25rem 0 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* CARDS */
+.card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Detail Layout */
+.detail-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.detail-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.value-text {
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Filter Section (Legacy/List specific, keeping generic card style though) */
+.filter-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    /* spacing inside card if needed */
+}
+
+/* ... keep existing filter inputs styles */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+}
+
+/* Desktop Table */
+.desktop-table {
+    display: block;
+    overflow-x: auto;
+}
+
+.mobile-list {
+    display: none;
+}
+
+/* Badges override/custom */
+.badge-custom {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Transparent View Button */
+.btn-view-transparent {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.btn-view-transparent:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--primary-color);
+}
+
+/* User Info Styling in Detail */
+.user-info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-avatar-large {
+    width: 48px;
+    height: 48px;
+    background: var(--neutral-focus);
+    color: var(--neutral-content);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.user-details h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: var(--text-secondary);
+}
+
+.info-val {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .page-header .header-actions {
+        width: 100%;
+    }
+
+    .page-header .btn {
+        flex: 1;
+    }
+
+    /* Detail Page Header Mobile */
+    .header-left {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        gap: 0.75rem;
+    }
+
+    .header-left .btn {
+        flex-shrink: 0;
+        padding: 0 !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        min-width: 36px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        border-radius: 50%;
+        /* Optional: make it circular if square looks odd, or keep square but ensure dimensions */
+    }
+
+    .header-left .btn span {
+        display: none;
+    }
+
+    .desktop-table {
+        display: none;
+    }
+
+    .mobile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .mobile-card {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+    }
+
+    .mobile-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .mobile-card-body {
+        font-size: 14px;
+    }
+
+    .mobile-user {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-meta {
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: flex;
+        gap: 1rem;
+    }
+}

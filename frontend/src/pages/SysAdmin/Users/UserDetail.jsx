@@ -1,11 +1,11 @@
 import './UserDetail.css';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from '../../utils/axios';
-import { useAuth } from '../../contexts/AuthContext';
+import api from '../../../utils/axios';
+import { useAuth } from '../../../contexts/AuthContext';
 import EditUserModal from './EditUserModal';
-import ConfirmationModal from '../../components/Modal/ConfirmationModal';
-import Toast from '../../components/Toast/Toast';
+import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
+import Toast from '../../../components/Toast/Toast';
 import {
     FiArrowLeft,
     FiUser,
@@ -40,7 +40,7 @@ const UserDetail = () => {
     const fetchUserDetail = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`/sysadmin/users/${id}`);
+            const response = await api.get(`/sysadmin/users/${id}`);
             if (response.data.success) {
                 setUser(response.data.data);
             }

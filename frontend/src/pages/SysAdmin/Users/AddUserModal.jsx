@@ -1,7 +1,7 @@
 import './AddUserModal.css';
 import { useState, useEffect } from 'react';
 import { FiX, FiEye, FiEyeOff, FiSave } from 'react-icons/fi';
-import axios from '../../utils/axios';
+import api from '../../../utils/axios';
 import './AddUserModal.css';
 
 const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
@@ -29,7 +29,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get('/sysadmin/roles-list');
+            const response = await api.get('/sysadmin/roles-list');
             if (response.data.success) {
                 setRoles(response.data.data);
             }
@@ -94,7 +94,7 @@ const AddUserModal = ({ isOpen, onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            const response = await axios.post('/sysadmin/users', formData);
+            const response = await api.post('/sysadmin/users', formData);
             if (response.data.success) {
                 // Langsung close modal dan callback ke parent
                 handleClose();

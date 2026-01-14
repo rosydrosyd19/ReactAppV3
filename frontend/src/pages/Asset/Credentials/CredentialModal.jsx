@@ -4,7 +4,7 @@ import axios from '../../../utils/axios';
 import { FiX, FiSave, FiEye, FiEyeOff, FiPlus } from 'react-icons/fi';
 import SearchableSelect from '../../../components/Form/SearchableSelect';
 import Toast from '../../../components/Toast/Toast';
-import { QuickAddCredentialCategoryModal } from '../AssetList/QuickAddModals';
+import { QuickAddCredentialCategoryModal } from '../Assets/QuickAddModals';
 
 const CredentialModal = ({ isOpen, onClose, onSuccess, credentialId, cloneId }) => {
     const [formData, setFormData] = useState({

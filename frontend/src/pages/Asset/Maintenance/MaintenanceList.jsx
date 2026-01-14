@@ -6,7 +6,7 @@ import Pagination from '../../../components/Pagination/Pagination';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
 import MaintenanceModal from './MaintenanceModal';
-import '../AssetList/AssetList.css'; // Reuse AssetList styles
+import '../Assets/AssetList.css'; // Reuse AssetList styles
 
 const MaintenanceList = () => {
     const navigate = useNavigate();

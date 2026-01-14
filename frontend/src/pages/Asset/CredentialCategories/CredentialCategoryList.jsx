@@ -6,7 +6,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFolder, FiLock, FiChevronDown, F
 import Toast from '../../../components/Toast/Toast';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import CredentialCategoryModal from './CredentialCategoryModal';
-import '../AssetList/AssetList.css'; // Reusing AssetList styles for consistency
+import '../Assets/AssetList.css'; // Reusing AssetList styles for consistency
 
 const CredentialCategoryList = () => {
     const [categories, setCategories] = useState([]);

@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const db = require('./config/database');
+const initCronJobs = require('./services/cronService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -81,6 +82,9 @@ async function startServer() {
             console.log('');
             console.log('✨ Ready to accept connections!');
             console.log('🌐 CORS: Allowing ALL origins (development mode)');
+
+            // Initialize Cron Jobs
+            initCronJobs();
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);

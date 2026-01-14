@@ -1,7 +1,7 @@
 import './AddUserModal.css'; // Reuse CSS
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiX, FiEye, FiEyeOff } from 'react-icons/fi';
-import axios from '../../utils/axios';
+import api from '../../../utils/axios';
 
 const EditUserModal = ({ isOpen, onClose, onSuccess, userId }) => {
     const [formData, setFormData] = useState({
@@ -35,8 +35,8 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, userId }) => {
 
             // Parallel fetch for roles and user details
             const [rolesResponse, userResponse] = await Promise.all([
-                axios.get('/sysadmin/roles-list'),
-                axios.get(`/sysadmin/users/${userId}`)
+                api.get('/sysadmin/roles-list'),
+                api.get(`/sysadmin/users/${userId}`)
             ]);
 
             if (rolesResponse.data.success) {
@@ -133,7 +133,7 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, userId }) => {
                 // Backend checks `if (password)` so empty string is fine (falsy)
             };
 
-            const response = await axios.put(`/sysadmin/users/${userId}`, payload);
+            const response = await api.put(`/sysadmin/users/${userId}`, payload);
 
             // Also need to update roles separately? 
             // Wait, looking at backend sysadmin.js update user:

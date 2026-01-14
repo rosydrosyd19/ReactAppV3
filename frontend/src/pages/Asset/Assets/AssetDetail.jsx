@@ -1,17 +1,17 @@
 import './AssetDetail.css';
-import '../../SysAdmin/UserDetail.css';
+import '../../SysAdmin/Users/UserDetail.css';
 import { useState, useEffect } from 'react';
 import { intervalToDuration } from 'date-fns';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';
 import { useAuth } from '../../../contexts/AuthContext';
-import AssetModal from '../AssetList/AssetModal';
+import AssetModal from './AssetModal';
 import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
 import Toast from '../../../components/Toast/Toast';
-import CheckOutModal from '../AssetList/CheckOutModal';
-import CheckInModal from '../AssetList/CheckInModal';
-import MaintenanceModal from '../AssetList/MaintenanceModal';
-import MaintenanceRequestModal from '../AssetList/MaintenanceRequestModal';
+import CheckOutModal from './CheckOutModal';
+import CheckInModal from './CheckInModal';
+import MaintenanceModal from './MaintenanceModal';
+import MaintenanceRequestModal from './MaintenanceRequestModal';
 import { BsQrCode } from 'react-icons/bs'; // Correctly imported
 import QRCode from 'react-qr-code';
 import {

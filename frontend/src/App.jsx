@@ -7,24 +7,26 @@ import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import AssetDashboard from './pages/Dashboard/AssetDashboard'; // New
 import SysAdminDashboard from './pages/Dashboard/SysAdminDashboard'; // New
-import UserList from './pages/SysAdmin/UserList'; // New
-import UserDetail from './pages/SysAdmin/UserDetail'; // New
-import RoleList from './pages/SysAdmin/RoleList'; // New
-import SettingsPage from './pages/SysAdmin/Settings/SettingsPage'; // New
-import AssetList from './pages/Asset/AssetList/AssetList';
-import AssetDetail from './pages/Asset/AssetDetail/AssetDetail'; // New
-import CategoryDetail from './pages/Asset/CategoryDetail/CategoryDetail';
-import CategoryList from './pages/Asset/CategoryList/CategoryList'; // New
-import SupplierList from './pages/Asset/SupplierList/SupplierList'; // New
-import SupplierDetail from './pages/Asset/SupplierList/SupplierDetail'; // New
-import LocationList from './pages/Asset/LocationList/LocationList'; // New
-import LocationDetail from './pages/Asset/LocationList/LocationDetail'; // New
-import CredentialList from './pages/Asset/CredentialList/CredentialList'; // New
-import CredentialDetail from './pages/Asset/CredentialList/CredentialDetail'; // New
-import CredentialCategoryList from './pages/Asset/CredentialList/CredentialCategoryList'; // New
-import CredentialCategoryDetail from './pages/Asset/CredentialList/CredentialCategoryDetail'; // New
-import MaintenanceList from './pages/Asset/Maintenance/MaintenanceList'; // New
-import MaintenanceDetail from './pages/Asset/Maintenance/MaintenanceDetail'; // New
+import UserList from './pages/SysAdmin/Users/UserList'; // Moved
+import UserDetail from './pages/SysAdmin/Users/UserDetail'; // Moved
+import RoleList from './pages/SysAdmin/Roles/RoleList'; // Moved
+import SettingsPage from './pages/SysAdmin/Settings/SettingsPage';
+import ActivityLogs from './pages/SysAdmin/ActivityLogs/ActivityLogs'; // Moved
+import ActivityLogDetail from './pages/SysAdmin/ActivityLogs/ActivityLogDetail'; // Moved
+import AssetList from './pages/Asset/Assets/AssetList'; // Moved to Assets
+import AssetDetail from './pages/Asset/Assets/AssetDetail'; // Moved to Assets
+import CategoryDetail from './pages/Asset/Categories/CategoryDetail'; // Moved to Categories
+import CategoryList from './pages/Asset/Categories/CategoryList'; // Moved to Categories
+import SupplierList from './pages/Asset/Suppliers/SupplierList'; // Moved to Suppliers
+import SupplierDetail from './pages/Asset/Suppliers/SupplierDetail'; // Moved to Suppliers
+import LocationList from './pages/Asset/Locations/LocationList'; // Moved to Locations
+import LocationDetail from './pages/Asset/Locations/LocationDetail'; // Moved to Locations
+import CredentialList from './pages/Asset/Credentials/CredentialList'; // Moved to Credentials
+import CredentialDetail from './pages/Asset/Credentials/CredentialDetail'; // Moved to Credentials
+import CredentialCategoryList from './pages/Asset/CredentialCategories/CredentialCategoryList'; // Moved to CredentialCategories
+import CredentialCategoryDetail from './pages/Asset/CredentialCategories/CredentialCategoryDetail'; // Moved to CredentialCategories
+import MaintenanceList from './pages/Asset/Maintenance/MaintenanceList';
+import MaintenanceDetail from './pages/Asset/Maintenance/MaintenanceDetail';
 import ModuleSelection from './pages/Modules/ModuleSelection';
 import Profile from './pages/Profile/Profile'; // New
 
@@ -129,7 +131,15 @@ function App() {
                   path="logs"
                   element={
                     <PermissionRoute permission="sysadmin.logs.view">
-                      <div className="card"><h2>Activity Logs</h2><p>Coming soon...</p></div>
+                      <ActivityLogs />
+                    </PermissionRoute>
+                  }
+                />
+                <Route
+                  path="logs/:id"
+                  element={
+                    <PermissionRoute permission="sysadmin.logs.view">
+                      <ActivityLogDetail />
                     </PermissionRoute>
                   }
                 />

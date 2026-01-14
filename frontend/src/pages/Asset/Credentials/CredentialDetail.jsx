@@ -1,5 +1,5 @@
 import './CredentialDetail.css';
-import '../../SysAdmin/UserDetail.css'; // Inheritar base styles from UserDetail
+import '../../SysAdmin/Users/UserDetail.css'; // Inheritar base styles from UserDetail
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios';

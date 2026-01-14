@@ -1,11 +1,11 @@
-import Pagination from '../../components/Pagination/Pagination';
+import Pagination from '../../../components/Pagination/Pagination';
 import './RoleList.css';
-import { useState, useEffect } from 'react';
-import axios from '../../utils/axios';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
+import api from '../../../utils/axios';
+import { useAuth } from '../../../contexts/AuthContext';
 import RoleModal from './RoleModal';
-import ConfirmationModal from '../../components/Modal/ConfirmationModal';
-import Toast from '../../components/Toast/Toast';
+import ConfirmationModal from '../../../components/Modal/ConfirmationModal';
+import Toast from '../../../components/Toast/Toast';
 import {
     FiPlus,
     FiSearch,
@@ -50,7 +50,7 @@ const RoleList = () => {
     const fetchRoles = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/sysadmin/roles');
+            const response = await api.get('/sysadmin/roles');
             if (response.data.success) {
                 setRoles(response.data.data);
             }
@@ -80,7 +80,7 @@ const RoleList = () => {
     const confirmDelete = async () => {
         try {
             setLoading(true);
-            const response = await axios.delete(`/sysadmin/roles/${roleToDelete.id}`);
+            const response = await api.delete(`/sysadmin/roles/${roleToDelete.id}`);
             if (response.data.success) {
                 showNotification('Role successfully deleted');
                 fetchRoles();
