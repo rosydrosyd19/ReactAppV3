@@ -25,6 +25,9 @@ import CredentialList from './pages/Asset/Credentials/CredentialList'; // Moved 
 import CredentialDetail from './pages/Asset/Credentials/CredentialDetail'; // Moved to Credentials
 import CredentialCategoryList from './pages/Asset/CredentialCategories/CredentialCategoryList'; // Moved to CredentialCategories
 import CredentialCategoryDetail from './pages/Asset/CredentialCategories/CredentialCategoryDetail'; // Moved to CredentialCategories
+import IpAddressList from './pages/Asset/IpAddresses/IpAddressList'; // New
+import AccessoryList from './pages/Asset/Accessories/AccessoryList'; // New
+import LicenseList from './pages/Asset/Licenses/LicenseList'; // New
 import MaintenanceList from './pages/Asset/Maintenance/MaintenanceList';
 import MaintenanceDetail from './pages/Asset/Maintenance/MaintenanceDetail';
 import ModuleSelection from './pages/Modules/ModuleSelection';
@@ -259,6 +262,18 @@ function App() {
                       <CredentialCategoryDetail />
                     </PermissionRoute>
                   }
+                />
+                <Route
+                  path="ip-addresses"
+                  element={<IpAddressList />}
+                />
+                <Route
+                  path="accessories"
+                  element={<AccessoryList />}
+                />
+                <Route
+                  path="licenses"
+                  element={<LicenseList />}
                 />
               </Route>
             </Route>

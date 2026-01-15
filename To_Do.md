@@ -1,20 +1,14 @@
 ## NB : Bila ada tampilan yang tidak berkenan karna terlalu panjang saran untuk di ubah "Menggunakan layout 2 kolom"
 
-Lakukan ketika up ke server
+## Lakukan ketika up ke server
+01_create_ip_management_tables.js
 
 **Sysadmin Module**
 
 **Asser Module**
 
-buat Menu baru "List IP Address",  "Accessories", "Licenses" isi halaman dengan comming soon dulu
 
-Pilih ROUTER dari database asset_items
-   ↓
-Daftarkan SUBNET
-   ↓
-Assign IP ke DEVICE untuk assign 1 ip dari 1 router hanya bisa di assign 1 device, tambahkan fitur untuk block ip agar tidak dipakai dan berikan keterangannya kenapa diblock.
-
-buat tampilannya senyaman dan semudah mungkin mengingat untuk list ip ini ada ratusan nantinya.
+bila menu sidebar terbuka tampilan IP Addresses for terlalu sempit carikan solusinya dan perbaiki
 
 ---------------------Not Urgent---------------------
 

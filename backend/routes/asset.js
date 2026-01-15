@@ -482,6 +482,16 @@ router.get('/assets/:id', checkPermission('asset.items.view'), async (req, res) 
 
         asset.assigned_credentials = assignedCredentials;
 
+        // Get assigned IPs
+        const assignedIps = await db.query(`
+            SELECT ip.ip_address, ip.subnet_id, s.subnet_address, s.description as subnet_description
+            FROM asset_ip_addresses ip
+            LEFT JOIN asset_ip_subnets s ON ip.subnet_id = s.id
+            WHERE ip.assigned_to_asset_id = ?
+        `, [req.params.id]);
+
+        asset.assigned_ips = assignedIps;
+
         res.json({ success: true, data: asset });
     } catch (error) {
         console.error('Get asset error:', error);

@@ -39,7 +39,8 @@ import {
     FiEye,
     FiEyeOff,
     FiAlertTriangle,
-    FiMoreVertical
+    FiMoreVertical,
+    FiServer
 } from 'react-icons/fi';
 
 const PasswordReveal = ({ password }) => {
@@ -540,10 +541,6 @@ const AssetDetail = ({ readOnly = false }) => {
                                 <label><FiPackage /> Asset Name</label>
                                 <p>{asset.asset_name}</p>
                             </div>
-                            <div className="info-item" style={{ gridColumn: 'span 2' }}>
-                                <label><FiInfo /> Description</label>
-                                <p style={{ whiteSpace: 'pre-wrap' }}>{renderDescriptionWithLinks(asset.description)}</p>
-                            </div>
                             <div className="info-item">
                                 <label><FiPackage /> Category</label>
                                 <p>{asset.category_name || '-'}</p>
@@ -586,6 +583,24 @@ const AssetDetail = ({ readOnly = false }) => {
                             <div className="info-item">
                                 <label><FiDollarSign /> Cost</label>
                                 <p>{asset.purchase_cost ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(asset.purchase_cost) : '-'}</p>
+                            </div>
+                            <div className="info-item">
+                                <label><FiServer /> IP Address</label>
+                                <p>
+                                    {asset.assigned_ips && asset.assigned_ips.length > 0 ? (
+                                        asset.assigned_ips.map((ip, idx) => (
+                                            <span key={idx} style={{ display: 'block' }}>
+                                                <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{ip.ip_address}</span>
+                                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginLeft: '6px' }}>({ip.subnet_address})</span>
+                                            </span>
+                                        ))
+                                    ) : '-'}
+                                </p>
+                            </div>
+                            {/* Description moved to bottom */}
+                            <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                                <label><FiInfo /> Description</label>
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{renderDescriptionWithLinks(asset.description)}</p>
                             </div>
                         </div>
                     </div>

@@ -25,6 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOAD_DIR |
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/sysadmin', require('./routes/sysadmin'));
 app.use('/api/asset/credentials', require('./routes/assetCredentials'));
+app.use('/api/asset/ip', require('./routes/assetIp'));
 app.use('/api/asset', require('./routes/asset'));
 
 // Health check

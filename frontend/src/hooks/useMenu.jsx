@@ -11,6 +11,9 @@ import {
     FiActivity,
     FiTruck,
     FiSliders,
+    FiGlobe,
+    FiHeadphones,
+    FiFileText,
 } from 'react-icons/fi';
 
 export const useMenu = () => {
@@ -86,6 +89,27 @@ export const useMenu = () => {
                     path: '/asset/credentials',
                     icon: <FiShield />,
                     show: hasPermission('asset.credentials.view'),
+                    group: 'Main',
+                },
+                {
+                    title: 'List IP Address',
+                    path: '/asset/ip-addresses',
+                    icon: <FiGlobe />,
+                    show: true,
+                    group: 'Main',
+                },
+                {
+                    title: 'Accessories',
+                    path: '/asset/accessories',
+                    icon: <FiHeadphones />,
+                    show: true,
+                    group: 'Main',
+                },
+                {
+                    title: 'Licenses',
+                    path: '/asset/licenses',
+                    icon: <FiFileText />,
+                    show: true,
                     group: 'Main',
                 },
                 {
