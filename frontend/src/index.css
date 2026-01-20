@@ -40,6 +40,88 @@
   --shadow: rgba(0, 0, 0, 0.3);
 }
 
+/* Simple Modern Theme variables */
+[data-theme="simple-modern"] {
+  --primary-color: #2563eb;
+  /* Royal Blue */
+  --primary-dark: #1e40af;
+  --primary-light: #60a5fa;
+  --secondary-color: #10b981;
+  /* Emerald */
+  --danger-color: #ef4444;
+  /* Red */
+  --warning-color: #f59e0b;
+  /* Amber */
+  --info-color: #0ea5e9;
+  /* Sky */
+
+  --bg-color: #f8fafc;
+  /* Slate-50 */
+  --bg-secondary: #ffffff;
+  /* White */
+  --bg-tertiary: #f1f5f9;
+  /* Slate-100 */
+
+  --text-primary: #0f172a;
+  /* Slate-900 */
+  --text-secondary: #475569;
+  /* Slate-600 */
+  --text-tertiary: #94a3b8;
+  /* Slate-400 */
+
+  --border-color: #e2e8f0;
+  /* Slate-200 */
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  /* Soft shadow */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  /* More rounded corners */
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Simple Modern Dark Theme variables */
+[data-theme="simple-modern-dark"] {
+  --primary-color: #3b82f6;
+  /* Blue-500 (brighter for dark mode) */
+  --primary-dark: #2563eb;
+  --primary-light: #60a5fa;
+  --secondary-color: #34d399;
+  /* Emerald-400 */
+  --danger-color: #f87171;
+  /* Red-400 */
+  --warning-color: #fbbf24;
+  /* Amber-400 */
+  --info-color: #38bdf8;
+  /* Sky-400 */
+
+  --bg-color: #0f172a;
+  /* Slate-900 */
+  --bg-secondary: #1e293b;
+  /* Slate-800 */
+  --bg-tertiary: #334155;
+  /* Slate-700 */
+
+  --text-primary: #f8fafc;
+  /* Slate-50 */
+  --text-secondary: #cbd5e1;
+  /* Slate-300 */
+  --text-tertiary: #94a3b8;
+  /* Slate-400 */
+
+  --border-color: #334155;
+  /* Slate-700 */
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
 /* Reset */
 * {
   margin: 0;

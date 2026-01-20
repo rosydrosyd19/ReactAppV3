@@ -7,7 +7,10 @@ import { useEffect, useState } from 'react';
 const ModuleSelection = () => {
     const { user, logout, hasAnyPermission, hasModule } = useAuth();
     const navigate = useNavigate();
-    const [isDark, setIsDark] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDark, setIsDark] = useState(() => {
+        const theme = localStorage.getItem('theme') || 'light';
+        return theme === 'dark' || theme === 'simple-modern-dark';
+    });
 
     useEffect(() => {
         // Clear active module when entering selection screen
@@ -15,15 +18,34 @@ const ModuleSelection = () => {
 
         // Apply theme on mount
         const savedTheme = localStorage.getItem('theme') || 'light';
-        setIsDark(savedTheme === 'dark');
+        setIsDark(savedTheme === 'dark' || savedTheme === 'simple-modern-dark');
         document.documentElement.setAttribute('data-theme', savedTheme);
     }, []);
 
     const toggleTheme = () => {
-        const newTheme = !isDark ? 'dark' : 'light';
-        setIsDark(!isDark);
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        let newTheme;
+
+        // Toggle within the same theme family
+        if (currentTheme === 'simple-modern') {
+            newTheme = 'simple-modern-dark';
+            setIsDark(true);
+        } else if (currentTheme === 'simple-modern-dark') {
+            newTheme = 'simple-modern';
+            setIsDark(false);
+        } else if (currentTheme === 'dark') {
+            newTheme = 'light';
+            setIsDark(false);
+        } else {
+            newTheme = 'dark';
+            setIsDark(true);
+        }
+
         localStorage.setItem('theme', newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
+
+        // Dispatch custom event for Login page sync
+        window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme: newTheme } }));
     };
 
     const modules = [

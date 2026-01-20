@@ -7,14 +7,40 @@ import { FiMenu, FiUser, FiLogOut, FiMoon, FiSun, FiGrid } from 'react-icons/fi'
 const Header = ({ onMenuClick, isSidebarOpen }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const [isDark, setIsDark] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDark, setIsDark] = useState(() => {
+        const theme = localStorage.getItem('theme') || 'light';
+        return theme === 'dark' || theme === 'simple-modern-dark';
+    });
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const toggleTheme = () => {
-        const newTheme = !isDark ? 'dark' : 'light';
-        setIsDark(!isDark);
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        let newTheme;
+
+        // Toggle within the same theme family
+        if (currentTheme === 'simple-modern') {
+            // Simple Modern Light -> Simple Modern Dark
+            newTheme = 'simple-modern-dark';
+            setIsDark(true);
+        } else if (currentTheme === 'simple-modern-dark') {
+            // Simple Modern Dark -> Simple Modern Light
+            newTheme = 'simple-modern';
+            setIsDark(false);
+        } else if (currentTheme === 'dark') {
+            // Standard Dark -> Standard Light
+            newTheme = 'light';
+            setIsDark(false);
+        } else {
+            // Standard Light -> Standard Dark
+            newTheme = 'dark';
+            setIsDark(true);
+        }
+
         localStorage.setItem('theme', newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
+
+        // Dispatch custom event for same-window theme changes
+        window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme: newTheme } }));
     };
 
     const getModuleName = () => {

@@ -1,8 +1,9 @@
 import './Login.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import ModernLogin from './ModernLogin';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -11,9 +12,43 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [currentTheme, setCurrentTheme] = useState('light');
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        const theme = localStorage.getItem('theme') || 'light';
+        setCurrentTheme(theme);
+
+        // Listen for theme changes from header toggle
+        const handleStorageChange = (e) => {
+            if (e.key === 'theme' || e.type === 'storage') {
+                const newTheme = localStorage.getItem('theme') || 'light';
+                setCurrentTheme(newTheme);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Custom event for same-window changes
+        const handleCustomThemeChange = () => {
+            const newTheme = localStorage.getItem('theme') || 'light';
+            setCurrentTheme(newTheme);
+        };
+
+        window.addEventListener('themeChange', handleCustomThemeChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('themeChange', handleCustomThemeChange);
+        };
+    }, [location]); // Re-run when location changes (e.g., after logout redirect)
+
+    // Use ModernLogin for Simple Modern themes
+    if (currentTheme === 'simple-modern' || currentTheme === 'simple-modern-dark') {
+        return <ModernLogin />;
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();

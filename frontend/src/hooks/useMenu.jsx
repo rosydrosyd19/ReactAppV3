@@ -14,6 +14,7 @@ import {
     FiGlobe,
     FiHeadphones,
     FiFileText,
+    FiMonitor,
 } from 'react-icons/fi';
 
 export const useMenu = () => {
@@ -60,6 +61,13 @@ export const useMenu = () => {
                     icon: <FiSliders />,
                     group: 'System',
                     show: true // Public for now, add permission check later if needed
+                },
+                {
+                    title: 'Change Theme',
+                    path: '/sysadmin/theme',
+                    icon: <FiMonitor />,
+                    group: 'System',
+                    show: true
                 },
                 {
                     title: 'Activity Logs',

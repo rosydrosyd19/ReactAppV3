@@ -3,7 +3,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: var(--bg-tertiary);
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); Removed to support theme */
     padding: 20px;
 }
 
@@ -113,6 +114,7 @@
 
 .login-form .btn-primary {
     color: #ffffff;
+    /* This is usually fine for primary buttons, but can change if needed */
     background-color: var(--primary-color);
 }
 

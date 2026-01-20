@@ -11,6 +11,7 @@ import UserList from './pages/SysAdmin/Users/UserList'; // Moved
 import UserDetail from './pages/SysAdmin/Users/UserDetail'; // Moved
 import RoleList from './pages/SysAdmin/Roles/RoleList'; // Moved
 import SettingsPage from './pages/SysAdmin/Settings/SettingsPage';
+import ThemeSelection from './pages/SysAdmin/Themes/ThemeSelection';
 import ActivityLogs from './pages/SysAdmin/ActivityLogs/ActivityLogs'; // Moved
 import ActivityLogDetail from './pages/SysAdmin/ActivityLogs/ActivityLogDetail'; // Moved
 import AssetList from './pages/Asset/Assets/AssetList'; // Moved to Assets
@@ -130,6 +131,7 @@ function App() {
                   }
                 />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="theme" element={<ThemeSelection />} />
                 <Route
                   path="logs"
                   element={
