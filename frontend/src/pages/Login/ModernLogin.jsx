@@ -12,6 +12,7 @@ const ModernLogin = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isDark, setIsDark] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const { login } = useAuth();
     const { config } = useConfig();
     const navigate = useNavigate();
@@ -60,7 +61,7 @@ const ModernLogin = () => {
         setError('');
         setLoading(true);
 
-        const result = await login(username, password, false);
+        const result = await login(username, password, rememberMe);
 
         if (result.success) {
             const from = location.state?.from?.pathname || '/modules';
@@ -122,7 +123,7 @@ const ModernLogin = () => {
                         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                             {config?.app_name || 'ReactAppV3'}
                         </h1>
-                        <p className="mt-2 text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium">
+                        <p className="mt-0 text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium">
                             Sign in to access your account
                         </p>
                     </div>
@@ -140,7 +141,7 @@ const ModernLogin = () => {
                     )}
 
                     {/* Login Form */}
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Username/Email Field */}
                         <div className="space-y-1.5 w-full">
                             <label htmlFor="username" className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">
@@ -188,11 +189,27 @@ const ModernLogin = () => {
                                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                                 </button>
                             </div>
-                            <div className="flex flex-col gap-1 px-1 mt-2">
+                            <div className="px-1">
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Forgot password? Please contact the <span className="text-blue-600 dark:text-blue-400 font-semibold cursor-help transition-colors hover:text-blue-500">administrator</span>.
+                                    Forgot password? Please contact the <span className="text-blue-600 dark:text-blue-400 font-semibold">administrator</span>.
                                 </p>
                             </div>
+                        </div>
+
+                        {/* Remember Me Toggle */}
+                        <div className="flex items-center justify-between px-1">
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <div className="relative inline-flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                </div>
+                                <span className="select-none text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">Remember me</span>
+                            </label>
                         </div>
 
                         <button
