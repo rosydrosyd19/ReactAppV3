@@ -59,12 +59,21 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setPermissions([]);
-        setModules([]);
-        navigate('/login');
+        // Show loading screen
+        const loader = document.getElementById('app-loader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+
+        // Small delay to ensure loader is visible
+        setTimeout(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+            setPermissions([]);
+            setModules([]);
+            navigate('/login');
+        }, 300);
     };
 
     const hasPermission = (permissionKey) => {

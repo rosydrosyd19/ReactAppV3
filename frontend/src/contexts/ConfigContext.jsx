@@ -36,6 +36,14 @@ export const ConfigProvider = ({ children }) => {
             document.title = config.app_name;
         }
 
+        // Save to localStorage for index.html loading screen
+        if (config.app_name) {
+            localStorage.setItem('app_name', config.app_name);
+        }
+        if (config.app_icon) {
+            localStorage.setItem('app_icon', config.app_icon);
+        }
+
         if (config.app_icon) {
             let link = document.querySelector("link[rel~='icon']");
             if (!link) {
@@ -43,12 +51,6 @@ export const ConfigProvider = ({ children }) => {
                 link.rel = 'icon';
                 document.getElementsByTagName('head')[0].appendChild(link);
             }
-            // If it's a relative path starting with /uploads, prepend backend URL if needed
-            // But usually the browser handles it relative to domain if coming from same origin or proxy
-            // If API and frontend are on different ports in dev, we might need full URL.
-            // For now assuming proxy or same origin.
-            // Typically uploads serve from backend, check if we need base URL
-            // If using Vite proxy, /uploads should work.
             link.href = config.app_icon;
         }
     }, [config]);

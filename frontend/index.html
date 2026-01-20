@@ -27,11 +27,375 @@
   </script>
 
   <title>ReactAppV3</title>
+
+  <style>
+    /* Loading Screen Styles */
+    #app-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8fafc;
+      /* Slate-50 for Light Mode */
+      transition: opacity 0.5s ease-out, visibility 0.5s ease-out, background-color 0.3s ease;
+      overflow: hidden;
+      color: #0f172a;
+      /* Slate-900 for text */
+    }
+
+    /* Dark Mode Overrides */
+    html.dark #app-loader {
+      background-color: #030712;
+      /* Original Dark Background */
+      color: #f8fafc;
+    }
+
+    /* Hide loader class */
+    #app-loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Background Decorative Elements */
+    .loader-orb-1 {
+      position: absolute;
+      top: 25%;
+      left: 25%;
+      width: 24rem;
+      height: 24rem;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 50%;
+      filter: blur(120px);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .loader-orb-2 {
+      position: absolute;
+      bottom: 25%;
+      right: 25%;
+      width: 24rem;
+      height: 24rem;
+      background: rgba(147, 51, 234, 0.1);
+      border-radius: 50%;
+      filter: blur(120px);
+      animation: pulse 3s ease-in-out infinite;
+      animation-delay: 0.7s;
+    }
+
+    /* Main Loader Container */
+    .loader-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Spinner Container */
+    .loader-spinner-container {
+      position: relative;
+      margin-bottom: 3rem;
+      width: 6rem;
+      height: 6rem;
+    }
+
+    /* Outer Ring */
+    .loader-outer-ring {
+      position: absolute;
+      inset: 0;
+      width: 6rem;
+      height: 6rem;
+      border: 2px solid rgba(99, 102, 241, 0.2);
+      /* Light/Dark friendly */
+      border-radius: 50%;
+    }
+
+    /* Spinning Segment */
+    .loader-spinner {
+      width: 6rem;
+      height: 6rem;
+      border: 2px solid transparent;
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 1.5s linear infinite;
+    }
+
+    /* Core Symbol */
+    .loader-core {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader-core-symbol {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(to bottom right, #818cf8, #a855f7);
+      border-radius: 0.5rem;
+      transform: rotate(45deg);
+      animation: pulse 2s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .loader-core-img {
+      width: 3.5rem;
+      height: 3.5rem;
+      object-fit: contain;
+      border-radius: 0.5rem;
+      animation: pulse 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+    }
+
+    /* Text Content */
+    .loader-text-container {
+      text-align: center;
+      max-width: 28rem;
+      padding: 0 1.5rem;
+    }
+
+    .loader-title {
+      font-size: 1.5rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      color: #334155;
+      /* Slate-700 Light Mode */
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    html.dark .loader-title {
+      color: rgba(255, 255, 255, 0.9);
+      /* Original Dark Mode */
+    }
+
+    /* Progress Bar */
+    .loader-progress-container {
+      width: 16rem;
+      height: 0.375rem;
+      background-color: #e2e8f0;
+      /* Slate-200 Light Mode */
+      border-radius: 9999px;
+      overflow: hidden;
+      margin: 0 auto 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    html.dark .loader-progress-container {
+      background-color: #1e293b;
+      /* Slate-800 Dark Mode */
+    }
+
+    .loader-progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, #6366f1, #a855f7);
+      transition: width 0.5s ease-out;
+      animation: progress 4s ease-out forwards;
+    }
+
+    .loader-tip {
+      font-size: 0.875rem;
+      color: #64748b;
+      /* Slate-500 Light Mode */
+      font-weight: 500;
+      font-style: italic;
+      min-height: 1.5rem;
+      transition: color 0.3s ease;
+    }
+
+    html.dark .loader-tip {
+      color: #94a3b8;
+      /* Slate-400 Dark Mode */
+    }
+
+    /* Bottom Badge */
+    .loader-badge {
+      position: absolute;
+      bottom: 2.5rem;
+      font-size: 0.625rem;
+      color: #94a3b8;
+      /* Slate-400 Light Mode */
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+
+    html.dark .loader-badge {
+      color: #475569;
+      /* Slate-600 Dark Mode */
+    }
+
+    /* Animations */
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    @keyframes progress {
+      0% {
+        width: 0%;
+      }
+
+      100% {
+        width: 100%;
+      }
+    }
+
+    @keyframes dots {
+
+      0%,
+      20% {
+        content: '';
+      }
+
+      40% {
+        content: '.';
+      }
+
+      60% {
+        content: '..';
+      }
+
+      80%,
+      100% {
+        content: '...';
+      }
+    }
+  </style>
+
+  <!-- Theme initialization script -->
+  <script>
+      (function () {
+        const theme = localStorage.getItem('theme') || 'light';
+        const root = document.documentElement;
+
+        // Set data-theme attribute
+        root.setAttribute('data-theme', theme);
+
+        // Handle dark class
+        if (theme === 'simple-modern-dark' || theme === 'dark') {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+      })();
+
+    // Dynamic Content Loader
+    document.addEventListener('DOMContentLoaded', () => {
+      const appName = localStorage.getItem('app_name');
+      const appIcon = localStorage.getItem('app_icon');
+
+      // Update App Name Badge
+      if (appName) {
+        const badge = document.querySelector('.loader-badge');
+        if (badge) badge.textContent = 'Powered by ' + appName;
+      }
+
+      // Update App Icon
+      if (appIcon) {
+        const coreContainer = document.querySelector('.loader-core');
+        if (coreContainer) {
+          // Create image element
+          const img = document.createElement('img');
+          img.src = appIcon;
+          img.className = 'loader-core-img';
+          img.alt = 'App Logo';
+
+          // Clear existing content (CSS symbol) and append image
+          coreContainer.innerHTML = '';
+          coreContainer.appendChild(img);
+        }
+      }
+    });
+  </script>
 </head>
 
 <body>
+  <!-- Modern Loading Screen -->
+  <div id="app-loader">
+    <!-- Background Decorative Elements -->
+    <div class="loader-orb-1"></div>
+    <div class="loader-orb-2"></div>
+
+    <!-- Main Loader Content -->
+    <div class="loader-content">
+      <!-- Spinner Container -->
+      <div class="loader-spinner-container">
+        <!-- Outer Ring -->
+        <div class="loader-outer-ring"></div>
+
+        <!-- Spinning Segment -->
+        <div class="loader-spinner"></div>
+
+        <!-- Core Symbol -->
+        <div class="loader-core">
+          <div class="loader-core-symbol"></div>
+        </div>
+      </div>
+
+      <!-- Text Content -->
+      <div class="loader-text-container">
+        <h2 class="loader-title" id="loader-title">Loading</h2>
+
+        <!-- Progress Bar -->
+        <div class="loader-progress-container">
+          <div class="loader-progress-bar"></div>
+        </div>
+
+        <p class="loader-tip">Initializing application...</p>
+      </div>
+    </div>
+
+    <!-- Bottom Badge -->
+    <div class="loader-badge">Powered by ReactAppV3</div>
+  </div>
+
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+
+  <!-- Script to remove loader and animate dots -->
+  <script>
+    // Animate loading dots
+    let dotCount = 0;
+    const titleElement = document.getElementById('loader-title');
+    const dotInterval = setInterval(() => {
+      dotCount = (dotCount + 1) % 4;
+      titleElement.textContent = 'Loading' + '.'.repeat(dotCount);
+    }, 500);
+
+    window.addEventListener('load', function () {
+      clearInterval(dotInterval);
+      // Small delay to ensure styles are applied
+      setTimeout(function () {
+        const loader = document.getElementById('app-loader');
+        if (loader) {
+          loader.classList.add('hidden');
+        }
+      }, 100);
+    });
+  </script>
 </body>
 
 </html>

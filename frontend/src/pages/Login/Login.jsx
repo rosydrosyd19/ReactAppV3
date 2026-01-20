@@ -21,6 +21,12 @@ const Login = () => {
         const theme = localStorage.getItem('theme') || 'light';
         setCurrentTheme(theme);
 
+        // Hide loading screen when login page loads
+        const loader = document.getElementById('app-loader');
+        if (loader) {
+            loader.classList.add('hidden');
+        }
+
         // Listen for theme changes from header toggle
         const handleStorageChange = (e) => {
             if (e.key === 'theme' || e.type === 'storage') {

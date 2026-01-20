@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useConfig } from '../../contexts/ConfigContext';
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import './ModernLogin.css';
 
@@ -12,6 +13,7 @@ const ModernLogin = () => {
     const [loading, setLoading] = useState(false);
     const [isDark, setIsDark] = useState(false);
     const { login } = useAuth();
+    const { config } = useConfig();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -26,6 +28,12 @@ const ModernLogin = () => {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+        }
+
+        // Hide loading screen when login page loads
+        const loader = document.getElementById('app-loader');
+        if (loader) {
+            loader.classList.add('hidden');
         }
     }, []);
 
@@ -97,13 +105,22 @@ const ModernLogin = () => {
 
                     {/* Header & Brand */}
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 mb-6 shadow-xl shadow-blue-500/20 dark:shadow-blue-500/10 transform hover:scale-105 transition-transform duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
+                        {/* App Logo */}
+                        <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 mb-6 shadow-xl shadow-blue-500/20 dark:shadow-blue-500/10 transform hover:scale-105 transition-transform duration-300 overflow-hidden">
+                            {config?.app_icon ? (
+                                <img
+                                    src={config.app_icon}
+                                    alt="App Logo"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                </svg>
+                            )}
                         </div>
                         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                            ReactAppV3
+                            {config?.app_name || 'ReactAppV3'}
                         </h1>
                         <p className="mt-2 text-sm md:text-base text-slate-500 dark:text-slate-400 font-medium">
                             Sign in to access your account
