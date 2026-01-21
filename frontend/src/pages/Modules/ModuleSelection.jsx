@@ -3,44 +3,75 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FiSettings, FiBox, FiUsers, FiLogOut, FiMoon, FiSun } from 'react-icons/fi';
 import { useEffect, useState } from 'react';
+import ModernModuleSelection from './ModernModuleSelection';
 
 const ModuleSelection = () => {
     const { user, logout, hasAnyPermission, hasModule } = useAuth();
     const navigate = useNavigate();
+    const [currentTheme, setCurrentTheme] = useState('light');
+    const [isLoading, setIsLoading] = useState(true);
     const [isDark, setIsDark] = useState(() => {
         const theme = localStorage.getItem('theme') || 'light';
-        return theme === 'dark' || theme === 'simple-modern-dark';
+        return theme === 'dark';
     });
 
     useEffect(() => {
+        // Show loading screen
+        const loader = document.getElementById('app-loader');
+        if (loader) {
+            loader.classList.remove('hidden');
+        }
+
         // Clear active module when entering selection screen
         localStorage.removeItem('activeModule');
 
         // Apply theme on mount
         const savedTheme = localStorage.getItem('theme') || 'light';
-        setIsDark(savedTheme === 'dark' || savedTheme === 'simple-modern-dark');
+        setCurrentTheme(savedTheme);
+        setIsDark(savedTheme === 'dark');
         document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // Listen for theme changes
+        const handleThemeChange = () => {
+            const newTheme = localStorage.getItem('theme') || 'light';
+            setCurrentTheme(newTheme);
+            setIsDark(newTheme === 'dark');
+        };
+
+        window.addEventListener('themeChange', handleThemeChange);
+
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, []);
 
+    // Hide loading screen after component is ready
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+            const loader = document.getElementById('app-loader');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }, 500); // Small delay to ensure smooth transition
+
+        return () => clearTimeout(timer);
+    }, [currentTheme]);
+
+    // Show loading screen while loading
+    if (isLoading) {
+        return null;
+    }
+
+    // Use ModernModuleSelection for Simple Modern themes
+    if (currentTheme === 'simple-modern' || currentTheme === 'simple-modern-dark') {
+        return <ModernModuleSelection />;
+    }
+
     const toggleTheme = () => {
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        let newTheme;
-
-        // Toggle within the same theme family
-        if (currentTheme === 'simple-modern') {
-            newTheme = 'simple-modern-dark';
-            setIsDark(true);
-        } else if (currentTheme === 'simple-modern-dark') {
-            newTheme = 'simple-modern';
-            setIsDark(false);
-        } else if (currentTheme === 'dark') {
-            newTheme = 'light';
-            setIsDark(false);
-        } else {
-            newTheme = 'dark';
-            setIsDark(true);
-        }
-
+        const newTheme = isDark ? 'light' : 'dark';
+        setIsDark(!isDark);
+        setCurrentTheme(newTheme);
         localStorage.setItem('theme', newTheme);
         document.documentElement.setAttribute('data-theme', newTheme);
 
@@ -66,12 +97,12 @@ const ModuleSelection = () => {
             show: hasModule('sysadmin') || hasAnyPermission(['MANAGE_USERS', 'MANAGE_ROLES'])
         },
         {
-            id: 'users',
-            name: 'User Management',
-            description: 'Manage users and their activities',
+            id: 'hr',
+            name: 'HR Management',
+            description: 'Manage employee data and HR operations',
             icon: <FiUsers />,
-            path: '/sysadmin/users',
-            show: false
+            path: '/hr/dashboard',
+            show: hasModule('hr') || hasAnyPermission(['MANAGE_HR'])
         }
     ];
 
