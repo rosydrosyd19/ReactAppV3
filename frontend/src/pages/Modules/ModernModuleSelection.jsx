@@ -112,7 +112,7 @@ const ModernModuleSelection = () => {
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 h-16 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                        <span className="text-white font-bold text-xl">O</span>
+                        <span className="text-white font-bold text-xl">0</span>
                     </div>
                     <span className="text-xl font-bold tracking-tight hidden sm:inline-block">OmniSuite</span>
                 </div>

@@ -28,7 +28,7 @@ const Login = () => {
             if (loader) {
                 loader.classList.add('hidden');
             }
-        }, 1000); // Delay to ensure smooth transition from logout
+        }, 600); // Delay to ensure smooth transition from logout
 
         // Listen for theme changes from header toggle
         const handleStorageChange = (e) => {
