@@ -21,11 +21,14 @@ const Login = () => {
         const theme = localStorage.getItem('theme') || 'light';
         setCurrentTheme(theme);
 
-        // Hide loading screen when login page loads
-        const loader = document.getElementById('app-loader');
-        if (loader) {
-            loader.classList.add('hidden');
-        }
+        // Hide loading screen when login page loads with delay
+        // Delay ensures smooth transition from logout
+        const timer = setTimeout(() => {
+            const loader = document.getElementById('app-loader');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }, 1000); // Delay to ensure smooth transition from logout
 
         // Listen for theme changes from header toggle
         const handleStorageChange = (e) => {
@@ -46,6 +49,7 @@ const Login = () => {
         window.addEventListener('themeChange', handleCustomThemeChange);
 
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('themeChange', handleCustomThemeChange);
         };

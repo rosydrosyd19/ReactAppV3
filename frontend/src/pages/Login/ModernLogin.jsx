@@ -31,11 +31,16 @@ const ModernLogin = () => {
             document.documentElement.classList.remove('dark');
         }
 
-        // Hide loading screen when login page loads
-        const loader = document.getElementById('app-loader');
-        if (loader) {
-            loader.classList.add('hidden');
-        }
+        // Hide loading screen when login page loads with delay
+        // Delay ensures smooth transition from logout
+        const timer = setTimeout(() => {
+            const loader = document.getElementById('app-loader');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }, 0); // Delay to ensure smooth transition from logout
+
+        return () => clearTimeout(timer);
     }, []);
 
     const toggleTheme = () => {
