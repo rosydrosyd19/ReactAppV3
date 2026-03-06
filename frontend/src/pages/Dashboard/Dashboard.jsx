@@ -1,10 +1,39 @@
 import './Dashboard.css';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FiPackage, FiUsers, FiActivity, FiTrendingUp } from 'react-icons/fi';
+import ModernDashboard from './ModernDashboard';
 
 const Dashboard = () => {
     const { user, modules } = useAuth();
+    const [currentTheme, setCurrentTheme] = useState('simple-modern');
 
+    useEffect(() => {
+        // Check theme on mount
+        const theme = localStorage.getItem('theme') || 'simple-modern';
+        setCurrentTheme(theme);
+
+        // Listen for theme changes
+        const handleThemeChange = () => {
+            const newTheme = localStorage.getItem('theme') || 'simple-modern';
+            setCurrentTheme(newTheme);
+        };
+
+        window.addEventListener('themeChange', handleThemeChange);
+        window.addEventListener('storage', handleThemeChange);
+
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+            window.removeEventListener('storage', handleThemeChange);
+        };
+    }, []);
+
+    // Use ModernDashboard for Simple Modern themes
+    if (currentTheme === 'simple-modern' || currentTheme === 'simple-modern-dark') {
+        return <ModernDashboard />;
+    }
+
+    // Use standard dashboard for other themes
     const stats = [
         {
             title: 'Total Assets',

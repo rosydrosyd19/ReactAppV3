@@ -44,7 +44,7 @@ const ModernLogin = () => {
     }, []);
 
     const toggleTheme = () => {
-        const currentTheme = localStorage.getItem('theme') || 'light';
+        const currentTheme = localStorage.getItem('theme') || 'simple-modern';
         const newTheme = currentTheme === 'simple-modern' ? 'simple-modern-dark' : 'simple-modern';
 
         setIsDark(newTheme === 'simple-modern-dark');
@@ -112,7 +112,8 @@ const ModernLogin = () => {
                     {/* Header & Brand */}
                     <div className="text-center mb-8">
                         {/* App Logo */}
-                        <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 mb-6 shadow-xl shadow-blue-500/20 dark:shadow-blue-500/10 transform hover:scale-105 transition-transform duration-300 overflow-hidden">
+                        {/* App Logo */}
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 mb-6 shadow-xl shadow-blue-500/20 dark:shadow-blue-500/10 transform hover:scale-105 transition-transform duration-300 overflow-hidden shrink-0">
                             {config?.app_icon ? (
                                 <img
                                     src={config.app_icon}

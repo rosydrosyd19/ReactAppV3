@@ -1,5 +1,6 @@
 import './Dashboard.css';
 import { FiPackage, FiCheckCircle, FiAlertCircle, FiXCircle } from 'react-icons/fi';
+import ModernAssetDashboard from './ModernAssetDashboard';
 
 const StatCard = ({ title, value, icon, color, bgColor }) => (
     <div className="stat-card">
@@ -14,6 +15,16 @@ const StatCard = ({ title, value, icon, color, bgColor }) => (
 );
 
 const AssetDashboard = () => {
+    // Check if modern theme is active
+    const theme = localStorage.getItem('theme') || 'simple-modern';
+    const isModernTheme = theme === 'simple-modern' || theme === 'simple-modern-dark';
+
+    // Render modern dashboard if modern theme is active
+    if (isModernTheme) {
+        return <ModernAssetDashboard />;
+    }
+
+    // Original dashboard for standard themes
     // In a real app, these values would come from an API
     const stats = [
         { title: 'Total Assets', value: '124', icon: <FiPackage />, color: '#3b82f6', bgColor: '#eff6ff' },

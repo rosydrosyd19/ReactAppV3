@@ -8,13 +8,13 @@ const Header = ({ onMenuClick, isSidebarOpen }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isDark, setIsDark] = useState(() => {
-        const theme = localStorage.getItem('theme') || 'light';
+        const theme = localStorage.getItem('theme') || 'simple-modern';
         return theme === 'dark' || theme === 'simple-modern-dark';
     });
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const toggleTheme = () => {
-        const currentTheme = localStorage.getItem('theme') || 'light';
+        const currentTheme = localStorage.getItem('theme') || 'simple-modern';
         let newTheme;
 
         // Toggle within the same theme family

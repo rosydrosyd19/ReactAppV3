@@ -62,7 +62,7 @@ const PublicRoute = ({ children }) => {
 
 function App() {
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') || 'simple-modern';
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 

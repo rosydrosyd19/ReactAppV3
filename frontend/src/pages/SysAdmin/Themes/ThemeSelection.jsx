@@ -3,10 +3,10 @@ import './ThemeSelection.css'; // We'll create this for specific styles
 import { FiCheck, FiMonitor, FiLayout } from 'react-icons/fi';
 
 const ThemeSelection = () => {
-    const [currentTheme, setCurrentTheme] = useState(() => localStorage.getItem('theme') || 'light');
+    const [currentTheme, setCurrentTheme] = useState(() => localStorage.getItem('theme') || 'simple-modern');
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'simple-modern';
         setCurrentTheme(savedTheme);
         document.documentElement.setAttribute('data-theme', savedTheme);
     }, []);

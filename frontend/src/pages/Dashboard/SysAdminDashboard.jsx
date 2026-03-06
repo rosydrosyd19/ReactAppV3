@@ -1,5 +1,6 @@
 import './Dashboard.css';
 import { FiUsers, FiShield, FiActivity, FiServer } from 'react-icons/fi';
+import ModernSysAdminDashboard from './ModernSysAdminDashboard';
 
 const StatCard = ({ title, value, icon, color, bgColor }) => (
     <div className="stat-card">
@@ -14,6 +15,16 @@ const StatCard = ({ title, value, icon, color, bgColor }) => (
 );
 
 const SysAdminDashboard = () => {
+    // Check if modern theme is active
+    const theme = localStorage.getItem('theme') || 'simple-modern';
+    const isModernTheme = theme === 'simple-modern' || theme === 'simple-modern-dark';
+
+    // Render modern dashboard if modern theme is active
+    if (isModernTheme) {
+        return <ModernSysAdminDashboard />;
+    }
+
+    // Original dashboard for standard themes
     // In a real app, these values would come from an API
     const stats = [
         { title: 'Total Users', value: '12', icon: <FiUsers />, color: '#8b5cf6', bgColor: '#f5f3ff' },

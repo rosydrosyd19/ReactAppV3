@@ -33,7 +33,7 @@ const Login = () => {
         // Listen for theme changes from header toggle
         const handleStorageChange = (e) => {
             if (e.key === 'theme' || e.type === 'storage') {
-                const newTheme = localStorage.getItem('theme') || 'light';
+                const newTheme = localStorage.getItem('theme') || 'simple-modern';
                 setCurrentTheme(newTheme);
             }
         };
@@ -42,7 +42,7 @@ const Login = () => {
 
         // Custom event for same-window changes
         const handleCustomThemeChange = () => {
-            const newTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = localStorage.getItem('theme') || 'simple-modern';
             setCurrentTheme(newTheme);
         };
 

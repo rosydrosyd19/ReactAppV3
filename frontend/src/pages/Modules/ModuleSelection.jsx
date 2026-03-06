@@ -1,12 +1,14 @@
 import './ModuleSelection.css';
+import { useEffect, useState } from 'react';
+import ModernModuleSelection from './ModernModuleSelection';
+import { useConfig } from '../../contexts/ConfigContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FiSettings, FiBox, FiUsers, FiLogOut, FiMoon, FiSun } from 'react-icons/fi';
-import { useEffect, useState } from 'react';
-import ModernModuleSelection from './ModernModuleSelection';
 
 const ModuleSelection = () => {
     const { user, logout, hasAnyPermission, hasModule } = useAuth();
+    const { config } = useConfig();
     const navigate = useNavigate();
     const [currentTheme, setCurrentTheme] = useState('light');
     const [isLoading, setIsLoading] = useState(true);
@@ -26,14 +28,14 @@ const ModuleSelection = () => {
         localStorage.removeItem('activeModule');
 
         // Apply theme on mount
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'simple-modern';
         setCurrentTheme(savedTheme);
         setIsDark(savedTheme === 'dark');
         document.documentElement.setAttribute('data-theme', savedTheme);
 
         // Listen for theme changes
         const handleThemeChange = () => {
-            const newTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = localStorage.getItem('theme') || 'simple-modern';
             setCurrentTheme(newTheme);
             setIsDark(newTheme === 'dark');
         };
@@ -115,7 +117,7 @@ const ModuleSelection = () => {
         <div className="module-selection-container">
             <header className="module-header">
                 <div className="header-left">
-                    <h1>Modular System Application</h1>
+                    <h1>{config?.app_name || 'Modular System Application'}</h1>
                 </div>
                 <div className="module-header-actions">
                     <button className="icon-button" onClick={toggleTheme} title="Toggle theme">

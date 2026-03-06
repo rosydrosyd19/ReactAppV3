@@ -1,11 +1,13 @@
 import './ModernModuleSelection.css';
+import { useEffect, useState } from 'react';
+import { useConfig } from '../../contexts/ConfigContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FiSettings, FiBox, FiUsers, FiLogOut, FiMoon, FiSun } from 'react-icons/fi';
-import { useEffect, useState } from 'react';
 
 const ModernModuleSelection = () => {
     const { user, logout, hasAnyPermission, hasModule } = useAuth();
+    const { config } = useConfig();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [isDark, setIsDark] = useState(() => {
@@ -24,7 +26,7 @@ const ModernModuleSelection = () => {
         localStorage.removeItem('activeModule');
 
         // Apply theme on mount
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'simple-modern';
         setIsDark(savedTheme === 'simple-modern-dark');
         document.documentElement.setAttribute('data-theme', savedTheme);
 
@@ -111,10 +113,22 @@ const ModernModuleSelection = () => {
             {/* Header */}
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 h-16 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                        <span className="text-white font-bold text-xl">0</span>
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30 overflow-hidden">
+                        {config?.app_icon ? (
+                            <img
+                                src={config.app_icon}
+                                alt="App Icon"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                            </svg>
+                        )}
                     </div>
-                    <span className="text-xl font-bold tracking-tight hidden sm:inline-block">OmniSuite</span>
+                    <span className="text-xl font-bold tracking-tight hidden sm:inline-block">
+                        {config?.app_name || 'ReactAppV3'}
+                    </span>
                 </div>
 
                 <div className="flex items-center space-x-2 md:space-x-6">
